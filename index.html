@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="robots" content="noindex,nofollow" />
 <title>Clara Asia 2027 – Route & Timeline</title>
+<link rel="canonical" href="https://clara-asia-2027.vercel.app/" />
 <link rel="preconnect" href="https://unpkg.com">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
@@ -682,13 +683,14 @@ document.getElementById('journeySlider').addEventListener('input', (e) => {
   setActiveStop(Number(e.target.value), true);
 });
 document.getElementById('shareBtn').addEventListener('click', async () => {
+  const cleanUrl = 'https://clara-asia-2027.vercel.app/';
   try{
-    await navigator.clipboard.writeText(window.location.href);
+    await navigator.clipboard.writeText(cleanUrl);
     const btn = document.getElementById('shareBtn');
     btn.textContent = 'Link copied';
     setTimeout(() => btn.textContent = 'Copy share link', 1200);
   }catch(e){
-    window.prompt('Share this link:', window.location.href);
+    window.prompt('Share this link:', cleanUrl);
   }
 });
 document.getElementById('copyBtn').addEventListener('click', async () => {
