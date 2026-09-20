@@ -361,6 +361,13 @@ const MEDIA_FOCAL = {
   'Osaka':'50% 48%','Kyoto':'50% 50%','Kinosaki Onsen':'50% 50%','Hakone':'50% 55%','Tokyo':'50% 50%'
 };
 const COUNTRY_FOCAL = {'Thailand':'50% 50%','Vietnam':'50% 55%','Philippines':'50% 55%','Indonesia':'50% 55%','Japan':'50% 50%'};
+const DIRECT_MEDIA = {
+  'Koh Yao Noi': {
+    image:'https://commons.wikimedia.org/wiki/Special:FilePath/Palms%20in%20Koh%20Yao%20Noi%2C%20Phang%20Nga%20Bay%2C%20Thailand.jpg?width=1200',
+    pageUrl:'https://commons.wikimedia.org/wiki/File:Palms_in_Koh_Yao_Noi,_Phang_Nga_Bay,_Thailand.jpg',
+    extract:'Ko Yao Noi is an island in Phang Nga Bay in southern Thailand.'
+  }
+};
 const mediaCache = new Map();
 
 const ROUTES = {
@@ -507,6 +514,7 @@ async function getWikiMedia(title){
   return request;
 }
 async function getPlaceMedia(place){
+  if(DIRECT_MEDIA[place]) return DIRECT_MEDIA[place];
   return getWikiMedia(MEDIA_TITLES[place] || place);
 }
 async function getCountryMedia(country){
