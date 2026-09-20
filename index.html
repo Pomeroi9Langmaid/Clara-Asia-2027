@@ -100,6 +100,16 @@ header p{margin:5px 0 0;color:var(--muted);font-size:12px;max-width:720px}
 .active-stop h2{font-size:19px;line-height:1.05;margin:0 0 3px;letter-spacing:-.03em}
 .active-stop .meta{font-size:11px;color:var(--muted)}
 .active-stop .note{margin-top:6px;font-size:11px;line-height:1.45;color:#334155}
+.active-photo{height:118px;margin:8px 0 6px;border-radius:10px;overflow:hidden;background:linear-gradient(135deg,#dce7ed,#f4eadb);border:1px solid #e5ddd1;position:relative}
+.active-photo img{width:100%;height:100%;object-fit:cover;display:block}
+.active-photo.loading::after{content:"Loading real image…";position:absolute;left:0;right:0;bottom:8px;text-align:center;font-size:9px;color:#5f6b78}
+.active-media-summary{font-size:10px;line-height:1.4;color:#586675;margin-top:6px}
+.active-media-source{font-size:9px;color:#7a8490;margin-top:4px}
+.active-media-source a{color:inherit}
+.stop-thumb{width:72px;height:52px;border-radius:8px;overflow:hidden;background:linear-gradient(135deg,#dce7ed,#f4eadb);border:1px solid #e5ddd1;position:relative;align-self:center}
+.stop-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.stop-thumb.loading::after{content:"…";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:12px;color:#657281}
+.stop-thumb-fallback{width:100%;height:100%;display:flex;align-items:center;justify-content:center;padding:5px;text-align:center;font-size:8px;line-height:1.15;color:#657281}
 .controls-box,.notice,.route-info{background:#fff;border:1px solid var(--border);border-radius:12px;padding:10px;box-shadow:0 1px 0 rgba(57,69,82,.02)}
 .controls-box .top{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:7px}
 .controls-box .title{font-size:11px;font-weight:800}
@@ -118,8 +128,8 @@ header p{margin:5px 0 0;color:var(--muted);font-size:12px;max-width:720px}
 .group-title span{font-size:9px;opacity:.95}
 .group-body{padding:0}
 .stop-card{
-  display:grid;grid-template-columns:30px 58px 1fr;gap:7px;align-items:flex-start;
-  padding:8px 10px;border-top:1px solid #f1ece3;cursor:pointer;background:#fff;transition:background .15s ease,transform .15s ease;
+  display:grid;grid-template-columns:26px 48px minmax(0,1fr) 72px;gap:7px;align-items:center;
+  padding:7px 9px;border-top:1px solid #f1ece3;cursor:pointer;background:#fff;transition:background .15s ease,transform .15s ease;
 }
 .stop-card:first-child{border-top:none}
 .stop-card:hover{background:#fbf7ef}
@@ -296,6 +306,41 @@ function stop(date, place, country, days, note='', optional=false){
   return { date, place, country, days, note, optional, lat: COORDS[place][0], lng: COORDS[place][1] };
 }
 
+const MEDIA_TITLES = {
+  'Bangkok':'Bangkok',
+  'Chiang Mai':'Chiang Mai',
+  'Pai':'Pai, Thailand',
+  'Krabi / Ao Nang':'Ao Nang',
+  'Koh Yao Noi':'Ko Yao Noi',
+  'Khao Sok':'Khao Sok National Park',
+  'Hanoi':'Hanoi',
+  'Sapa':'Sa Pa',
+  'Ha Giang':'Hà Giang province',
+  'Cat Ba':'Cát Bà Island',
+  'Ninh Binh':'Ninh Bình',
+  'Hue':'Huế',
+  'Da Nang':'Da Nang',
+  'Hoi An':'Hội An',
+  'Ho Chi Minh City':'Ho Chi Minh City',
+  'Cebu City':'Cebu City',
+  'Moalboal':'Moalboal',
+  'Bohol / Panglao':'Bohol',
+  'El Nido':'El Nido, Palawan',
+  'Coron':'Coron, Palawan',
+  'Yogyakarta':'Yogyakarta',
+  'Mount Bromo':'Mount Bromo',
+  'Ijen':'Ijen',
+  'Ubud':'Ubud',
+  'Canggu':'Canggu',
+  'Uluwatu':'Uluwatu, Bali',
+  'Osaka':'Osaka',
+  'Kyoto':'Kyoto',
+  'Kinosaki Onsen':'Kinosaki, Hyōgo',
+  'Hakone':'Hakone',
+  'Tokyo':'Tokyo'
+};
+const mediaCache = new Map();
+
 const ROUTES = {
   written: {
     title:'Clara’s itinerary — dated route',
@@ -411,6 +456,63 @@ function fmtDate(dateString){
 }
 function shortDate(dateString){
   return new Date(dateString + 'T12:00:00').toLocaleDateString('en-GB', { day:'numeric', month:'short' });
+}
+function escapeHtml(value){
+  return String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+}
+async function getPlaceMedia(place){
+  const title = MEDIA_TITLES[place] || place;
+  if(mediaCache.has(title)) return mediaCache.get(title);
+  const request = (async () => {
+    try{
+      const url = 'https://en.wikipedia.org/w/api.php?action=query&format=json&origin=*&redirects=1&prop=pageimages%7Cextracts&piprop=thumbnail%7Coriginal&pithumbsize=900&exintro=1&explaintext=1&titles=' + encodeURIComponent(title);
+      const response = await fetch(url);
+      if(!response.ok) throw new Error('media request failed');
+      const data = await response.json();
+      const page = Object.values(data?.query?.pages || {})[0] || {};
+      const resolvedTitle = page.title || title;
+      const pageUrl = 'https://en.wikipedia.org/wiki/' + encodeURIComponent(String(resolvedTitle).replaceAll(' ','_'));
+      return {
+        image: page.thumbnail?.source || page.original?.source || '',
+        extract: page.extract || '',
+        pageUrl
+      };
+    }catch(error){
+      return { image:'', extract:'', pageUrl:'' };
+    }
+  })();
+  mediaCache.set(title, request);
+  return request;
+}
+async function hydrateItineraryImages(){
+  const thumbs = [...document.querySelectorAll('.stop-thumb[data-place]')];
+  await Promise.allSettled(thumbs.map(async el => {
+    if(el.dataset.loaded === '1') return;
+    el.dataset.loaded = '1';
+    const place = el.dataset.place;
+    const media = await getPlaceMedia(place);
+    if(!el.isConnected) return;
+    el.classList.remove('loading');
+    el.innerHTML = media.image
+      ? `<img src="${media.image}" alt="${escapeHtml(place)}" loading="lazy" decoding="async">`
+      : `<div class="stop-thumb-fallback">${escapeHtml(place)}</div>`;
+  }));
+}
+async function hydrateActiveMedia(stop){
+  const photo = document.getElementById('activePhoto');
+  const meta = document.getElementById('activeMediaMeta');
+  if(!photo || !meta) return;
+  const expectedPlace = stop.place;
+  const media = await getPlaceMedia(expectedPlace);
+  if(currentRoute().stops[activeIndex]?.place !== expectedPlace) return;
+  photo.classList.remove('loading');
+  photo.innerHTML = media.image
+    ? `<img src="${media.image}" alt="${escapeHtml(expectedPlace)}" decoding="async">`
+    : '';
+  const compact = media.extract ? media.extract.split(/(?<=[.!?])\s+/).slice(0,2).join(' ') : '';
+  meta.innerHTML =
+    (compact ? `<div class="active-media-summary">${escapeHtml(compact)}</div>` : '') +
+    (media.pageUrl ? `<div class="active-media-source">Real image & location context: <a href="${media.pageUrl}" target="_blank" rel="noopener noreferrer">Wikipedia / Wikimedia</a></div>` : '');
 }
 function groupByCountry(stops){
   const order = [];
@@ -593,6 +695,7 @@ function renderTimeline(){
           <div class="stop-place">${stop.place}${stop.optional ? '<span class="stop-tag">optional</span>' : ''}</div>
           <div class="stop-meta">${country}${stop.days ? ` · ${stop.days} day${stop.days === 1 ? '' : 's'}` : ''}${stop.note ? ` · ${stop.note}` : ''}</div>
         </div>
+        <div class="stop-thumb loading" data-place="${escapeHtml(stop.place)}" aria-label="Real image of ${escapeHtml(stop.place)}"></div>
       </div>
     `).join('');
     return `
@@ -615,6 +718,7 @@ function renderTimeline(){
     });
   });
 }
+  hydrateItineraryImages();
 function renderActiveStop(){
   const stop = currentRoute().stops[activeIndex];
   document.getElementById('activeStop').innerHTML = `
@@ -622,8 +726,11 @@ function renderActiveStop(){
     <div class="date">${fmtDate(stop.date)}</div>
     <h2>${stop.place}</h2>
     <div class="meta"><strong style="color:${COLORS[stop.country]}">${stop.country}</strong>${stop.days ? ` · ${stop.days} day${stop.days === 1 ? '' : 's'}` : ''}${stop.optional ? ' · optional' : ''}</div>
-    ${stop.note ? `<div class="note">${stop.note}</div>` : `<div class="note">No additional note has been added for this stop yet.</div>`}
+    <div class="active-photo loading" id="activePhoto" aria-label="Real image of ${escapeHtml(stop.place)}"></div>
+    ${stop.note ? `<div class="note">${stop.note}</div>` : `<div class="note">No additional itinerary note has been added for this stop yet.</div>`}
+    <div id="activeMediaMeta"></div>
   `;
+  hydrateActiveMedia(stop);
 }
 function updateJourneyControls(){
   const route = currentRoute();
