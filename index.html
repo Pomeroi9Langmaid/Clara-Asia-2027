@@ -333,10 +333,9 @@ const ROUTES = {
 
 const map = L.map('map', { worldCopyJump:true, attributionControl:true, zoomControl:true }).setView([15,113],4);
 map.attributionControl.setPrefix(false);
-const carto = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}{r}.png', {
-  subdomains:'abcd',
+const esriImagery = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
   maxZoom:19,
-  attribution:'© OpenStreetMap contributors © CARTO',
+  attribution:'Imagery © Esri',
   crossOrigin:true
 }).addTo(map);
 const esriFallback = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
@@ -345,10 +344,10 @@ const esriFallback = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/se
   crossOrigin:true
 });
 let tileErrors = 0;
-carto.on('tileerror', () => {
+esriImagery.on('tileerror', () => {
   tileErrors++;
   if(tileErrors >= 10 && !map.hasLayer(esriFallback)) {
-    map.removeLayer(carto);
+    map.removeLayer(esriImagery);
     esriFallback.addTo(map);
   }
 });
@@ -432,7 +431,7 @@ function renderCountryOverlays(){
       weight: currentFilter === country || currentFilter === 'All' ? 2 : 1,
       opacity: dimmed ? 0.3 : 0.75,
       fillColor: COLORS[country],
-      fillOpacity: dimmed ? 0.04 : 0.11,
+      fillOpacity: dimmed ? 0.05 : 0.16,
       interactive:false
     }).addTo(map);
     countryLayers.push(poly);
