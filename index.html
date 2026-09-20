@@ -9,180 +9,670 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <style>
-:root{--bg:#f7f5ef;--panel:#fffdf8;--ink:#202426;--muted:#6b7072;--border:#ddd8cc;--accent:#2f5d50;--warn:#9a5b21}
-*{box-sizing:border-box}body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink)}
-header{padding:18px 22px;border-bottom:1px solid var(--border);background:var(--panel);display:flex;gap:18px;align-items:center;justify-content:space-between;flex-wrap:wrap}
-header h1{font-size:20px;margin:0}header p{margin:3px 0 0;color:var(--muted);font-size:13px}.controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-button,select{font:inherit;border:1px solid var(--border);background:#fff;border-radius:9px;padding:9px 11px;color:var(--ink)}button{cursor:pointer}button:hover{border-color:#aaa}button:disabled{opacity:.45;cursor:not-allowed}
-.shell{display:grid;grid-template-columns:minmax(0,1fr) 390px;height:calc(100vh - 79px)}#map{min-height:500px;background:#e7ecee}.side{background:var(--panel);border-left:1px solid var(--border);overflow:auto;padding:16px 16px 24px}
-.summary{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 12px}.card{border:1px solid var(--border);border-radius:11px;padding:10px;background:#fff}.card b{display:block;font-size:17px}.card span{font-size:11px;color:var(--muted)}
-.notice{font-size:12px;line-height:1.45;border:1px solid #e7c9a9;background:#fff7ee;border-radius:10px;padding:10px 11px;margin:10px 0 14px}.notice strong{color:var(--warn)}
-.route-title{font-size:15px;margin:14px 0 6px}.route-note{font-size:12px;color:var(--muted);line-height:1.45;margin-bottom:12px}
-.stop{display:grid;grid-template-columns:34px 78px 1fr;gap:8px;padding:9px 6px;border-top:1px solid #eee8dc;align-items:start;cursor:pointer;border-radius:8px;transition:background .15s,transform .15s}.stop:hover{background:#f4f0e7}.stop.active{background:#ece7da;transform:translateX(2px)}.num{width:27px;height:27px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:700}.date{font-size:12px;font-weight:700;padding-top:4px}.place{font-size:13px;font-weight:650}.meta{font-size:11px;color:var(--muted);margin-top:2px;line-height:1.35}.tag{display:inline-block;font-size:9px;letter-spacing:.04em;text-transform:uppercase;border:1px solid var(--border);border-radius:999px;padding:2px 5px;margin-left:4px;color:var(--muted)}
-.legend{display:flex;flex-wrap:wrap;gap:7px;font-size:10px;color:var(--muted);margin-top:10px}.journey{border:1px solid var(--border);border-radius:11px;padding:10px;background:#fff;margin:0 0 12px}.journey-top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}.journey-title{font-size:12px;font-weight:750}.journey-place{font-size:11px;color:var(--muted);text-align:right}.journey-controls{display:grid;grid-template-columns:auto auto 1fr auto;gap:6px;align-items:center}.journey-controls button{padding:7px 9px}.journey-controls input{width:100%}.journey-progress{font-size:10px;color:var(--muted);margin-top:6px;text-align:center}.dot{width:9px;height:9px;border-radius:50%;display:inline-block;margin-right:4px}.leaflet-popup-content{font-family:Inter,ui-sans-serif,system-ui,sans-serif;line-height:1.4}.popup-date{font-weight:700}.popup-note{color:#666;font-size:12px}.marker-num{border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:800;font-size:11px;border:2px solid white;box-shadow:0 1px 5px rgba(0,0,0,.35)}
-@media(max-width:900px){.shell{grid-template-columns:1fr;height:auto}.side{border-left:none;border-top:1px solid var(--border);max-height:none}#map{height:62vh}}
+:root{
+  --bg:#f6f3ee;
+  --panel:#fffdf9;
+  --ink:#1f2933;
+  --muted:#697586;
+  --border:#e5ddd0;
+  --shadow:0 12px 28px rgba(27,39,51,.08);
+  --th:#d77447;
+  --vn:#2b8a78;
+  --id:#8f68c2;
+  --ph:#3c79d4;
+  --jp:#ca5574;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:linear-gradient(180deg,#faf8f3 0%,#f4efe8 100%);color:var(--ink)}
+button,select,input{font:inherit}
+button,select{
+  border:1px solid var(--border);
+  background:#fff;
+  color:var(--ink);
+  border-radius:12px;
+  padding:10px 12px;
+}
+button{cursor:pointer}
+button:hover,select:hover{border-color:#cdbfa9}
+button.primary{background:linear-gradient(180deg,#fff 0%,#f8f1e6 100%)}
+button:disabled{opacity:.45;cursor:not-allowed}
+header{
+  padding:18px 22px 16px;
+  background:rgba(255,253,249,.92);
+  backdrop-filter:blur(6px);
+  border-bottom:1px solid var(--border);
+  position:sticky;top:0;z-index:1000;
+}
+.header-row{display:flex;gap:16px;justify-content:space-between;align-items:flex-start;flex-wrap:wrap}
+header h1{margin:0;font-size:30px;line-height:1.05;letter-spacing:-.03em}
+header p{margin:8px 0 0;color:var(--muted);font-size:14px;max-width:820px}
+.control-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.shell{display:grid;grid-template-columns:minmax(0,1fr) 420px;height:calc(100vh - 99px)}
+.map-wrap{position:relative;overflow:hidden;background:linear-gradient(180deg,#dbeaf1 0%,#eef6fb 100%)}
+#map{height:100%;width:100%}
+.map-overlay{
+  position:absolute;left:16px;top:16px;z-index:500;
+  display:flex;flex-wrap:wrap;gap:8px;max-width:min(700px,calc(100% - 32px));
+}
+.pill{
+  background:rgba(255,255,255,.93);
+  border:1px solid rgba(255,255,255,.9);
+  border-radius:999px;
+  box-shadow:var(--shadow);
+  padding:8px 11px;font-size:12px;font-weight:650;color:#334155;
+}
+.pill strong{font-weight:800}
+.side{
+  background:var(--panel);
+  border-left:1px solid var(--border);
+  overflow:auto;
+  padding:18px 16px 24px;
+}
+.section{margin-bottom:14px}
+.summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.card{
+  background:#fff;border:1px solid var(--border);border-radius:16px;padding:14px 14px 12px;box-shadow:0 2px 0 rgba(57,69,82,.02);
+}
+.card b{display:block;font-size:28px;line-height:1.05}
+.card span{display:block;color:var(--muted);font-size:12px;margin-top:4px}
+.country-chips{display:flex;flex-wrap:wrap;gap:8px}
+.country-chip{
+  display:inline-flex;align-items:center;gap:8px;padding:8px 11px;border-radius:999px;border:1px solid var(--border);background:#fff;font-size:12px;font-weight:700;color:#334155;cursor:pointer;
+}
+.country-chip.active{box-shadow:inset 0 0 0 2px rgba(31,41,51,.08);transform:translateY(-1px)}
+.swatch{width:11px;height:11px;border-radius:50%}
+.helper{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.45}
+.active-stop{
+  background:linear-gradient(180deg,#fff 0%,#fbf7ef 100%);
+  border:1px solid #eadfcf;border-radius:16px;padding:14px;box-shadow:var(--shadow)
+}
+.active-stop .kicker{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#9b6c2f;font-weight:800;margin-bottom:6px}
+.active-stop .date{font-size:13px;font-weight:800;color:#5a6472;margin-bottom:4px}
+.active-stop h2{font-size:25px;line-height:1.05;margin:0 0 5px;letter-spacing:-.03em}
+.active-stop .meta{font-size:13px;color:var(--muted)}
+.active-stop .note{margin-top:10px;font-size:13px;line-height:1.55;color:#334155}
+.controls-box,.notice,.route-info{background:#fff;border:1px solid var(--border);border-radius:16px;padding:14px;box-shadow:0 2px 0 rgba(57,69,82,.02)}
+.controls-box .top{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:10px}
+.controls-box .title{font-size:13px;font-weight:800}
+.route-step{font-size:12px;color:var(--muted)}
+.nav-row{display:grid;grid-template-columns:auto auto 1fr auto;gap:8px;align-items:center}
+.nav-row input{width:100%}
+.notice{font-size:12px;line-height:1.55;background:#fff8ef;border-color:#eed9b5;color:#5d4b34}
+.notice strong{color:#9a5b21}
+.route-info h3{margin:0 0 8px;font-size:18px;letter-spacing:-.02em}
+.route-info p{margin:0;color:var(--muted);font-size:13px;line-height:1.55}
+.group{margin-top:14px;border:1px solid var(--border);border-radius:16px;overflow:hidden;background:#fff}
+.group-header{padding:12px 14px;color:#fff}
+.group-title{display:flex;justify-content:space-between;gap:10px;align-items:center}
+.group-title strong{font-size:16px}
+.group-title span{font-size:12px;opacity:.95}
+.group-body{padding:0}
+.stop-card{
+  display:grid;grid-template-columns:40px 76px 1fr;gap:10px;align-items:flex-start;
+  padding:11px 14px;border-top:1px solid #f1ece3;cursor:pointer;background:#fff;transition:background .15s ease,transform .15s ease;
+}
+.stop-card:first-child{border-top:none}
+.stop-card:hover{background:#fbf7ef}
+.stop-card.active{background:#f5efe3;transform:translateX(2px)}
+.num{
+  width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:800;box-shadow:0 3px 10px rgba(0,0,0,.16)
+}
+.stop-date{font-size:12px;font-weight:800;padding-top:5px;color:#44505e}
+.stop-place{font-size:14px;font-weight:750;line-height:1.25}
+.stop-meta{font-size:12px;color:var(--muted);margin-top:2px;line-height:1.45}
+.stop-tag{display:inline-block;margin-left:6px;padding:2px 6px;border-radius:999px;border:1px solid #e4dbc9;font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:#77634d;background:#fbf7ef}
+.legend-note{font-size:12px;color:var(--muted);line-height:1.45}
+.leaflet-container{background:#d9ebf4}
+.leaflet-popup-content-wrapper{border-radius:14px;box-shadow:0 12px 25px rgba(0,0,0,.16)}
+.leaflet-popup-content{margin:12px 14px;font-family:Inter,ui-sans-serif,system-ui,sans-serif;line-height:1.45}
+.leaflet-popup-tip{box-shadow:0 8px 20px rgba(0,0,0,.12)}
+.popup-date{font-weight:800;font-size:12px;color:#5d6977;text-transform:uppercase;letter-spacing:.03em}
+.popup-place{font-size:18px;font-weight:800;letter-spacing:-.02em;margin-top:2px}
+.popup-meta{font-size:12px;color:#5d6977;margin-top:4px}
+.popup-note{font-size:12px;color:#334155;margin-top:7px;line-height:1.5}
+.marker{
+  border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:800;font-size:11px;
+  border:3px solid rgba(255,255,255,.97);box-shadow:0 6px 14px rgba(0,0,0,.24);transition:transform .15s ease;
+}
+.marker.optional{outline:2px dashed rgba(255,255,255,.95);outline-offset:2px}
+.marker.active{transform:scale(1.2);border-width:4px;box-shadow:0 10px 18px rgba(0,0,0,.28)}
+.country-label{
+  background:rgba(255,255,255,.9);border:1px solid rgba(255,255,255,.95);border-radius:999px;
+  padding:6px 10px;font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#23303f;
+  box-shadow:0 8px 18px rgba(18,30,41,.15);white-space:nowrap
+}
+.footer-note{font-size:11px;color:var(--muted);line-height:1.45;margin-top:14px}
+@media (max-width:1100px){
+  .shell{grid-template-columns:minmax(0,1fr) 380px}
+}
+@media (max-width:960px){
+  .shell{grid-template-columns:1fr;height:auto}
+  .side{border-left:none;border-top:1px solid var(--border)}
+  .map-wrap{height:62vh}
+  header h1{font-size:24px}
+}
 </style>
 </head>
 <body>
 <header>
-  <div><h1>Clara Asia 2027 – route & timeline</h1><p>Clara's working Asia itinerary for 1 February → 2 May 2027. The dated route from her document is shown by default.</p></div>
-  <div class="controls">
-    <select id="routeSelect" aria-label="Route version">
-      <option value="written" selected>Clara's itinerary (dated route)</option>
-      <option value="revised">Possible revised route (ideas)</option>
-    </select>
-    <button id="fitBtn">Show whole route</button>
-    <button id="copyBtn">Copy dated stop list</button>
+  <div class="header-row">
+    <div>
+      <h1>Clara Asia 2027</h1>
+      <p>An interactive route and timeline for Clara’s Asia trip. The dated route from her document is shown by default, with an alternate “possible revised route” view for planning ideas.</p>
+    </div>
+    <div class="control-row">
+      <select id="routeSelect" aria-label="Route version">
+        <option value="written" selected>Clara’s itinerary (dated route)</option>
+        <option value="revised">Possible revised route (ideas)</option>
+      </select>
+      <button id="fitBtn" class="primary">Show whole route</button>
+      <button id="copyBtn">Copy dated stop list</button>
+    </div>
   </div>
 </header>
 <div class="shell">
-  <div id="map"></div>
+  <div class="map-wrap">
+    <div id="map"></div>
+    <div class="map-overlay" id="mapOverlay"></div>
+  </div>
   <aside class="side">
-    <div class="summary" id="summary"></div>
-    <div class="journey" id="journeyBox">
-      <div class="journey-top"><span class="journey-title">Explore the trip</span><span class="journey-place" id="journeyPlace">Select a stop</span></div>
-      <div class="journey-controls">
-        <button id="prevBtn" aria-label="Previous stop">Prev</button>
-        <button id="playBtn" aria-label="Play route">Play</button>
-        <input id="journeySlider" type="range" min="0" max="0" value="0" step="1" aria-label="Trip stop">
-        <button id="nextBtn" aria-label="Next stop">Next</button>
+    <div class="summary-grid" id="summary"></div>
+
+    <div class="section controls-box">
+      <div class="top">
+        <div class="title">Explore the trip</div>
+        <div class="route-step" id="routeStep">Stop 1</div>
       </div>
-      <div class="journey-progress" id="journeyProgress">Stop 1</div>
+      <div class="nav-row">
+        <button id="prevBtn">Prev</button>
+        <button id="playBtn">Play</button>
+        <input id="journeySlider" type="range" min="0" max="0" value="0" step="1" aria-label="Trip stop">
+        <button id="nextBtn">Next</button>
+      </div>
+      <div class="helper">Tip: click any stop card or map marker, or use the country filters to jump around quickly.</div>
     </div>
-    <div class="notice"><strong>Clara's document:</strong> the dated route is kept as written. It says “7 days to fill” after 28 April, while the saved flight is 2 May, so those final dates still need confirming.</div>
-    <div class="notice"><strong>Ideas not yet confirmed:</strong> add Khao Sok, Sapa and countryside/nature in Japan (for example Hakone); possibly remove Coron; and consider Indonesia before the Philippines.</div>
-    <div id="routeInfo"></div>
+
+    <div class="section active-stop" id="activeStop"></div>
+
+    <div class="section">
+      <div class="country-chips" id="countryChips"></div>
+      <div class="helper">Focus on a country to zoom the map and dim the rest of the trip.</div>
+    </div>
+
+    <div class="section notice"><strong>Trip note:</strong> Clara’s document says “7 days to fill” after 28 April, while the saved flight is 2 May, so those final days still need confirming.</div>
+    <div class="section notice"><strong>Ideas not yet confirmed:</strong> add Khao Sok, Sapa and countryside/nature in Japan (for example Hakone); possibly remove Coron; and consider Indonesia before the Philippines.</div>
+
+    <div class="section route-info" id="routeInfo"></div>
+
     <div id="timeline"></div>
-    <div class="legend" id="legend"></div>
+
+    <div class="footer-note">Colour guide: each country is highlighted both on the map and in the itinerary. Dotted lines indicate jumps between countries; solid coloured segments show travel within the same country.</div>
   </aside>
 </div>
+
 <script>
-const colors={Thailand:'#cc6b49',Vietnam:'#347c6b',Indonesia:'#7b5aa6',Philippines:'#2f6db0',Japan:'#b84d63'};
-const coords={
-'Bangkok':[13.7563,100.5018],'Chiang Mai':[18.7883,98.9853],'Pai':[19.3583,98.4400],'Krabi / Ao Nang':[8.0320,98.8225],'Koh Yao Noi':[8.1178,98.6184],'Khao Sok':[8.9105,98.5313],
-'Hanoi':[21.0278,105.8342],'Sapa':[22.3364,103.8438],'Ha Giang':[22.8233,104.9836],'Cat Ba':[20.7270,107.0480],'Ninh Binh':[20.2506,105.9745],'Hue':[16.4637,107.5909],'Da Nang':[16.0544,108.2022],'Hoi An':[15.8801,108.3380],'Ho Chi Minh City':[10.8231,106.6297],
-'Yogyakarta':[-7.7956,110.3695],'Mount Bromo':[-7.9425,112.9530],'Ijen':[-8.0583,114.2420],'Ubud':[-8.5069,115.2625],'Canggu':[-8.6478,115.1385],'Uluwatu':[-8.8291,115.0849],
-'Cebu City':[10.3157,123.8854],'Moalboal':[9.9431,123.3926],'Bohol / Panglao':[9.5774,123.7453],'El Nido':[11.1949,119.4034],'Coron':[12.0012,120.2047],
-'Osaka':[34.6937,135.5023],'Kyoto':[35.0116,135.7681],'Kinosaki Onsen':[35.6250,134.8110],'Hakone':[35.2324,139.1069],'Tokyo':[35.6762,139.6503]
+const COLORS = {
+  Thailand:'#d77447',
+  Vietnam:'#2b8a78',
+  Indonesia:'#8f68c2',
+  Philippines:'#3c79d4',
+  Japan:'#ca5574'
 };
-function s(date,place,country,days,note='',optional=false){return{date,place,country,days,note,optional,lat:coords[place][0],lng:coords[place][1]}}
-const routes={
-revised:{
- title:'Possible revised route — not yet confirmed',
- note:'A planning scenario based on the ideas written in Clara’s document: Khao Sok, Sapa and Hakone are added; Indonesia is moved before the Philippines; Coron/Bohol remain decision points. This is not the confirmed itinerary.',
- stops:[
-  s('2027-02-01','Bangkok','Thailand',4,'Easy landing point: temples, food, shopping, nightlife.'),
-  s('2027-02-05','Chiang Mai','Thailand',5,'Night markets, cooking class, waterfalls.'),
-  s('2027-02-10','Pai','Thailand',3,'Canyon, hot springs, relaxed mountain stop.'),
-  s('2027-02-13','Krabi / Ao Nang','Thailand',4,'Base for Railay and island day trips.'),
-  s('2027-02-17','Koh Yao Noi','Thailand',3,'Quieter island break.'),
-  s('2027-02-20','Khao Sok','Thailand',3,'Added from Clara’s wish list: rainforest / lake.'),
-  s('2027-02-23','Hanoi','Vietnam',4,'Old Quarter, cafés, street-food tour.'),
-  s('2027-02-27','Sapa','Vietnam',3,'Added from Clara’s wish list: mountains / countryside.'),
-  s('2027-03-02','Ha Giang','Vietnam',4,'Ha Giang Loop with Easy Rider.'),
-  s('2027-03-06','Cat Ba','Vietnam',3,'Lan Ha Bay, kayaking, national park.'),
-  s('2027-03-09','Ninh Binh','Vietnam',3,'Trang An / Tam Coc and countryside.'),
-  s('2027-03-12','Hue','Vietnam',2,'Imperial City and Hai Van Pass.'),
-  s('2027-03-14','Da Nang','Vietnam',3,'Beach, cafés, gym, Marble Mountains.'),
-  s('2027-03-17','Hoi An','Vietnam',4,'Ancient town, tailoring, cooking class.'),
-  s('2027-03-21','Ho Chi Minh City','Vietnam',3,'Shortened from five days; museum / rooftop bars / Mekong option.'),
-  s('2027-03-24','Yogyakarta','Indonesia',4,'Borobudur, Prambanan, street food.'),
-  s('2027-03-28','Mount Bromo','Indonesia',2,'Sunrise / volcano leg.'),
-  s('2027-03-30','Ijen','Indonesia',1,'Ijen crater / blue-fire leg.'),
-  s('2027-03-31','Ubud','Indonesia',3,'Inland Bali: temples, waterfalls, rice terraces.'),
-  s('2027-04-03','Canggu','Indonesia',2,'Surf / cafés / social stop.'),
-  s('2027-04-05','Uluwatu','Indonesia',2,'Cliffs, beaches, temple.'),
-  s('2027-04-07','Cebu City','Philippines',1,'Transit / arrival day.'),
-  s('2027-04-08','Moalboal','Philippines',3,'Sardine run, snorkelling, Kawasan Falls.'),
-  s('2027-04-11','Bohol / Panglao','Philippines',2,'Chocolate Hills, tarsiers, Panglao beaches. Swap for Siquijor if preferred.',true),
-  s('2027-04-13','El Nido','Philippines',3,'Lagoons, snorkelling, island hopping.'),
-  s('2027-04-16','Coron','Philippines',4,'Includes the 3D2N El Nido→Coron expedition; Coron itself can still be removed.',true),
-  s('2027-04-20','Osaka','Japan',2,'Food, Dotonbori, city start.'),
-  s('2027-04-22','Kyoto','Japan',3,'Temples, old districts, day trips.'),
-  s('2027-04-25','Kinosaki Onsen','Japan',1,'Ryokan / onsen countryside stop.'),
-  s('2027-04-26','Hakone','Japan',2,'Added from Clara’s wish list: countryside / Fuji-area scenery.'),
-  s('2027-04-28','Tokyo','Japan',4,'Finish in Tokyo before 2 May departure; avoids another intercity move once Golden Week begins.'),
- ]
-},
-written:{
- title:'Clara’s itinerary — dated route',
- note:'This is the default source-of-truth view from Clara’s ASIEN document. Dates and stated durations are preserved. Combined stops such as Osaka/Kyoto and Bromo/Ijen are split only to make the map readable; any inferred split is identified in the notes.',
- stops:[
-  s('2027-02-01','Bangkok','Thailand',4),s('2027-02-04','Chiang Mai','Thailand',6),s('2027-02-10','Pai','Thailand',3),s('2027-02-13','Krabi / Ao Nang','Thailand',5),s('2027-02-18','Koh Yao Noi','Thailand',3),
-  s('2027-02-22','Hanoi','Vietnam',4),s('2027-02-26','Ha Giang','Vietnam',4),s('2027-03-02','Cat Ba','Vietnam',3,'Document says 2–3 days.'),s('2027-03-05','Ninh Binh','Vietnam',3),s('2027-03-08','Hue','Vietnam',2),s('2027-03-10','Da Nang','Vietnam',4),s('2027-03-14','Hoi An','Vietnam',4),s('2027-03-18','Ho Chi Minh City','Vietnam',5,'The document says 5 days, although the Philippines is dated from 21 March.'),
-  s('2027-03-21','Cebu City','Philippines',1),s('2027-03-22','Moalboal','Philippines',4,'Chocolate Hills, tarsiers and Panglao are also listed in this section, but those are Bohol/Panglao activities.'),s('2027-03-26','El Nido','Philippines',3,'29 March: planned 3D2N island-hopping expedition towards Coron.'),s('2027-03-31','Coron','Philippines',0,'No duration is stated; the next dated stop is Yogyakarta on 4 April.'),
-  s('2027-04-04','Yogyakarta','Indonesia',4),s('2027-04-08','Mount Bromo','Indonesia',2,'Part of the 3-day Bromo/Ijen block; split here only for mapping.'),s('2027-04-10','Ijen','Indonesia',1,'Part of the 3-day Bromo/Ijen block; split here only for mapping.'),s('2027-04-11','Ubud','Indonesia',3),s('2027-04-14','Canggu','Indonesia',2),s('2027-04-16','Uluwatu','Indonesia',2),
-  s('2027-04-18','Osaka','Japan',2,'Osaka + Kyoto are 5 days together; this 2/3 split is only for mapping.'),s('2027-04-20','Kyoto','Japan',3,'Osaka + Kyoto are 5 days together; this 2/3 split is only for mapping.'),s('2027-04-23','Kinosaki Onsen','Japan',1),s('2027-04-24','Tokyo','Japan',4,'The document then says “7 days to fill” from 28 April, but the saved flight is 2 May.')
- ]
-}}
-const map=L.map('map',{worldCopyJump:true,attributionControl:true}).setView([15,111],4);
+
+const COUNTRY_LABEL_POS = {
+  Thailand:[15.3,100.5],
+  Vietnam:[16.7,107.4],
+  Philippines:[11.2,121.2],
+  Indonesia:[-7.4,113.0],
+  Japan:[36.0,137.5]
+};
+
+const COUNTRY_SHAPES = {
+  Thailand:[
+    [20.7,97.2],[20.3,100.6],[17.6,104.8],[13.9,100.8],[11.2,99.8],[8.5,98.8],[6.3,101.3],[6.1,98.2],[10.2,98.0],[14.5,100.2],[18.6,98.7]
+  ],
+  Vietnam:[
+    [23.3,103.6],[22.8,106.8],[21.3,109.2],[18.6,106.4],[16.0,108.6],[13.0,109.4],[10.3,107.1],[8.7,104.7],[11.4,106.0],[15.3,108.0],[19.1,105.3],[21.8,104.6]
+  ],
+  Philippines:[
+    [13.0,118.8],[15.8,120.0],[14.6,123.2],[11.2,125.4],[8.7,124.8],[8.7,122.1],[9.4,120.4],[11.0,119.2]
+  ],
+  Indonesia:[
+    [-6.0,108.1],[-6.4,111.6],[-7.1,114.8],[-8.3,115.7],[-8.9,114.6],[-8.7,112.2],[-7.7,109.8],[-7.0,108.1]
+  ],
+  Japan:[
+    [35.0,134.0],[35.6,136.4],[35.2,139.9],[36.2,140.2],[36.7,138.8],[35.9,135.0]
+  ]
+};
+
+const COORDS = {
+  'Bangkok':[13.7563,100.5018],'Chiang Mai':[18.7883,98.9853],'Pai':[19.3583,98.4400],'Krabi / Ao Nang':[8.0320,98.8225],'Koh Yao Noi':[8.1178,98.6184],'Khao Sok':[8.9105,98.5313],
+  'Hanoi':[21.0278,105.8342],'Sapa':[22.3364,103.8438],'Ha Giang':[22.8233,104.9836],'Cat Ba':[20.7270,107.0480],'Ninh Binh':[20.2506,105.9745],'Hue':[16.4637,107.5909],'Da Nang':[16.0544,108.2022],'Hoi An':[15.8801,108.3380],'Ho Chi Minh City':[10.8231,106.6297],
+  'Yogyakarta':[-7.7956,110.3695],'Mount Bromo':[-7.9425,112.9530],'Ijen':[-8.0583,114.2420],'Ubud':[-8.5069,115.2625],'Canggu':[-8.6478,115.1385],'Uluwatu':[-8.8291,115.0849],
+  'Cebu City':[10.3157,123.8854],'Moalboal':[9.9431,123.3926],'Bohol / Panglao':[9.5774,123.7453],'El Nido':[11.1949,119.4034],'Coron':[12.0012,120.2047],
+  'Osaka':[34.6937,135.5023],'Kyoto':[35.0116,135.7681],'Kinosaki Onsen':[35.6250,134.8110],'Hakone':[35.2324,139.1069],'Tokyo':[35.6762,139.6503]
+};
+
+function stop(date, place, country, days, note='', optional=false){
+  return { date, place, country, days, note, optional, lat: COORDS[place][0], lng: COORDS[place][1] };
+}
+
+const ROUTES = {
+  written: {
+    title:'Clara’s itinerary — dated route',
+    note:'This is the default source-of-truth view from Clara’s ASIEN document. Dates and stated durations are preserved. Combined stops such as Osaka/Kyoto and Bromo/Ijen are split only to make the map easier to read; any inferred split is identified in the notes.',
+    stops:[
+      stop('2027-02-01','Bangkok','Thailand',4),
+      stop('2027-02-04','Chiang Mai','Thailand',6),
+      stop('2027-02-10','Pai','Thailand',3),
+      stop('2027-02-13','Krabi / Ao Nang','Thailand',5),
+      stop('2027-02-18','Koh Yao Noi','Thailand',3),
+      stop('2027-02-22','Hanoi','Vietnam',4),
+      stop('2027-02-26','Ha Giang','Vietnam',4),
+      stop('2027-03-02','Cat Ba','Vietnam',3,'Document says 2–3 days.'),
+      stop('2027-03-05','Ninh Binh','Vietnam',3),
+      stop('2027-03-08','Hue','Vietnam',2),
+      stop('2027-03-10','Da Nang','Vietnam',4),
+      stop('2027-03-14','Hoi An','Vietnam',4),
+      stop('2027-03-18','Ho Chi Minh City','Vietnam',5,'The document says 5 days, although the Philippines is dated from 21 March.'),
+      stop('2027-03-21','Cebu City','Philippines',1),
+      stop('2027-03-22','Moalboal','Philippines',4,'Chocolate Hills, tarsiers and Panglao are also listed in this section, but those are Bohol/Panglao activities.'),
+      stop('2027-03-26','El Nido','Philippines',3,'29 March: planned 3D2N island-hopping expedition towards Coron.'),
+      stop('2027-03-31','Coron','Philippines',0,'No duration is stated; the next dated stop is Yogyakarta on 4 April.'),
+      stop('2027-04-04','Yogyakarta','Indonesia',4),
+      stop('2027-04-08','Mount Bromo','Indonesia',2,'Part of the 3-day Bromo/Ijen block; split here only for mapping.'),
+      stop('2027-04-10','Ijen','Indonesia',1,'Part of the 3-day Bromo/Ijen block; split here only for mapping.'),
+      stop('2027-04-11','Ubud','Indonesia',3),
+      stop('2027-04-14','Canggu','Indonesia',2),
+      stop('2027-04-16','Uluwatu','Indonesia',2),
+      stop('2027-04-18','Osaka','Japan',2,'Osaka + Kyoto are 5 days together; this 2/3 split is only for mapping.'),
+      stop('2027-04-20','Kyoto','Japan',3,'Osaka + Kyoto are 5 days together; this 2/3 split is only for mapping.'),
+      stop('2027-04-23','Kinosaki Onsen','Japan',1),
+      stop('2027-04-24','Tokyo','Japan',4,'The document then says “7 days to fill” from 28 April, but the saved flight is 2 May.')
+    ]
+  },
+  revised: {
+    title:'Possible revised route — not yet confirmed',
+    note:'A planning scenario based on the ideas written in Clara’s document: Khao Sok, Sapa and Hakone are added; Indonesia is moved before the Philippines; Coron/Bohol remain decision points. This is not the confirmed itinerary.',
+    stops:[
+      stop('2027-02-01','Bangkok','Thailand',4,'Easy landing point: temples, food, shopping, nightlife.'),
+      stop('2027-02-05','Chiang Mai','Thailand',5,'Night markets, cooking class, waterfalls.'),
+      stop('2027-02-10','Pai','Thailand',3,'Canyon, hot springs, relaxed mountain stop.'),
+      stop('2027-02-13','Krabi / Ao Nang','Thailand',4,'Base for Railay and island day trips.'),
+      stop('2027-02-17','Koh Yao Noi','Thailand',3,'Quieter island break.'),
+      stop('2027-02-20','Khao Sok','Thailand',3,'Added from Clara’s wish list: rainforest / lake.'),
+      stop('2027-02-23','Hanoi','Vietnam',4,'Old Quarter, cafés, street-food tour.'),
+      stop('2027-02-27','Sapa','Vietnam',3,'Added from Clara’s wish list: mountains / countryside.'),
+      stop('2027-03-02','Ha Giang','Vietnam',4,'Ha Giang Loop with Easy Rider.'),
+      stop('2027-03-06','Cat Ba','Vietnam',3,'Lan Ha Bay, kayaking, national park.'),
+      stop('2027-03-09','Ninh Binh','Vietnam',3,'Trang An / Tam Coc and countryside.'),
+      stop('2027-03-12','Hue','Vietnam',2,'Imperial City and Hai Van Pass.'),
+      stop('2027-03-14','Da Nang','Vietnam',3,'Beach, cafés, gym, Marble Mountains.'),
+      stop('2027-03-17','Hoi An','Vietnam',4,'Ancient town, tailoring, cooking class.'),
+      stop('2027-03-21','Ho Chi Minh City','Vietnam',3,'Shortened from five days; museum / rooftop bars / Mekong option.'),
+      stop('2027-03-24','Yogyakarta','Indonesia',4,'Borobudur, Prambanan, street food.'),
+      stop('2027-03-28','Mount Bromo','Indonesia',2,'Sunrise / volcano leg.'),
+      stop('2027-03-30','Ijen','Indonesia',1,'Ijen crater / blue-fire leg.'),
+      stop('2027-03-31','Ubud','Indonesia',3,'Inland Bali: temples, waterfalls, rice terraces.'),
+      stop('2027-04-03','Canggu','Indonesia',2,'Surf / cafés / social stop.'),
+      stop('2027-04-05','Uluwatu','Indonesia',2,'Cliffs, beaches, temple.'),
+      stop('2027-04-07','Cebu City','Philippines',1,'Transit / arrival day.'),
+      stop('2027-04-08','Moalboal','Philippines',3,'Sardine run, snorkelling, Kawasan Falls.'),
+      stop('2027-04-11','Bohol / Panglao','Philippines',2,'Chocolate Hills, tarsiers, Panglao beaches. Swap for Siquijor if preferred.',true),
+      stop('2027-04-13','El Nido','Philippines',3,'Lagoons, snorkelling, island hopping.'),
+      stop('2027-04-16','Coron','Philippines',4,'Includes the 3D2N El Nido → Coron expedition; Coron itself can still be removed.',true),
+      stop('2027-04-20','Osaka','Japan',2,'Food, Dotonbori, city start.'),
+      stop('2027-04-22','Kyoto','Japan',3,'Temples, old districts, day trips.'),
+      stop('2027-04-25','Kinosaki Onsen','Japan',1,'Ryokan / onsen countryside stop.'),
+      stop('2027-04-26','Hakone','Japan',2,'Added from Clara’s wish list: countryside / Fuji-area scenery.'),
+      stop('2027-04-28','Tokyo','Japan',4,'Finish in Tokyo before 2 May departure; avoids another intercity move once Golden Week begins.')
+    ]
+  }
+};
+
+const map = L.map('map', { worldCopyJump:true, attributionControl:true, zoomControl:true }).setView([15,113],4);
 map.attributionControl.setPrefix(false);
-const baseLayer=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}',{maxZoom:16,attribution:'Basemap © Esri',crossOrigin:true}).addTo(map);
-let tileErrors=0;
-baseLayer.on('tileerror',()=>{
+const carto = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}{r}.png', {
+  subdomains:'abcd',
+  maxZoom:19,
+  attribution:'© OpenStreetMap contributors © CARTO',
+  crossOrigin:true
+}).addTo(map);
+const esriFallback = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+  maxZoom:16,
+  attribution:'Basemap © Esri',
+  crossOrigin:true
+});
+let tileErrors = 0;
+carto.on('tileerror', () => {
   tileErrors++;
-  if(tileErrors===6){
-    map.removeLayer(baseLayer);
-    const fallback=L.control({position:'bottomleft'});
-    fallback.onAdd=()=>{const d=L.DomUtil.create('div');d.style.cssText='background:rgba(255,255,255,.92);padding:6px 8px;border:1px solid #d8d8d0;border-radius:6px;font:11px system-ui;color:#666';d.textContent='Clean basemap unavailable — route remains interactive.';return d};
-    fallback.addTo(map);
+  if(tileErrors >= 10 && !map.hasLayer(esriFallback)) {
+    map.removeLayer(carto);
+    esriFallback.addTo(map);
   }
 });
-let layers=[];let markers=[];let routeLine=null;let progressLine=null;let activeIndex=0;let playTimer=null;
-function iconFor(i,country,optional){const bg=colors[country]||'#555';return L.divIcon({className:'',html:`<div class="marker-num" style="width:28px;height:28px;background:${bg};${optional?'outline:3px dashed #fff;outline-offset:2px;':''}">${i+1}</div>`,iconSize:[28,28],iconAnchor:[14,14],popupAnchor:[0,-14]})}
-function fmt(d){return new Date(d+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short'})}
-function clear(){layers.forEach(l=>map.removeLayer(l));layers=[];markers=[];routeLine=null;progressLine=null}
-function render(){
- clear(); const key=document.getElementById('routeSelect').value; const r=routes[key];
- const pts=[];
- r.stops.forEach((x,i)=>{pts.push([x.lat,x.lng]);const m=L.marker([x.lat,x.lng],{icon:iconFor(i,x.country,x.optional)}).addTo(map);m.bindPopup(`<div class="popup-date">${fmt(x.date)} 2027</div><b>${x.place}</b><br>${x.country}${x.days?` · ${x.days} day${x.days===1?'':'s'}`:''}${x.optional?' · optional':''}${x.note?`<div class="popup-note">${x.note}</div>`:''}`);m.bindTooltip(x.place,{direction:'top',offset:[0,-8],opacity:.9});m.on('click',()=>setActiveStop(i,false));markers.push(m);layers.push(m)});
- routeLine=L.polyline(pts,{color:'#3d4547',weight:2.5,opacity:.45,dashArray:key==='written'?'7 7':null}).addTo(map);layers.push(routeLine);
- progressLine=L.polyline(pts.length?[pts[0]]:[],{color:'#202426',weight:4,opacity:.85}).addTo(map);layers.push(progressLine);
- document.getElementById('routeInfo').innerHTML=`<h2 class="route-title">${r.title}</h2><div class="route-note">${r.note}</div>`;
- const totalN=r.stops.reduce((a,b)=>a+(b.days||0),0); const countries=[...new Set(r.stops.map(x=>x.country))];
- document.getElementById('summary').innerHTML=`<div class="card"><b>${r.stops.length}</b><span>mapped stops</span></div><div class="card"><b>${countries.length}</b><span>countries</span></div><div class="card"><b>${totalN}</b><span>listed days</span></div><div class="card"><b>2 May</b><span>planned flight home</span></div>`;
- document.getElementById('timeline').innerHTML=r.stops.map((x,i)=>`<div class="stop" data-index="${i}"><div class="num" style="background:${colors[x.country]}">${i+1}</div><div class="date">${fmt(x.date)}</div><div><div class="place">${x.place}${x.optional?'<span class="tag">optional</span>':''}</div><div class="meta">${x.country}${x.days?` · ${x.days} day${x.days===1?'':'s'}`:''}${x.note?` · ${x.note}`:''}</div></div></div>`).join('');
- document.getElementById('legend').innerHTML=countries.map(c=>`<span><span class="dot" style="background:${colors[c]}"></span>${c}</span>`).join('');
- document.querySelectorAll('.stop').forEach(el=>el.addEventListener('click',()=>setActiveStop(Number(el.dataset.index),true)));
- const slider=document.getElementById('journeySlider');slider.max=Math.max(0,r.stops.length-1);slider.value='0';
- activeIndex=0;updateJourneyUI();
- if(pts.length)map.fitBounds(pts,{padding:[35,35]});
+
+let countryLayers = [];
+let countryLabels = [];
+let routeLayers = [];
+let markers = [];
+let activeIndex = 0;
+let currentFilter = 'All';
+let playTimer = null;
+
+function fmtDate(dateString){
+  return new Date(dateString + 'T12:00:00').toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
 }
-function currentRoute(){return routes[document.getElementById('routeSelect').value]}
-function setActiveStop(i,fly=true){
- const r=currentRoute();if(!r.stops.length)return;
- activeIndex=Math.max(0,Math.min(i,r.stops.length-1));
- const x=r.stops[activeIndex];
- if(progressLine){progressLine.setLatLngs(r.stops.slice(0,activeIndex+1).map(z=>[z.lat,z.lng]))}
- if(fly){map.flyTo([x.lat,x.lng],Math.max(map.getZoom(),7),{duration:.8})}
- if(markers[activeIndex])markers[activeIndex].openPopup();
- updateJourneyUI();
- const el=document.querySelector(`.stop[data-index="${activeIndex}"]`);if(el)el.scrollIntoView({behavior:'smooth',block:'nearest'});
+function shortDate(dateString){
+  return new Date(dateString + 'T12:00:00').toLocaleDateString('en-GB', { day:'numeric', month:'short' });
 }
-function updateJourneyUI(){
- const r=currentRoute();if(!r.stops.length)return;
- const x=r.stops[activeIndex];
- document.getElementById('journeySlider').value=String(activeIndex);
- document.getElementById('journeyPlace').textContent=`${fmt(x.date)} - ${x.place}`;
- document.getElementById('journeyProgress').textContent=`Stop ${activeIndex+1} of ${r.stops.length} - ${x.country}`;
- document.getElementById('prevBtn').disabled=activeIndex===0;
- document.getElementById('nextBtn').disabled=activeIndex===r.stops.length-1;
- document.querySelectorAll('.stop').forEach(el=>el.classList.toggle('active',Number(el.dataset.index)===activeIndex));
+function groupByCountry(stops){
+  const order = [];
+  const mapObj = {};
+  stops.forEach((stop, index) => {
+    if(!mapObj[stop.country]) { mapObj[stop.country] = []; order.push(stop.country); }
+    mapObj[stop.country].push({ ...stop, _index:index });
+  });
+  return { order, groups: mapObj };
 }
-function stopPlayback(){if(playTimer){clearInterval(playTimer);playTimer=null}document.getElementById('playBtn').textContent='Play'}
+function countryMetrics(stops, country){
+  const selected = stops.filter(s => s.country === country);
+  return {
+    stops: selected.length,
+    days: selected.reduce((sum,s) => sum + (s.days || 0), 0)
+  };
+}
+function buildMarkerIcon(index, stop, active=false, dimmed=false){
+  const bg = COLORS[stop.country] || '#555';
+  const size = active ? 34 : 28;
+  const opacity = dimmed ? 0.28 : 1;
+  const classes = ['marker', stop.optional ? 'optional' : '', active ? 'active' : ''].join(' ');
+  return L.divIcon({
+    className:'',
+    html:`<div class="${classes}" style="width:${size}px;height:${size}px;background:${bg};opacity:${opacity}">${index+1}</div>`,
+    iconSize:[size,size],
+    iconAnchor:[size/2,size/2],
+    popupAnchor:[0,-size/2]
+  });
+}
+function clearLayers(){
+  countryLayers.forEach(layer => map.removeLayer(layer));
+  countryLabels.forEach(layer => map.removeLayer(layer));
+  routeLayers.forEach(layer => map.removeLayer(layer));
+  markers.forEach(layer => map.removeLayer(layer));
+  countryLayers = [];
+  countryLabels = [];
+  routeLayers = [];
+  markers = [];
+}
+function currentRoute(){
+  return ROUTES[document.getElementById('routeSelect').value];
+}
+function filteredStops(){
+  const stops = currentRoute().stops;
+  return currentFilter === 'All' ? stops : stops.filter(s => s.country === currentFilter);
+}
+function setMarkerStates(){
+  const stops = currentRoute().stops;
+  markers.forEach((marker, idx) => {
+    const stop = stops[idx];
+    const dimmed = currentFilter !== 'All' && stop.country !== currentFilter;
+    marker.setIcon(buildMarkerIcon(idx, stop, idx === activeIndex, dimmed));
+    marker.setOpacity(dimmed ? 0.6 : 1);
+  });
+}
+function renderCountryOverlays(){
+  const route = currentRoute();
+  const countries = [...new Set(route.stops.map(s => s.country))];
+  countries.forEach(country => {
+    const dimmed = currentFilter !== 'All' && country !== currentFilter;
+    const poly = L.polygon(COUNTRY_SHAPES[country], {
+      color: COLORS[country],
+      weight: currentFilter === country || currentFilter === 'All' ? 2 : 1,
+      opacity: dimmed ? 0.3 : 0.75,
+      fillColor: COLORS[country],
+      fillOpacity: dimmed ? 0.04 : 0.11,
+      interactive:false
+    }).addTo(map);
+    countryLayers.push(poly);
+    const label = L.marker(COUNTRY_LABEL_POS[country], {
+      interactive:false,
+      icon: L.divIcon({
+        className:'',
+        html:`<div class="country-label" style="opacity:${dimmed ? 0.45 : 1}">${country}</div>`,
+        iconSize:[110,28],
+        iconAnchor:[55,14]
+      })
+    }).addTo(map);
+    countryLabels.push(label);
+  });
+}
+function renderRouteLines(){
+  const stops = currentRoute().stops;
+  for(let i=0;i<stops.length-1;i++){
+    const a = stops[i], b = stops[i+1];
+    const sameCountry = a.country === b.country;
+    const dimmed = currentFilter !== 'All' && !(a.country === currentFilter || b.country === currentFilter);
+    const line = L.polyline([[a.lat,a.lng],[b.lat,b.lng]], {
+      color: sameCountry ? COLORS[a.country] : '#697586',
+      weight: sameCountry ? 4 : 2.5,
+      opacity: dimmed ? 0.15 : (sameCountry ? 0.86 : 0.62),
+      dashArray: sameCountry ? null : '8 8',
+      lineCap:'round'
+    }).addTo(map);
+    routeLayers.push(line);
+  }
+}
+function renderMarkers(){
+  const stops = currentRoute().stops;
+  stops.forEach((stop, index) => {
+    const dimmed = currentFilter !== 'All' && stop.country !== currentFilter;
+    const marker = L.marker([stop.lat, stop.lng], { icon: buildMarkerIcon(index, stop, index === activeIndex, dimmed) }).addTo(map);
+    marker.bindPopup(`
+      <div class="popup-date">${fmtDate(stop.date)}</div>
+      <div class="popup-place">${stop.place}</div>
+      <div class="popup-meta">${stop.country}${stop.days ? ` · ${stop.days} day${stop.days === 1 ? '' : 's'}` : ''}${stop.optional ? ' · optional' : ''}</div>
+      ${stop.note ? `<div class="popup-note">${stop.note}</div>` : ''}
+    `);
+    marker.on('click', () => setActiveStop(index, true));
+    markers.push(marker);
+  });
+}
+function renderSummary(){
+  const route = currentRoute();
+  const stops = route.stops;
+  const countries = [...new Set(stops.map(s => s.country))];
+  const listedDays = stops.reduce((sum, s) => sum + (s.days || 0), 0);
+  const filterLabel = currentFilter === 'All' ? 'whole trip' : currentFilter;
+  document.getElementById('summary').innerHTML = `
+    <div class="card"><b>${stops.length}</b><span>mapped stops</span></div>
+    <div class="card"><b>${countries.length}</b><span>countries</span></div>
+    <div class="card"><b>${listedDays}</b><span>listed days</span></div>
+    <div class="card"><b>${filterLabel}</b><span>current focus</span></div>
+  `;
+}
+function renderRouteInfo(){
+  const route = currentRoute();
+  document.getElementById('routeInfo').innerHTML = `
+    <h3>${route.title}</h3>
+    <p>${route.note}</p>
+  `;
+}
+function renderCountryChips(){
+  const route = currentRoute();
+  const countries = [...new Set(route.stops.map(s => s.country))];
+  const html = [`<button class="country-chip ${currentFilter === 'All' ? 'active' : ''}" data-country="All"><span class="swatch" style="background:#64748b"></span>All stops</button>`];
+  countries.forEach(country => {
+    const metrics = countryMetrics(route.stops, country);
+    html.push(`<button class="country-chip ${currentFilter === country ? 'active' : ''}" data-country="${country}"><span class="swatch" style="background:${COLORS[country]}"></span>${country} · ${metrics.stops} stops</button>`);
+  });
+  document.getElementById('countryChips').innerHTML = html.join('');
+  document.querySelectorAll('.country-chip').forEach(btn => btn.addEventListener('click', () => setFilter(btn.dataset.country)));
+}
+function renderMapOverlay(){
+  const route = currentRoute();
+  const countries = [...new Set(route.stops.map(s => s.country))];
+  document.getElementById('mapOverlay').innerHTML = countries.map(country => {
+    const metrics = countryMetrics(route.stops, country);
+    return `<div class="pill"><strong style="color:${COLORS[country]}">${country}</strong> · ${metrics.stops} stops · ${metrics.days} days</div>`;
+  }).join('');
+}
+function renderTimeline(){
+  const route = currentRoute();
+  const grouped = groupByCountry(route.stops);
+  const html = grouped.order.map(country => {
+    const metrics = countryMetrics(route.stops, country);
+    const body = grouped.groups[country].map(stop => `
+      <div class="stop-card ${stop._index === activeIndex ? 'active' : ''}" data-index="${stop._index}">
+        <div class="num" style="background:${COLORS[country]}">${stop._index + 1}</div>
+        <div class="stop-date">${shortDate(stop.date)}</div>
+        <div>
+          <div class="stop-place">${stop.place}${stop.optional ? '<span class="stop-tag">optional</span>' : ''}</div>
+          <div class="stop-meta">${country}${stop.days ? ` · ${stop.days} day${stop.days === 1 ? '' : 's'}` : ''}${stop.note ? ` · ${stop.note}` : ''}</div>
+        </div>
+      </div>
+    `).join('');
+    return `
+      <section class="group" id="group-${country.replace(/\s+/g,'-')}">
+        <div class="group-header" style="background:${COLORS[country]}">
+          <div class="group-title">
+            <strong>${country}</strong>
+            <span>${metrics.stops} stops · ${metrics.days} days</span>
+          </div>
+        </div>
+        <div class="group-body">${body}</div>
+      </section>
+    `;
+  }).join('');
+  document.getElementById('timeline').innerHTML = html;
+  document.querySelectorAll('.stop-card').forEach(card => {
+    card.addEventListener('click', () => setActiveStop(Number(card.dataset.index), true));
+  });
+}
+function renderActiveStop(){
+  const stop = currentRoute().stops[activeIndex];
+  document.getElementById('activeStop').innerHTML = `
+    <div class="kicker">Currently selected stop</div>
+    <div class="date">${fmtDate(stop.date)}</div>
+    <h2>${stop.place}</h2>
+    <div class="meta"><strong style="color:${COLORS[stop.country]}">${stop.country}</strong>${stop.days ? ` · ${stop.days} day${stop.days === 1 ? '' : 's'}` : ''}${stop.optional ? ' · optional' : ''}</div>
+    ${stop.note ? `<div class="note">${stop.note}</div>` : `<div class="note">No additional note has been added for this stop yet.</div>`}
+  `;
+}
+function updateJourneyControls(){
+  const route = currentRoute();
+  document.getElementById('journeySlider').max = Math.max(0, route.stops.length - 1);
+  document.getElementById('journeySlider').value = String(activeIndex);
+  document.getElementById('routeStep').textContent = `Stop ${activeIndex + 1} of ${route.stops.length}`;
+  document.getElementById('prevBtn').disabled = activeIndex === 0;
+  document.getElementById('nextBtn').disabled = activeIndex === route.stops.length - 1;
+}
+function updateOpenPopup(){
+  markers.forEach((marker, i) => {
+    if(i === activeIndex) { marker.openPopup(); }
+    else { marker.closePopup(); }
+  });
+}
+function fitForCurrentView(){
+  const stops = filteredStops();
+  const bounds = L.latLngBounds(stops.map(s => [s.lat, s.lng]));
+  if(bounds.isValid()) map.fitBounds(bounds.pad(0.35), { animate:true });
+}
+function setFilter(country){
+  currentFilter = country;
+  render();
+  fitForCurrentView();
+}
+function stopPlayback(){
+  if(playTimer){ clearInterval(playTimer); playTimer = null; }
+  document.getElementById('playBtn').textContent = 'Play';
+}
 function togglePlayback(){
- if(playTimer){stopPlayback();return}
- const r=currentRoute();if(activeIndex>=r.stops.length-1)activeIndex=0;
- document.getElementById('playBtn').textContent='Pause';setActiveStop(activeIndex,true);
- playTimer=setInterval(()=>{if(activeIndex>=r.stops.length-1){stopPlayback();return}setActiveStop(activeIndex+1,true)},1500)
+  const stops = currentRoute().stops;
+  if(playTimer){ stopPlayback(); return; }
+  if(activeIndex >= stops.length - 1) activeIndex = 0;
+  document.getElementById('playBtn').textContent = 'Pause';
+  setActiveStop(activeIndex, true);
+  playTimer = setInterval(() => {
+    if(activeIndex >= stops.length - 1){ stopPlayback(); return; }
+    setActiveStop(activeIndex + 1, true);
+  }, 1600);
 }
-document.getElementById('routeSelect').addEventListener('change',()=>{stopPlayback();render()});
-document.getElementById('fitBtn').addEventListener('click',()=>{const r=currentRoute();if(r.stops.length)map.fitBounds(r.stops.map(x=>[x.lat,x.lng]),{padding:[35,35]})});
-document.getElementById('prevBtn').addEventListener('click',()=>setActiveStop(activeIndex-1,true));
-document.getElementById('nextBtn').addEventListener('click',()=>setActiveStop(activeIndex+1,true));
-document.getElementById('playBtn').addEventListener('click',togglePlayback);
-document.getElementById('journeySlider').addEventListener('input',e=>{stopPlayback();setActiveStop(Number(e.target.value),true)});
-document.getElementById('copyBtn').addEventListener('click',async()=>{const r=routes[document.getElementById('routeSelect').value];const txt=r.stops.map((x,i)=>`${i+1}. ${x.date} — ${x.place}, ${x.country}${x.optional?' (optional)':''}`).join('\n');try{await navigator.clipboard.writeText(txt);document.getElementById('copyBtn').textContent='Copied';setTimeout(()=>document.getElementById('copyBtn').textContent='Copy dated stop list',1200)}catch(e){prompt('Copy this list:',txt)}});
+function setActiveStop(index, fly=true){
+  activeIndex = Math.max(0, Math.min(index, currentRoute().stops.length - 1));
+  const stop = currentRoute().stops[activeIndex];
+  if(currentFilter !== 'All' && stop.country !== currentFilter){ currentFilter = stop.country; }
+  renderSummary();
+  renderCountryChips();
+  renderCountryOverlaysOnly();
+  renderRouteLinesOnly();
+  setMarkerStates();
+  renderTimeline();
+  renderActiveStop();
+  updateJourneyControls();
+  updateOpenPopup();
+  if(fly) map.flyTo([stop.lat, stop.lng], Math.max(map.getZoom(), 6), { duration:.8 });
+}
+function renderCountryOverlaysOnly(){
+  countryLayers.forEach(layer => map.removeLayer(layer));
+  countryLabels.forEach(layer => map.removeLayer(layer));
+  countryLayers = []; countryLabels = [];
+  renderCountryOverlays();
+}
+function renderRouteLinesOnly(){
+  routeLayers.forEach(layer => map.removeLayer(layer));
+  routeLayers = [];
+  renderRouteLines();
+}
+function render(){
+  clearLayers();
+  renderSummary();
+  renderRouteInfo();
+  renderCountryChips();
+  renderMapOverlay();
+  renderCountryOverlays();
+  renderRouteLines();
+  renderMarkers();
+  renderTimeline();
+  renderActiveStop();
+  updateJourneyControls();
+  setMarkerStates();
+  fitForCurrentView();
+  updateOpenPopup();
+}
+
+document.getElementById('routeSelect').addEventListener('change', () => {
+  stopPlayback();
+  currentFilter = 'All';
+  activeIndex = 0;
+  render();
+});
+document.getElementById('fitBtn').addEventListener('click', () => {
+  currentFilter = 'All';
+  render();
+});
+document.getElementById('prevBtn').addEventListener('click', () => setActiveStop(activeIndex - 1, true));
+document.getElementById('nextBtn').addEventListener('click', () => setActiveStop(activeIndex + 1, true));
+document.getElementById('playBtn').addEventListener('click', togglePlayback);
+document.getElementById('journeySlider').addEventListener('input', (e) => {
+  stopPlayback();
+  setActiveStop(Number(e.target.value), true);
+});
+document.getElementById('copyBtn').addEventListener('click', async () => {
+  const route = currentRoute();
+  const text = route.stops.map((s,i) => `${i+1}. ${s.date} — ${s.place}, ${s.country}${s.optional ? ' (optional)' : ''}`).join('\n');
+  try {
+    await navigator.clipboard.writeText(text);
+    const btn = document.getElementById('copyBtn');
+    const old = btn.textContent;
+    btn.textContent = 'Copied';
+    setTimeout(() => btn.textContent = old, 1200);
+  } catch(err) {
+    window.prompt('Copy this stop list:', text);
+  }
+});
+
 render();
 </script>
 </body>
