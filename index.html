@@ -100,6 +100,7 @@ header p{margin:5px 0 0;color:var(--muted);font-size:12px;max-width:720px}
 .country-photo img{width:100%;height:100%;object-fit:cover;display:block}
 .country-photo.loading::after{content:"";display:block;width:100%;height:100%;background:linear-gradient(90deg,#eef1f3,#f8fafb,#eef1f3)}
 .photo-truth{font-size:9px;color:#6b7280;line-height:1.35;margin:6px 2px 0}
+.itinerary-photo-note{font-size:9px;color:#66717e;background:#f8f4ed;border:1px solid #e8dfd3;border-radius:9px;padding:7px 8px;margin-bottom:8px}
 .helper{font-size:10px;color:var(--muted);margin-top:6px;line-height:1.4}
 .active-stop{background:linear-gradient(180deg,#fff 0%,#fbf7ef 100%);border:1px solid #eadfcf;border-radius:12px;padding:10px;box-shadow:0 5px 14px rgba(27,39,51,.05)}
 .active-stop .kicker{font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:#9b6c2f;font-weight:800;margin-bottom:4px}
@@ -113,7 +114,9 @@ header p{margin:5px 0 0;color:var(--muted);font-size:12px;max-width:720px}
 .active-media-summary{font-size:10px;line-height:1.4;color:#586675;margin-top:6px}
 .active-media-source{font-size:9px;color:#7a8490;margin-top:4px}
 .active-media-source a{color:inherit}
-.stop-thumb{width:72px;height:52px;border-radius:8px;overflow:hidden;background:linear-gradient(135deg,#dce7ed,#f4eadb);border:1px solid #e5ddd1;position:relative;align-self:center}
+.view-itinerary-btn{margin-top:8px;width:100%;border:1px solid #ded5c8;background:#fff;border-radius:9px;padding:7px 9px;font-size:10px;font-weight:800;color:#344256;text-align:left}
+.view-itinerary-btn:hover{background:#faf6ef}
+.stop-thumb{width:76px;height:56px;border-radius:9px;overflow:hidden;background:linear-gradient(135deg,#dce7ed,#f4eadb);border:1px solid #e5ddd1;position:relative;align-self:center;box-shadow:0 2px 6px rgba(25,39,52,.08)}
 .stop-thumb img{width:100%;height:100%;object-fit:cover;display:block}
 .stop-thumb.loading::after{content:"…";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:12px;color:#657281}
 .stop-thumb-fallback{width:100%;height:100%;display:flex;align-items:center;justify-content:center;padding:5px;text-align:center;font-size:8px;line-height:1.15;color:#657281}
@@ -255,6 +258,7 @@ header p{margin:5px 0 0;color:var(--muted);font-size:12px;max-width:720px}
     </div>
 
     <div class="side-panel" id="panel-itinerary">
+      <div class="itinerary-photo-note">Each stop includes a real destination photograph.</div>
       <div id="timeline"></div>
     </div>
 
@@ -361,6 +365,40 @@ const MEDIA_FOCAL = {
   'Osaka':'50% 48%','Kyoto':'50% 50%','Kinosaki Onsen':'50% 50%','Hakone':'50% 55%','Tokyo':'50% 50%'
 };
 const COUNTRY_FOCAL = {'Thailand':'50% 50%','Vietnam':'50% 55%','Philippines':'50% 55%','Indonesia':'50% 55%','Japan':'50% 50%'};
+const LOCATION_CAPTIONS = {
+  'Bangkok':'Grand Palace and historic Bangkok — royal architecture, temples, street food and the city’s energetic centre.',
+  'Chiang Mai':'Northern Thailand’s cultural capital, known for old-city temples, night markets and mountain scenery.',
+  'Pai':'A relaxed mountain town surrounded by canyons, hot springs, viewpoints and countryside.',
+  'Krabi / Ao Nang':'A gateway to Railay, limestone cliffs, tropical beaches and island-hopping in the Andaman Sea.',
+  'Koh Yao Noi':'A quieter island in Phang Nga Bay with beaches, limestone views and a slower local pace.',
+  'Khao Sok':'Rainforest, limestone karsts and Cheow Lan Lake in one of southern Thailand’s most striking national parks.',
+  'Hanoi':'Vietnam’s capital — Old Quarter streets, lakes, cafés, food culture and layers of history.',
+  'Sapa':'Mountain landscapes, terraced rice fields and trekking country in northern Vietnam.',
+  'Ha Giang':'Dramatic mountain roads, valleys and highland scenery on the famous Ha Giang Loop.',
+  'Cat Ba':'Island base for Lan Ha Bay, kayaking, limestone scenery and Cat Ba National Park.',
+  'Ninh Binh':'Rivers, rice fields and limestone karsts around Trang An and Tam Coc.',
+  'Hue':'Vietnam’s former imperial capital, centred on the citadel, royal tombs and the Perfume River.',
+  'Da Nang':'Modern coastal city with beaches, cafés, Marble Mountains and easy access to central Vietnam.',
+  'Hoi An':'Lantern-lit historic town known for preserved architecture, riverside streets, tailoring and food.',
+  'Ho Chi Minh City':'Fast-paced southern metropolis with rooftop bars, historic sites, markets and modern city life.',
+  'Cebu City':'Major gateway to the central Philippines, connecting Clara onward to the islands and beaches.',
+  'Moalboal':'Coastal base famous for the sardine run, snorkelling, diving and nearby Kawasan Falls.',
+  'Bohol / Panglao':'Chocolate Hills, tarsiers and tropical beaches around Bohol and Panglao.',
+  'El Nido':'Palawan’s limestone lagoons, clear water, beaches and island-hopping routes.',
+  'Coron':'Turquoise lakes, limestone islands, snorkelling and dramatic seascapes in northern Palawan.',
+  'Yogyakarta':'Cultural centre of Java and a base for Borobudur, Prambanan and Javanese food and arts.',
+  'Mount Bromo':'Iconic volcanic landscape, best known for sunrise views across the Tengger caldera.',
+  'Ijen':'Volcanic crater landscape in East Java, known for its turquoise crater lake and sulphur-mining area.',
+  'Ubud':'Inland Bali — temples, rice terraces, waterfalls, wellness and Balinese culture.',
+  'Canggu':'Bali beach area known for surfing, cafés, restaurants and a lively social scene.',
+  'Uluwatu':'Clifftop southern Bali with beaches, surf, sunsets and the Uluwatu temple complex.',
+  'Osaka':'Energetic Japanese city known for food, nightlife, Dotonbori and Osaka Castle.',
+  'Kyoto':'Temples, shrines, traditional districts and gardens at the heart of historic Japan.',
+  'Kinosaki Onsen':'Traditional hot-spring town with ryokan stays, public baths and a walkable canal-side centre.',
+  'Hakone':'Mountain and lake scenery near Mount Fuji, with onsen, Lake Ashi and easy access from Tokyo.',
+  'Tokyo':'Japan’s vast capital — neighbourhoods, food, shopping, nightlife and an ideal final stop before flying home.'
+};
+
 const DIRECT_MEDIA = {
   'Koh Yao Noi': {
     image:'https://commons.wikimedia.org/wiki/Special:FilePath/Palms%20in%20Koh%20Yao%20Noi%2C%20Phang%20Nga%20Bay%2C%20Thailand.jpg?width=1200',
@@ -545,10 +583,10 @@ async function hydrateActiveMedia(stop){
   photo.innerHTML = media.image
     ? `<img src="${media.image}" alt="${escapeHtml(expectedPlace)}" decoding="async" style="object-position:${MEDIA_FOCAL[expectedPlace] || '50% 50%'}">`
     : '';
-  const compact = media.extract ? media.extract.split(/(?<=[.!?])\s+/).slice(0,2).join(' ') : '';
+  const cleanCaption = LOCATION_CAPTIONS[expectedPlace] || '';
   meta.innerHTML =
-    (compact ? `<div class="active-media-summary">${escapeHtml(compact)}</div>` : '') +
-    (media.pageUrl ? `<div class="active-media-source">Real image & location context: <a href="${media.pageUrl}" target="_blank" rel="noopener noreferrer">Wikipedia / Wikimedia</a></div>` : '');
+    (cleanCaption ? `<div class="active-media-summary">${escapeHtml(cleanCaption)}</div>` : '') +
+    (media.pageUrl ? `<div class="active-media-source">Real photograph: <a href="${media.pageUrl}" target="_blank" rel="noopener noreferrer">Wikipedia / Wikimedia</a></div>` : '');
 }
 async function hydrateCountryImages(){
   const nodes = [...document.querySelectorAll('[data-country-photo]')];
@@ -770,8 +808,8 @@ function renderTimeline(){
       setSideTab('itinerary');
     });
   });
-}
   hydrateItineraryImages();
+}
 function renderActiveStop(){
   const stop = currentRoute().stops[activeIndex];
   document.getElementById('activeStop').innerHTML = `
@@ -782,8 +820,13 @@ function renderActiveStop(){
     <div class="active-photo loading" id="activePhoto" aria-label="Real image of ${escapeHtml(stop.place)}"></div>
     ${stop.note ? `<div class="note">${stop.note}</div>` : `<div class="note">No additional itinerary note has been added for this stop yet.</div>`}
     <div id="activeMediaMeta"></div>
+    <button class="view-itinerary-btn" id="viewItineraryBtn" type="button">View full itinerary + photos →</button>
   `;
   hydrateActiveMedia(stop);
+  window.setTimeout(() => {
+    const btn = document.getElementById('viewItineraryBtn');
+    if(btn) btn.onclick = () => setSideTab('itinerary');
+  }, 0);
 }
 function updateJourneyControls(){
   const route = currentRoute();
