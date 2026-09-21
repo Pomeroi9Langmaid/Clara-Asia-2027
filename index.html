@@ -75,6 +75,26 @@ header p{margin:5px 0 0;color:var(--muted);font-size:12px;max-width:720px}
 .country-stay{position:absolute;top:25px;height:8px;border-radius:999px;opacity:.92}
 .calendar-stop{position:absolute;top:22px;width:8px;height:16px;border:2px solid #fff;border-radius:999px;padding:0;transform:translateX(-50%);box-shadow:0 1px 4px rgba(0,0,0,.18);z-index:4;min-width:0}
 .calendar-stop.active{width:11px;height:20px;top:20px;box-shadow:0 0 0 2px rgba(31,41,51,.15),0 2px 6px rgba(0,0,0,.22)}
+.month-band.active-month{font-weight:950;color:#172635;box-shadow:inset 0 -2px 0 rgba(23,38,53,.42)}
+.timeline-playhead{position:absolute;top:0;bottom:0;width:2px;background:#172635;z-index:8;transform:translateX(-1px);pointer-events:none}
+.timeline-playhead::after{content:"";position:absolute;top:28px;left:50%;width:12px;height:12px;border-radius:50%;background:var(--playhead-color,#172635);border:3px solid #fff;transform:translate(-50%,-50%);box-shadow:0 0 0 2px rgba(23,38,53,.18),0 2px 6px rgba(0,0,0,.26)}
+.timeline-playhead-label{position:absolute;top:2px;left:6px;background:#172635;color:#fff;border-radius:999px;padding:2px 7px;font-size:8px;font-weight:850;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.18)}
+.timeline-playhead.edge-right .timeline-playhead-label{left:auto;right:6px}
+.trip-track.playing .timeline-playhead::after{animation:timelinePulse 1.15s ease-in-out infinite}
+.trip-track.playing .timeline-playhead{animation:timelineLineGlow 1.15s ease-in-out infinite}
+.trip-track.playing .month-band.active-month{animation:monthPulse 1.6s ease-in-out infinite}
+@keyframes timelinePulse{
+  0%,100%{box-shadow:0 0 0 2px rgba(23,38,53,.18),0 2px 6px rgba(0,0,0,.26);transform:translate(-50%,-50%) scale(1)}
+  50%{box-shadow:0 0 0 7px rgba(23,38,53,.10),0 2px 7px rgba(0,0,0,.24);transform:translate(-50%,-50%) scale(1.16)}
+}
+@keyframes timelineLineGlow{
+  0%,100%{opacity:.72}
+  50%{opacity:1}
+}
+@keyframes monthPulse{
+  0%,100%{filter:brightness(1)}
+  50%{filter:brightness(.96);box-shadow:inset 0 -3px 0 rgba(23,38,53,.62)}
+}
 .country-arrival{position:absolute;top:37px;font-size:8px;font-weight:800;white-space:nowrap;color:#42505e;transform:translateX(-50%);line-height:1.1}
 .country-arrival.edge-left{transform:none}.country-arrival.edge-right{transform:translateX(-100%)}
 .country-arrival b{font-weight:900}
@@ -839,10 +859,13 @@ function currentScheduledStop(route,today){
 function renderTripCalendar(){
   const route=currentRoute();
   const start=daySerial(TRIP_START), end=daySerial(TIMELINE_END_EXCLUSIVE), total=end-start;
+  const activeStop=route.stops[activeIndex];
+  const activeSerial=daySerial(activeStop.date);
   const months=MONTHS_2027.map(month=>{
     const left=((daySerial(month.start)-start)/total)*100;
     const width=((daySerial(month.end)-daySerial(month.start))/total)*100;
-    return `<div class="month-band ${month.className}" style="left:${left}%;width:${width}%">${month.name}</div>`;
+    const activeMonth=activeSerial>=daySerial(month.start)&&activeSerial<daySerial(month.end);
+    return `<div class="month-band ${month.className}${activeMonth?' active-month':''}" style="left:${left}%;width:${width}%">${month.name}</div>`;
   }).join('');
 
   const windows=countryStayWindows(route);
@@ -863,6 +886,10 @@ function renderTripCalendar(){
     return `<div class="country-arrival${edge}" style="left:${left}%;color:${COLORS[w.country]}"><b>${shortDate(w.start)}</b> · ${w.entryStop.place}</div>`;
   }).join('');
 
+  const activeLeft=timelinePct(activeStop.date);
+  const activeEdge=activeLeft>82?' edge-right':'';
+  const playheadHtml=`<div class="timeline-playhead${activeEdge}" style="left:${activeLeft}%;--playhead-color:${COLORS[activeStop.country]}"><span class="timeline-playhead-label">${shortDate(activeStop.date)} · ${activeStop.place}</span></div>`;
+
   const today=localTodayString();
   const serial=daySerial(today);
   let todayHtml='';
@@ -877,8 +904,8 @@ function renderTripCalendar(){
   }
 
   document.getElementById('tripCalendar').innerHTML=`
-    <div class="trip-calendar-head"><strong>2027 journey timeline</strong><span class="trip-calendar-status">${status}</span></div>
-    <div class="trip-track">${months}${bands}${stops}${arrivals}${todayHtml}</div>
+    <div class="trip-calendar-head"><strong>${isPlaying?'Playing the journey':'2027 journey timeline'}</strong><span class="trip-calendar-status">${isPlaying?`${shortDate(activeStop.date)} · ${activeStop.place}, ${activeStop.country}`:status}</span></div>
+    <div class="trip-track${isPlaying?' playing':''}">${months}${bands}${stops}${arrivals}${playheadHtml}${todayHtml}</div>
   `;
 
   document.querySelectorAll('.calendar-stop').forEach(btn=>btn.addEventListener('click',()=>{
@@ -1227,6 +1254,7 @@ function stopPlayback(){
   const btn=document.getElementById('playBtn');
   btn.textContent='Play';
   btn.setAttribute('aria-label','Play route');
+  renderTripCalendar();
   renderRouteLinesOnly();
   scheduleSidebarHide();
 }
@@ -1270,6 +1298,7 @@ function togglePlayback(){
   const playButton=document.getElementById('playBtn');
   playButton.textContent='Pause';
   playButton.setAttribute('aria-label','Pause route');
+  renderTripCalendar();
   markers.forEach(marker=>marker.closePopup());
   markers[activeIndex]?.openPopup();
   renderRouteLinesOnly();
