@@ -2178,6 +2178,24 @@ header p{display:none!important}
   }
   .distance-total strong{margin-top:0}
 }
+
+/* ===== Timeline duplicate-label cleanup ===== */
+.trip-calendar-head{
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
+}
+.trip-calendar-status{
+  display:none!important;
+}
+@media(max-width:1100px){
+  .trip-calendar-head{
+    grid-template-columns:1fr 1fr!important;
+  }
+}
+@media(max-width:760px){
+  .trip-calendar-head{
+    grid-template-columns:1fr 1fr!important;
+  }
+}
 </style>
 </head>
 <body>
@@ -3035,16 +3053,9 @@ function renderTripCalendar(){
     status='Trip completed 2nd May 2027';
   }
 
-  const centreStatus=gatewayPlaybackPhase==='outbound'
-    ? 'Landvetter → Bangkok'
-    : gatewayPlaybackPhase==='return'
-      ? 'Tokyo → Landvetter'
-      : `${shortDate(activeStop.date)} · ${activeStop.place}`;
-
   document.getElementById('tripCalendar').innerHTML=`
     <div class="trip-calendar-head">
       <span class="timeline-endpoint"><b>GOT</b><small>Landvetter · 1 Feb</small></span>
-      <span class="trip-calendar-status">${centreStatus}</span>
       <span class="timeline-endpoint end"><small>2 May · Landvetter</small><b>GOT</b></span>
     </div>
     <div class="trip-track${isPlaying?' playing':''}">
