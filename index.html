@@ -1949,6 +1949,66 @@ header p{display:none!important}
   }
   .stop-card.current .num{transform:scale(1.08)}
 }
+
+/* ===== Itinerary is the single journey-detail surface ===== */
+.stop-card.past{
+  opacity:.32!important;
+  filter:grayscale(.28) saturate(.38) contrast(.92)!important;
+}
+.stop-card.future{
+  opacity:.61!important;
+  filter:saturate(.66)!important;
+}
+.stop-card.current{
+  opacity:1!important;
+  filter:none!important;
+  transform:translateX(4px)!important;
+  background:
+    linear-gradient(90deg,color-mix(in srgb,var(--stop-accent) 13%,rgba(255,255,255,.88)),rgba(255,255,255,.72))!important;
+  box-shadow:
+    inset 4px 0 0 var(--stop-accent),
+    0 10px 24px rgba(20,39,53,.13),
+    inset 0 1px 0 rgba(255,255,255,.72)!important;
+}
+.stop-card.current .stop-place{
+  font-weight:900!important;
+  color:#192b38!important;
+}
+.stop-card.current .stop-date,
+.stop-card.current .stop-duration{
+  color:#31495a!important;
+}
+.stop-card.current .stop-thumb{
+  opacity:1!important;
+  filter:none!important;
+  transform:scale(1.025);
+}
+.group:not(.current-group){
+  opacity:.48!important;
+  filter:saturate(.58);
+}
+.group.current-group{
+  opacity:1!important;
+  filter:none!important;
+  box-shadow:0 10px 24px rgba(20,39,53,.09)!important;
+}
+.group.current-group .group-header{
+  box-shadow:inset 0 -1px 0 rgba(255,255,255,.30);
+}
+
+/* The map no longer has destination popup bubbles. */
+.leaflet-popup.stop-popup{display:none!important}
+
+/* When itinerary is open, make its purpose explicit without adding more chrome. */
+#panel-itinerary.active .itinerary-photo-note{
+  position:sticky;
+  top:37px;
+  z-index:7;
+  background:rgba(241,248,251,.82)!important;
+  border-color:rgba(255,255,255,.62)!important;
+  backdrop-filter:blur(18px) saturate(120%);
+  -webkit-backdrop-filter:blur(18px) saturate(120%);
+}
 </style>
 </head>
 <body>
@@ -2951,8 +3011,7 @@ function playGatewayFlight(direction,onDone){
   const b=outbound?stops[0]:HOME_AIRPORT;
   gatewayPlaybackPhase=direction;
   renderTripCalendar();
-  markers.forEach(marker=>marker.closePopup());
-
+  
   // A dedicated active flight path keeps the aircraft visually tied to the route.
   const gatewayLine=L.polyline([[a.lat,a.lng],[b.lat,b.lng]],{
     color:'#f8fbfd',
@@ -3014,20 +3073,10 @@ function renderMarkers(){
   stops.forEach((stop, index) => {
     const dimmed = currentFilter !== 'All' && stop.country !== currentFilter;
     const marker = L.marker([stop.lat, stop.lng], { icon: buildMarkerIcon(index, stop, index === activeIndex, dimmed) }).addTo(map);
-    marker.bindPopup(`
-      <div class="popup-date">${fmtDate(stop.date)}</div>
-      <div class="popup-heading"><strong>${stop.place}, <span style="color:${COLORS[stop.country]}">${stop.country}</span> ·</strong> <span>${stop.days ? `${stop.days} day${stop.days === 1 ? '' : 's'}` : ''}</span>${stop.optional ? '<span class="popup-optional">optional</span>' : ''}</div>
-      ${publicStopNote(stop) ? `<div class="popup-note">${publicStopNote(stop)}</div>` : ''}
-    `,{
-      className:'stop-popup',
-      maxWidth:230,
-      minWidth:185,
-      autoPan:true,
-      keepInView:true,
-      autoPanPadding:L.point(28,28),
-      offset:popupOffsetFor(stop)
+    marker.on('click', () => {
+      stopPlayback();
+      setActiveStop(index, true, false);
     });
-    marker.on('click', () => setActiveStop(index, true, true));
     markers.push(marker);
   });
 }
@@ -3117,8 +3166,7 @@ function renderTimeline(){
   document.getElementById('timeline').innerHTML = html;
   document.querySelectorAll('.stop-card').forEach(card => {
     const activate=()=>{
-      setActiveStop(Number(card.dataset.index), true, true);
-      setSideTab('itinerary');
+      setActiveStop(Number(card.dataset.index), true, false);
     };
     card.addEventListener('click',activate);
     card.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){e.preventDefault();activate();} });
@@ -3169,8 +3217,7 @@ function setFilter(country){
   currentFilter = country;
   stopPlayback();
   hideFlightPlane();
-  markers.forEach(marker => marker.closePopup());
-  render();
+    render();
   fitForCurrentView();
 }
 function stopPlayback(){
@@ -3204,15 +3251,14 @@ function playAdvance(){
   const isFlight=a.country!==b.country;
 
   if(isFlight){
-    markers.forEach(marker=>marker.closePopup());
-    hideFlightPlane();
+        hideFlightPlane();
     map.fitBounds([[a.lat,a.lng],[b.lat,b.lng]],{padding:[120,120],animate:false});
     playTimer=setTimeout(()=>{
       playTimer=null;
       if(!isPlaying || activeIndex!==legIndex) return;
       animateFlightLeg(legIndex,4600,()=>{
         if(!isPlaying) return;
-        setActiveStop(legIndex+1,true,true);
+        setActiveStop(legIndex+1,true,false);
         playTimer=setTimeout(()=>{playTimer=null;playAdvance()},1100);
       });
     },180);
@@ -3220,7 +3266,7 @@ function playAdvance(){
     playTimer=setTimeout(()=>{
       playTimer=null;
       if(!isPlaying) return;
-      setActiveStop(legIndex+1,true,true);
+      setActiveStop(legIndex+1,true,false);
       playTimer=setTimeout(()=>{playTimer=null;playAdvance()},1100);
     },1250);
   }
@@ -3228,24 +3274,20 @@ function playAdvance(){
 function togglePlayback(){
   const stops=currentRoute().stops;
   if(isPlaying){stopPlayback();return}
-  if(activeIndex>=stops.length-1) setActiveStop(0,true,true);
+  if(activeIndex>=stops.length-1) setActiveStop(0,true,false);
 
-  // Playback gets the full map canvas on desktop.
-  if(window.innerWidth > 960){
-    clearTimeout(sidebarHideTimer);
-    setSidebarCollapsed(true);
-  }
+  // Playback is map + itinerary together. Keep the current stop visible in the right panel.
+  clearTimeout(sidebarHideTimer);
+  setSidebarCollapsed(false);
+  setSideTab('itinerary');
 
   isPlaying=true;
-  if(window.innerWidth > 960){
-    window.setTimeout(() => cueSidebarForStop(currentRoute().stops[activeIndex],{force:true}), 520);
-  }
   const playButton=document.getElementById('playBtn');
   playButton.classList.add('is-playing');
   playButton.setAttribute('aria-label','Pause route');
   renderTripCalendar();
-  markers.forEach(marker=>marker.closePopup());
-  markers[activeIndex]?.openPopup();
+  renderTimeline();
+  window.setTimeout(scrollActiveItineraryCard, 80);
   renderRouteLinesOnly();
 
   if(activeIndex===0 && !outboundGatewayPlayed){
@@ -3255,7 +3297,7 @@ function togglePlayback(){
       playGatewayFlight('outbound',()=>{
         if(!isPlaying) return;
         outboundGatewayPlayed=true;
-        setActiveStop(0,true,true);
+        setActiveStop(0,true,false);
         playTimer=setTimeout(()=>{playTimer=null;if(isPlaying) playAdvance();},1000);
       });
     },650);
@@ -3275,12 +3317,12 @@ function setActiveStop(index, fly=true, showPopup=false){
     gatewayPlaybackPhase=null;
   }
   const stop = currentRoute().stops[activeIndex];
-  const changedCountry = previousStop?.country !== stop.country;
   currentFilter = stop.country;
   if(!isPlaying) hideFlightPlane();
 
-  // Popups are deliberately on-demand only: route navigation never opens one.
-  markers.forEach(marker => marker.closePopup());
+  // The itinerary panel is the single detail surface. Map bubbles are intentionally disabled.
+  setSidebarCollapsed(false);
+  setSideTab('itinerary');
 
   renderSummary();
   renderCountryBar();
@@ -3294,16 +3336,7 @@ function setActiveStop(index, fly=true, showPopup=false){
   updateJourneyControls();
 
   if(fly) map.flyTo([stop.lat, stop.lng], Math.max(map.getZoom(), 6), { duration:.8 });
-  if(showPopup){
-    window.setTimeout(() => markers[activeIndex]?.openPopup(), fly ? 650 : 0);
-  }
-
-  if(sidebarIsCollapsed()){
-    if(!isPlaying) cueSidebarForStop(stop,{force:true});
-    else if(changedCountry) cueSidebarForStop(stop,{force:true});
-  }else if(activeSideTab === 'itinerary'){
-    window.setTimeout(scrollActiveItineraryCard, 120);
-  }
+  window.setTimeout(scrollActiveItineraryCard, fly ? 260 : 80);
 }
 function renderCountryOverlaysOnly(){
   countryLayers.forEach(layer => map.removeLayer(layer));
@@ -3348,10 +3381,10 @@ document.getElementById('restartBtn').addEventListener('click', () => {
   gatewayPlaybackPhase=null;
   outboundGatewayPlayed=false;
   returnGatewayPlayed=false;
-  setActiveStop(0,true,true);
+  setActiveStop(0,true,false);
 });
-document.getElementById('prevBtn').addEventListener('click', () => { stopPlayback(); setActiveStop(activeIndex - 1, true, true); });
-document.getElementById('nextBtn').addEventListener('click', () => { stopPlayback(); setActiveStop(activeIndex + 1, true, true); });
+document.getElementById('prevBtn').addEventListener('click', () => { stopPlayback(); setActiveStop(activeIndex - 1, true, false); });
+document.getElementById('nextBtn').addEventListener('click', () => { stopPlayback(); setActiveStop(activeIndex + 1, true, false); });
 document.getElementById('playBtn').addEventListener('click', togglePlayback);
 let sidebarHideTimer = null;
 let sidebarCueTimer = null;
@@ -3455,10 +3488,10 @@ document.addEventListener('keydown', (event) => {
   if(tag === 'input' || tag === 'select' || tag === 'textarea' || document.activeElement?.isContentEditable) return;
   if(event.key === 'ArrowLeft'){
     event.preventDefault();
-    if(activeIndex > 0){ stopPlayback(); setActiveStop(activeIndex - 1, true, true); }
+    if(activeIndex > 0){ stopPlayback(); setActiveStop(activeIndex - 1, true, false); }
   }else if(event.key === 'ArrowRight'){
     event.preventDefault();
-    if(activeIndex < currentRoute().stops.length - 1){ stopPlayback(); setActiveStop(activeIndex + 1, true, true); }
+    if(activeIndex < currentRoute().stops.length - 1){ stopPlayback(); setActiveStop(activeIndex + 1, true, false); }
   }else if(event.code === 'Space'){
     event.preventDefault();
     togglePlayback();
