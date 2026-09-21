@@ -65,7 +65,24 @@ header p{margin:5px 0 0;color:var(--muted);font-size:12px;max-width:720px}
 .country-nav-photo{width:30px;height:20px;border-radius:6px;overflow:hidden;flex:0 0 auto;background:#eef1f3;border:1px solid #e5e7eb}
 .country-nav-photo img{width:100%;height:100%;object-fit:cover;display:block}
 .country-nav-photo.loading::after{content:"";display:block;width:100%;height:100%;background:linear-gradient(90deg,#eef1f3,#f8fafb,#eef1f3)}
-.shell{display:grid;grid-template-columns:minmax(0,1fr) 350px;height:calc(100vh - 126px);transition:grid-template-columns .28s ease}
+.trip-calendar{background:#fff;border-bottom:1px solid var(--border);padding:6px 12px 7px;position:relative;z-index:890}
+.trip-calendar-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:4px;min-height:16px}
+.trip-calendar-head strong{font-size:10px;color:#344256}
+.trip-calendar-status{font-size:9px;color:#74808d;white-space:nowrap}
+.trip-track{position:relative;height:52px;border:1px solid #e6e0d7;border-radius:10px;overflow:hidden;background:#faf8f4}
+.month-band{position:absolute;top:0;height:22px;border-right:1px solid rgba(71,85,105,.12);display:flex;align-items:center;padding-left:7px;font-size:9px;font-weight:850;color:#344256}
+.month-band.feb{background:#e8f1fb}.month-band.mar{background:#e8f6ef}.month-band.apr{background:#fff1da}.month-band.may{background:#f7eaf3}
+.country-stay{position:absolute;top:25px;height:8px;border-radius:999px;opacity:.92}
+.calendar-stop{position:absolute;top:22px;width:8px;height:16px;border:2px solid #fff;border-radius:999px;padding:0;transform:translateX(-50%);box-shadow:0 1px 4px rgba(0,0,0,.18);z-index:4;min-width:0}
+.calendar-stop.active{width:11px;height:20px;top:20px;box-shadow:0 0 0 2px rgba(31,41,51,.15),0 2px 6px rgba(0,0,0,.22)}
+.country-arrival{position:absolute;top:37px;font-size:8px;font-weight:800;white-space:nowrap;color:#42505e;transform:translateX(-50%);line-height:1.1}
+.country-arrival.edge-left{transform:none}.country-arrival.edge-right{transform:translateX(-100%)}
+.country-arrival b{font-weight:900}
+.today-marker{position:absolute;top:0;bottom:0;width:2px;background:#172635;z-index:6;transform:translateX(-1px)}
+.today-marker::before{content:"";position:absolute;top:20px;left:50%;width:8px;height:8px;border-radius:50%;background:#172635;border:2px solid #fff;transform:translate(-50%,-50%);box-shadow:0 1px 4px rgba(0,0,0,.25)}
+.today-label{position:absolute;top:2px;left:5px;background:#172635;color:#fff;border-radius:999px;padding:2px 6px;font-size:8px;font-weight:850;white-space:nowrap}
+@media(max-width:900px){.trip-calendar{padding-inline:8px}.country-arrival{font-size:7px}.trip-calendar-status{display:none}.month-band{padding-left:4px;font-size:8px}}
+.shell{display:grid;grid-template-columns:minmax(0,1fr) 350px;height:calc(100vh - 205px);transition:grid-template-columns .28s ease}
 .shell.sidebar-collapsed{grid-template-columns:minmax(0,1fr) 0}
 .map-wrap{position:relative;overflow:hidden;background:linear-gradient(180deg,#dbeaf1 0%,#eef6fb 100%)}
 #map{height:100%;width:100%}
@@ -243,6 +260,7 @@ header p{margin:5px 0 0;color:var(--muted);font-size:12px;max-width:720px}
   </div>
 </header>
 <div class="country-bar" id="countryBar"></div>
+<div class="trip-calendar" id="tripCalendar" aria-label="Clara's 2027 travel timeline"></div>
 <div class="shell">
   <div class="map-wrap">
     <button id="sidebarToggle" class="sidebar-toggle" aria-expanded="true">Trip details</button>
@@ -518,7 +536,18 @@ const ROUTES = {
   }
 };
 
-const map = L.map('map', { worldCopyJump:true, attributionControl:true, zoomControl:true }).setView([15,113],4);
+const map = L.map('map', {
+  worldCopyJump:true,
+  attributionControl:true,
+  zoomControl:true,
+  zoomSnap:0.25,
+  zoomDelta:0.25,
+  wheelPxPerZoomLevel:180,
+  wheelDebounceTime:12,
+  zoomAnimation:true,
+  fadeAnimation:true,
+  markerZoomAnimation:true
+}).setView([15,113],4);
 map.attributionControl.setPrefix(false);
 const esriImagery = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
   maxZoom:19,
@@ -674,6 +703,104 @@ function groupByCountry(stops){
   });
   return { order, groups: mapObj };
 }
+const TRIP_START='2027-02-01';
+const TRIP_END='2027-05-02';
+const TIMELINE_END_EXCLUSIVE='2027-05-03';
+const MONTHS_2027=[
+  {name:'February',start:'2027-02-01',end:'2027-03-01',className:'feb'},
+  {name:'March',start:'2027-03-01',end:'2027-04-01',className:'mar'},
+  {name:'April',start:'2027-04-01',end:'2027-05-01',className:'apr'},
+  {name:'May',start:'2027-05-01',end:'2027-05-03',className:'may'}
+];
+function daySerial(dateString){
+  const [y,m,d]=dateString.split('-').map(Number);
+  return Date.UTC(y,m-1,d)/86400000;
+}
+function localTodayString(){
+  const d=new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function timelinePct(dateString){
+  const start=daySerial(TRIP_START), end=daySerial(TIMELINE_END_EXCLUSIVE);
+  return Math.max(0,Math.min(100,((daySerial(dateString)-start)/(end-start))*100));
+}
+function countryStayWindows(route){
+  const windows=[];
+  let i=0;
+  while(i<route.stops.length){
+    const country=route.stops[i].country;
+    const startIndex=i;
+    while(i+1<route.stops.length && route.stops[i+1].country===country) i++;
+    const next=route.stops[i+1];
+    const endExclusive=next?.date || TIMELINE_END_EXCLUSIVE;
+    const serial=daySerial(endExclusive)-1;
+    const d=new Date(serial*86400000);
+    const endDate=`${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}`;
+    windows.push({country,start:route.stops[startIndex].date,end:endDate,endExclusive,entryStop:route.stops[startIndex],startIndex});
+    i++;
+  }
+  return windows;
+}
+function currentScheduledStop(route,today){
+  if(daySerial(today)<daySerial(TRIP_START)||daySerial(today)>daySerial(TRIP_END)) return null;
+  let current=route.stops[0];
+  for(const stop of route.stops){
+    if(daySerial(stop.date)<=daySerial(today)) current=stop;
+    else break;
+  }
+  return current;
+}
+function renderTripCalendar(){
+  const route=currentRoute();
+  const start=daySerial(TRIP_START), end=daySerial(TIMELINE_END_EXCLUSIVE), total=end-start;
+  const months=MONTHS_2027.map(month=>{
+    const left=((daySerial(month.start)-start)/total)*100;
+    const width=((daySerial(month.end)-daySerial(month.start))/total)*100;
+    return `<div class="month-band ${month.className}" style="left:${left}%;width:${width}%">${month.name}</div>`;
+  }).join('');
+
+  const windows=countryStayWindows(route);
+  const bands=windows.map(w=>{
+    const left=timelinePct(w.start);
+    const width=((daySerial(w.endExclusive)-daySerial(w.start))/total)*100;
+    return `<div class="country-stay" style="left:${left}%;width:${width}%;background:${COLORS[w.country]}" title="${w.country}: ${compactDateRange(w.start,w.end)}"></div>`;
+  }).join('');
+
+  const stops=route.stops.map((stop,index)=>{
+    const left=timelinePct(stop.date);
+    return `<button class="calendar-stop${index===activeIndex?' active':''}" data-index="${index}" style="left:${left}%;background:${COLORS[stop.country]}" title="${fmtDate(stop.date)} · ${stop.place}, ${stop.country}" aria-label="${fmtDate(stop.date)}, ${stop.place}, ${stop.country}"></button>`;
+  }).join('');
+
+  const arrivals=windows.map(w=>{
+    const left=timelinePct(w.start);
+    const edge=left<6?' edge-left':left>91?' edge-right':'';
+    return `<div class="country-arrival${edge}" style="left:${left}%;color:${COLORS[w.country]}"><b>${shortDate(w.start)}</b> · ${w.entryStop.place}</div>`;
+  }).join('');
+
+  const today=localTodayString();
+  const serial=daySerial(today);
+  let todayHtml='';
+  let status='Trip begins 1st February 2027';
+  if(serial>=daySerial(TRIP_START)&&serial<=daySerial(TRIP_END)){
+    const stop=currentScheduledStop(route,today);
+    const left=timelinePct(today);
+    todayHtml=`<div class="today-marker" style="left:${left}%"><span class="today-label">Today · ${stop.place}, ${stop.country}</span></div>`;
+    status=`Today · ${stop.place}, ${stop.country}`;
+  }else if(serial>daySerial(TRIP_END)){
+    status='Trip completed 2nd May 2027';
+  }
+
+  document.getElementById('tripCalendar').innerHTML=`
+    <div class="trip-calendar-head"><strong>2027 journey timeline</strong><span class="trip-calendar-status">${status}</span></div>
+    <div class="trip-track">${months}${bands}${stops}${arrivals}${todayHtml}</div>
+  `;
+
+  document.querySelectorAll('.calendar-stop').forEach(btn=>btn.addEventListener('click',()=>{
+    stopPlayback();
+    setActiveStop(Number(btn.dataset.index),true,true);
+  }));
+}
+
 function countryMetrics(stops, country){
   const selected = stops.filter(s => s.country === country);
   return {
@@ -881,10 +1008,12 @@ function renderRouteInfo(){
 function renderCountryBar(){
   const route = currentRoute();
   const countries = [...new Set(route.stops.map(s => s.country))];
+  const stays = countryStayWindows(route);
   const whole = `<button class="country-nav ${currentFilter === 'All' ? 'active' : ''}" data-country="All" aria-pressed="${currentFilter === 'All'}"><span class="country-order" style="background:#64748b">↔</span><span>Whole trip</span><small>1 Feb–2 May</small></button>`;
   document.getElementById('countryBar').innerHTML = whole + countries.map((country,index) => {
     const m = countryMetrics(route.stops,country);
-    return `<button class="country-nav ${currentFilter === country ? 'active' : ''}" data-country="${country}" aria-pressed="${currentFilter === country}"><span class="country-order" style="background:${COLORS[country]}">${index+1}</span><span class="country-nav-photo loading" data-country-photo="${country}"></span><span style="color:${COLORS[country]}">${country}</span><small>${m.stops} stops · ${compactDateRange(m.start,m.end)}</small></button>`;
+    const stay=stays.find(s=>s.country===country);
+    return `<button class="country-nav ${currentFilter === country ? 'active' : ''}" data-country="${country}" aria-pressed="${currentFilter === country}"><span class="country-order" style="background:${COLORS[country]}">${index+1}</span><span class="country-nav-photo loading" data-country-photo="${country}"></span><span style="color:${COLORS[country]}">${country}</span><small>${m.stops} stops · ${compactDateRange(stay.start,stay.end)}</small></button>`;
   }).join('');
   document.querySelectorAll('.country-nav').forEach(btn => btn.addEventListener('click', () => setFilter(btn.dataset.country)));
   hydrateCountryImages();
@@ -986,7 +1115,15 @@ function updateJourneyControls(){
 function fitForCurrentView(){
   const stops = filteredStops();
   const bounds = L.latLngBounds(stops.map(s => [s.lat, s.lng]));
-  if(bounds.isValid()) map.fitBounds(bounds.pad(currentFilter === 'All' ? 0.18 : 0.35), { animate:true });
+  if(!bounds.isValid()) return;
+  const padded=bounds.pad(currentFilter==='All'?0.018:0.075);
+  map.fitBounds(padded,{
+    paddingTopLeft:[18,18],
+    paddingBottomRight:[18,28],
+    animate:true,
+    duration:.65,
+    maxZoom:currentFilter==='All'?5.5:8
+  });
 }
 function setFilter(country){
   currentFilter = country;
@@ -1066,6 +1203,7 @@ function setActiveStop(index, fly=true, showPopup=false){
 
   renderSummary();
   renderCountryBar();
+  renderTripCalendar();
   renderCountryOverview();
   renderCountryOverlaysOnly();
   renderRouteLinesOnly();
@@ -1095,6 +1233,7 @@ function render(){
   renderSummary();
   renderRouteInfo();
   renderCountryBar();
+  renderTripCalendar();
   renderCountryOverview();
     renderCountryOverlays();
   renderRouteLines();
@@ -1210,6 +1349,7 @@ document.getElementById('copyBtn').addEventListener('click', async () => {
 
 render();
 loadCountryGeo();
+window.setInterval(renderTripCalendar,60*60*1000);
 map.on('zoomend moveend',()=>{ if(!isPlaying) renderRouteLinesOnly(); });
 </script>
 </body>
