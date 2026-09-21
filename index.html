@@ -1185,6 +1185,138 @@ header{
 .active-photo img,.stop-thumb img,.country-photo img,.country-nav-photo img{
   filter:saturate(1.035) contrast(1.015);
 }
+
+/* ===== High-end floating journey footer ===== */
+header{padding:7px 12px!important}
+header h1{font-size:21px!important;line-height:1!important}
+header p{display:none!important}
+.control-row{gap:6px!important}
+.country-bar{
+  margin:5px 9px 6px!important;
+  min-height:38px!important;
+  padding:5px 7px!important;
+  gap:5px!important;
+}
+.country-nav{
+  min-height:27px!important;
+  padding:3px 7px!important;
+  gap:5px!important;
+  font-size:10px!important;
+}
+.country-nav small{font-size:8px!important;opacity:.62!important}
+.country-nav-photo{width:25px!important;height:15px!important}
+.country-order{width:19px!important;height:19px!important;font-size:9px!important}
+.shell{height:calc(100vh - 92px)!important}
+
+.trip-calendar{
+  position:absolute!important;
+  left:50%!important;
+  right:auto!important;
+  bottom:82px!important;
+  transform:translateX(-50%);
+  width:min(1120px,calc(100% - 34px))!important;
+  margin:0!important;
+  padding:6px 9px 7px!important;
+  z-index:650!important;
+  border-radius:20px!important;
+  background:linear-gradient(180deg,rgba(225,238,245,.24),rgba(196,218,230,.14))!important;
+  border:1px solid rgba(255,255,255,.46)!important;
+  box-shadow:0 10px 30px rgba(7,24,36,.16),inset 0 1px 0 rgba(255,255,255,.58)!important;
+  backdrop-filter:blur(28px) saturate(120%)!important;
+  -webkit-backdrop-filter:blur(28px) saturate(120%)!important;
+}
+.trip-calendar-head{min-height:14px!important;margin:0 3px 3px!important;padding:0!important}
+.trip-calendar-head strong{
+  font-size:8px!important;font-weight:800!important;color:rgba(241,248,251,.88)!important;letter-spacing:.025em
+}
+.trip-calendar-status{font-size:8px!important;color:rgba(235,246,251,.64)!important}
+.trip-track{
+  height:38px!important;
+  overflow:visible!important;
+  border:1px solid rgba(255,255,255,.18)!important;
+  border-radius:12px!important;
+  background:rgba(11,31,44,.16)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.15),inset 0 -1px 0 rgba(7,25,37,.10)!important;
+}
+.month-band{
+  top:0!important;height:15px!important;padding-left:6px!important;
+  font-size:7.5px!important;font-weight:720!important;
+  color:rgba(239,247,251,.68)!important;
+  background:transparent!important;
+  border-right:1px solid rgba(255,255,255,.15)!important;
+  box-shadow:none!important;
+}
+.month-band.active-month{color:#fff!important;font-weight:900!important;box-shadow:inset 0 -1px 0 rgba(255,255,255,.48)!important}
+.country-stay{
+  top:18px!important;height:5px!important;border-radius:999px!important;opacity:.72!important;
+  box-shadow:0 1px 4px rgba(7,24,36,.20),inset 0 1px 0 rgba(255,255,255,.18)!important;
+}
+.calendar-stop{
+  top:15px!important;width:6px!important;height:11px!important;
+  border:1.5px solid rgba(255,255,255,.84)!important;
+  box-shadow:0 2px 5px rgba(7,25,37,.18)!important;
+}
+.calendar-stop.active{
+  top:13px!important;width:11px!important;height:15px!important;
+  border:2.5px solid #fff!important;
+  box-shadow:0 0 0 2px rgba(255,255,255,.17),0 3px 8px rgba(7,25,37,.26)!important;
+}
+.calendar-stop.past{background:rgba(151,165,174,.72)!important;opacity:.50!important}
+.country-arrival{
+  top:27px!important;font-size:6.5px!important;font-weight:750!important;
+  color:rgba(237,246,251,.68)!important;text-shadow:0 1px 2px rgba(4,18,27,.25)
+}
+.country-arrival.past{color:rgba(197,209,216,.44)!important;opacity:.60!important}
+
+.timeline-playhead{
+  top:-2px!important;bottom:-2px!important;width:1px!important;
+  background:rgba(255,255,255,.88)!important;
+  box-shadow:0 0 8px rgba(255,255,255,.30)!important;
+}
+.timeline-playhead::after{
+  top:20px!important;width:11px!important;height:11px!important;
+  border:3px solid rgba(255,255,255,.96)!important;
+  background:var(--playhead-color)!important;
+  box-shadow:0 0 0 3px rgba(255,255,255,.13),0 3px 9px rgba(3,17,26,.28)!important;
+}
+.timeline-playhead::before{top:20px!important;width:14px!important;height:14px!important}
+.timeline-playhead-label{
+  top:-20px!important;left:7px!important;padding:3px 7px!important;font-size:7px!important;
+  color:#233946!important;background:rgba(242,249,252,.86)!important;
+  border:1px solid rgba(255,255,255,.78)!important;
+  box-shadow:0 5px 14px rgba(7,25,37,.16)!important;
+  backdrop-filter:blur(18px)!important;-webkit-backdrop-filter:blur(18px)!important;
+}
+.timeline-playhead.edge-right .timeline-playhead-label{left:auto!important;right:7px!important}
+@keyframes timelineLocatorHalo{
+  0%{opacity:.28;transform:translate(-50%,-50%) scale(.95)}
+  74%,100%{opacity:0;transform:translate(-50%,-50%) scale(1.85)}
+}
+.gateway-cap{
+  position:absolute;top:24px;z-index:10;font-size:6.5px;font-weight:850;letter-spacing:.035em;
+  color:rgba(234,245,250,.72);white-space:nowrap;pointer-events:none
+}
+.gateway-cap b{font-size:8px;color:rgba(255,255,255,.90)}
+.gateway-start{left:5px;transform:translateY(10px)}
+.gateway-end{right:5px;transform:translateY(10px)}
+.gateway-cap.active{color:#fff;text-shadow:0 0 8px rgba(255,255,255,.32)}
+.journey-dock{bottom:16px!important}
+
+@media(max-width:960px){
+  .shell{height:auto!important}
+  .map-wrap{height:72vh!important}
+  .trip-calendar{bottom:72px!important;width:calc(100% - 18px)!important;padding-inline:7px!important}
+  .country-arrival,.gateway-cap{display:none!important}
+}
+@media(max-width:700px){
+  .trip-calendar{bottom:66px!important}
+  .trip-calendar-head{display:none!important}
+  .trip-track{height:31px!important}
+  .month-band{height:13px!important;font-size:7px!important}
+  .country-stay{top:16px!important}
+  .calendar-stop{top:13px!important}
+  .timeline-playhead::after,.timeline-playhead::before{top:18px!important}
+}
 </style>
 </head>
 <body>
@@ -1192,7 +1324,6 @@ header{
   <div class="header-row">
     <div>
       <h1>Clara Asia 2027</h1>
-      <p>Follow Clara’s Asia journey from 1 February to 2 May 2027 — country by country and stop by stop.</p>
     </div>
     <div class="control-row">
       <label class="route-view-label">View
@@ -1207,11 +1338,11 @@ header{
   </div>
 </header>
 <div class="country-bar" id="countryBar"></div>
-<div class="trip-calendar" id="tripCalendar" aria-label="Clara's 2027 travel timeline"></div>
 <div class="shell">
   <div class="map-wrap">
     <button id="sidebarToggle" class="sidebar-toggle" aria-expanded="true">Trip details</button>
     <div id="map"></div>
+    <div class="trip-calendar" id="tripCalendar" aria-label="Clara's February to May 2027 journey timeline"></div>
     <div id="flightPlane" class="flight-plane-overlay" aria-hidden="true">
       <svg viewBox="0 0 120 120" role="img" aria-label="Aircraft">
         <path class="plane-wing" d="M55 52 43 14c-1-4 1-7 5-8l6-1 19 45Z"/>
@@ -1271,7 +1402,7 @@ header{
       <details class="section trip-facts">
         <summary><span>Trip facts</span><span class="trip-facts-glance" id="tripFactsGlance"></span></summary>
         <div class="trip-facts-grid" id="tripFacts"></div>
-        <div class="trip-facts-note">Distance is an approximate straight-line total between mapped stops. Flight count covers the cross-country flight legs shown on this map.</div>
+        <div class="trip-facts-note">Distance is an approximate straight-line total and includes the Landvetter outbound and return gateway legs. Flight count covers the international flight legs represented by this route.</div>
       </details>
 
       <div class="section route-info" id="routeInfo"></div>
@@ -1293,11 +1424,20 @@ header{
 <script>
 const COUNTRY_ISO = {Thailand:'THA',Vietnam:'VNM',Philippines:'PHL',Indonesia:'IDN',Japan:'JPN'};
 const COLORS = {
-  Thailand:'#d77447',
-  Vietnam:'#2b8a78',
-  Indonesia:'#8f68c2',
-  Philippines:'#3c79d4',
-  Japan:'#ca5574'
+  Thailand:'#d88662',
+  Vietnam:'#4f9a8b',
+  Indonesia:'#8c72bf',
+  Philippines:'#5a86c8',
+  Japan:'#c8667f'
+};
+
+const HOME_AIRPORT = {
+  place:'Göteborg Landvetter Airport',
+  short:'Landvetter',
+  code:'GOT',
+  country:'Sweden',
+  lat:57.66393,
+  lng:12.28249
 };
 
 const COORDS = {
@@ -1642,6 +1782,9 @@ let activeIndex = 0;
 let currentFilter = 'All';
 let playTimer = null;
 let isPlaying = false;
+let gatewayPlaybackPhase = null;
+let outboundGatewayPlayed = false;
+let returnGatewayPlayed = false;
 
 function ordinalDay(day){
   const mod100 = day % 100;
@@ -1684,16 +1827,20 @@ function haversineKm(a,b){
 function routeFacts(route){
   const stops=route.stops;
   const countries=[...new Set(stops.map(s=>s.country))];
-  const legs=[];
+  const itineraryLegs=[];
   for(let i=0;i<stops.length-1;i++){
     const a=stops[i], b=stops[i+1];
-    legs.push({
+    itineraryLegs.push({
       from:a,
       to:b,
       km:haversineKm(a,b),
-      crossCountry:a.country!==b.country
+      crossCountry:a.country!==b.country,
+      gateway:false
     });
   }
+  const gatewayOut={from:HOME_AIRPORT,to:stops[0],km:haversineKm(HOME_AIRPORT,stops[0]),crossCountry:true,gateway:true};
+  const gatewayHome={from:stops[stops.length-1],to:HOME_AIRPORT,km:haversineKm(stops[stops.length-1],HOME_AIRPORT),crossCountry:true,gateway:true};
+  const legs=[gatewayOut,...itineraryLegs,gatewayHome];
   const totalKm=legs.reduce((sum,leg)=>sum+leg.km,0);
   const flightLegs=legs.filter(leg=>leg.crossCountry);
   const longestLeg=legs.reduce((best,leg)=>!best||leg.km>best.km?leg:best,null);
@@ -1711,8 +1858,10 @@ function routeFacts(route){
     countries:countries.length,
     stops:stops.length,
     routeLegs:legs.length,
+    itineraryLegs:itineraryLegs.length,
     totalKm,
     averageLegKm:legs.length?totalKm/legs.length:0,
+    gatewayKm:gatewayOut.km+gatewayHome.km,
     flightLegs:flightLegs.length,
     flightKm:flightLegs.reduce((sum,leg)=>sum+leg.km,0),
     days:inclusiveDays(TRIP_START,TRIP_END),
@@ -1745,7 +1894,7 @@ function renderTripFacts(){
     <div class="trip-fact tone-sand"><b>~${formatKm(facts.averageLegKm,10).toLocaleString('en-GB')} km</b><span>average mapped leg</span></div>
     <div class="trip-fact wide tone-mint"><b>${facts.longestStay.country} · ${facts.longestStay.days} days</b><span>longest country stay</span></div>
     <div class="trip-fact wide tone-lilac"><b>${facts.longestLeg.from.place} → ${facts.longestLeg.to.place} · ~${formatKm(facts.longestLeg.km,10).toLocaleString('en-GB')} km</b><span>longest mapped leg</span></div>
-    <div class="trip-fact wide tone-sky"><b>${facts.firstStop.place} → ${facts.lastStop.place}</b><span>journey from first stop to final stop · February to May 2027</span></div>
+    <div class="trip-fact wide tone-sky"><b>Landvetter (GOT) → Asia → Landvetter</b><span>journey gateway · outbound before Bangkok, home from Tokyo</span></div>
   `;
 }
 
@@ -1937,21 +2086,12 @@ function renderTripCalendar(){
   const start=daySerial(TRIP_START), end=daySerial(TIMELINE_END_EXCLUSIVE), total=end-start;
   const activeStop=route.stops[activeIndex];
   const activeSerial=daySerial(activeStop.date);
-  const monthColours={feb:'rgba(214,231,246,.52)',mar:'rgba(215,238,229,.52)',apr:'rgba(250,232,198,.52)',may:'rgba(243,220,235,.52)'};
   const months=MONTHS_2027.map(month=>{
     const monthStart=daySerial(month.start), monthEnd=daySerial(month.end);
     const left=((monthStart-start)/total)*100;
     const width=((monthEnd-monthStart)/total)*100;
     const activeMonth=activeSerial>=monthStart&&activeSerial<monthEnd;
-    const completedMonth=activeSerial>=monthEnd;
-    let background=monthColours[month.className];
-    if(completedMonth){
-      background='rgba(202,210,216,.48)';
-    }else if(activeMonth){
-      const within=Math.max(0,Math.min(100,((activeSerial-monthStart)/(monthEnd-monthStart))*100));
-      background=`linear-gradient(90deg,rgba(202,210,216,.48) 0%,rgba(202,210,216,.48) ${within}%,${monthColours[month.className]} ${within}%,${monthColours[month.className]} 100%)`;
-    }
-    return `<div class="month-band ${month.className}${activeMonth?' active-month':''}" style="left:${left}%;width:${width}%;background:${background}">${month.name}</div>`;
+    return `<div class="month-band${activeMonth?' active-month':''}" style="left:${left}%;width:${width}%">${month.name}</div>`;
   }).join('');
 
   const windows=countryStayWindows(route);
@@ -1982,9 +2122,11 @@ function renderTripCalendar(){
     return `<div class="country-arrival${edge}${past?' past':''}" style="left:${left}%;color:${past?'#9aa2aa':COLORS[w.country]}"><b>${shortDate(w.start)}</b> · ${w.entryStop.place}</div>`;
   }).join('');
 
-  const activeLeft=timelinePct(activeStop.date);
+  const activeLeft=gatewayPlaybackPhase==='outbound'?0:gatewayPlaybackPhase==='return'?100:timelinePct(activeStop.date);
   const activeEdge=activeLeft>82?' edge-right':'';
-  const playheadHtml=`<div class="timeline-playhead${activeEdge}" style="left:${activeLeft}%;--playhead-color:${COLORS[activeStop.country]}"><span class="timeline-playhead-label">${shortDate(activeStop.date)} · ${activeStop.place}</span></div>`;
+  const activeLabel=gatewayPlaybackPhase==='outbound'?'Landvetter → Bangkok':gatewayPlaybackPhase==='return'?'Tokyo → Landvetter':`${shortDate(activeStop.date)} · ${activeStop.place}`;
+  const activeColour=gatewayPlaybackPhase?'#526b7a':COLORS[activeStop.country];
+  const playheadHtml=`<div class="timeline-playhead${activeEdge}" style="left:${activeLeft}%;--playhead-color:${activeColour}"><span class="timeline-playhead-label">${activeLabel}</span></div>`;
 
   const today=localTodayString();
   const serial=daySerial(today);
@@ -2000,8 +2142,12 @@ function renderTripCalendar(){
   }
 
   document.getElementById('tripCalendar').innerHTML=`
-    <div class="trip-calendar-head"><strong>${isPlaying?'Journey progress':'2027 journey timeline'}</strong><span class="trip-calendar-status">${isPlaying?`${shortDate(activeStop.date)} · ${activeStop.place}, ${activeStop.country}`:status}</span></div>
-    <div class="trip-track${isPlaying?' playing':''}">${months}${bands}${stops}${arrivals}${playheadHtml}${todayHtml}</div>
+    <div class="trip-calendar-head"><strong>2027 · Feb — May</strong><span class="trip-calendar-status">${gatewayPlaybackPhase==='outbound'?'GOT → Bangkok':gatewayPlaybackPhase==='return'?'Tokyo → GOT':isPlaying?`${shortDate(activeStop.date)} · ${activeStop.place}`:status}</span></div>
+    <div class="trip-track${isPlaying?' playing':''}">
+      <span class="gateway-cap gateway-start${gatewayPlaybackPhase==='outbound'?' active':''}" title="Start at Göteborg Landvetter Airport">GOT <b>✈</b></span>
+      ${months}${bands}${stops}${arrivals}${playheadHtml}${todayHtml}
+      <span class="gateway-cap gateway-end${gatewayPlaybackPhase==='return'?' active':''}" title="Return to Göteborg Landvetter Airport"><b>✈</b> GOT</span>
+    </div>
   `;
 
   document.querySelectorAll('.calendar-stop').forEach(btn=>btn.addEventListener('click',()=>{
@@ -2132,13 +2278,11 @@ function hideFlightPlane(){
 function interpolateLeg(a,b,t){
   return [a.lat+(b.lat-a.lat)*t,a.lng+(b.lng-a.lng)*t];
 }
-function animateFlightLeg(index,duration,onDone){
-  const stops=currentRoute().stops;
-  const a=stops[index], b=stops[index+1];
-  if(!a||!b||a.country===b.country){ hideFlightPlane(); onDone(); return; }
+function animateFlightBetween(a,b,duration,onDone){
+  if(!a||!b){ hideFlightPlane(); onDone(); return; }
   const started=performance.now();
   const frame=now=>{
-    if(!isPlaying || activeIndex!==index){ hideFlightPlane(); return; }
+    if(!isPlaying){ hideFlightPlane(); return; }
     const raw=Math.min(1,(now-started)/duration);
     const t=raw<.5?2*raw*raw:1-Math.pow(-2*raw+2,2)/2;
     setFlightPlane(a,b,t);
@@ -2151,6 +2295,34 @@ function animateFlightLeg(index,duration,onDone){
   };
   setFlightPlane(a,b,0);
   planeAnimationFrame=requestAnimationFrame(frame);
+}
+function animateFlightLeg(index,duration,onDone){
+  const stops=currentRoute().stops;
+  const a=stops[index], b=stops[index+1];
+  if(!a||!b||a.country===b.country){ hideFlightPlane(); onDone(); return; }
+  animateFlightBetween(a,b,duration,onDone);
+}
+function playGatewayFlight(direction,onDone){
+  const stops=currentRoute().stops;
+  const outbound=direction==='outbound';
+  const a=outbound?HOME_AIRPORT:stops[stops.length-1];
+  const b=outbound?stops[0]:HOME_AIRPORT;
+  gatewayPlaybackPhase=direction;
+  renderTripCalendar();
+  markers.forEach(marker=>marker.closePopup());
+  document.getElementById('journeyNow').textContent=outbound?'Landvetter → Bangkok':'Tokyo → Landvetter';
+  document.getElementById('journeyCountry').textContent='';
+  document.getElementById('journeyDate').textContent=outbound?'Outbound flight':'Homeward flight';
+  map.fitBounds([[a.lat,a.lng],[b.lat,b.lng]],{padding:[95,95],animate:false,maxZoom:4});
+  playTimer=setTimeout(()=>{
+    playTimer=null;
+    if(!isPlaying) return;
+    animateFlightBetween(a,b,5400,()=>{
+      gatewayPlaybackPhase=null;
+      renderTripCalendar();
+      if(onDone) onDone();
+    });
+  },220);
 }
 
 function renderRouteLines(){
@@ -2222,7 +2394,7 @@ function renderCountryBar(){
   document.getElementById('countryBar').innerHTML = whole + countries.map((country,index) => {
     const m = countryMetrics(route.stops,country);
     const stay=stays.find(s=>s.country===country);
-    return `<button class="country-nav ${currentFilter === country ? 'active' : ''}" data-country="${country}" aria-pressed="${currentFilter === country}"><span class="country-order" style="background:${COLORS[country]}">${index+1}</span><span class="country-nav-photo loading" data-country-photo="${country}"></span><span style="color:${COLORS[country]}">${country}</span><small>${m.stops} stops · ${compactDateRange(stay.start,stay.end)}</small></button>`;
+    return `<button class="country-nav ${currentFilter === country ? 'active' : ''}" data-country="${country}" aria-pressed="${currentFilter === country}"><span class="country-order" style="background:${COLORS[country]}">${index+1}</span><span class="country-nav-photo loading" data-country-photo="${country}"></span><span style="color:${COLORS[country]}">${country}</span><small>${compactDateRange(stay.start,stay.end)}</small></button>`;
   }).join('');
   document.querySelectorAll('.country-nav').forEach(btn => btn.addEventListener('click', () => setFilter(btn.dataset.country)));
   hydrateCountryImages();
@@ -2357,7 +2529,20 @@ function stopPlayback(){
 function playAdvance(){
   if(!isPlaying) return;
   const stops=currentRoute().stops;
-  if(activeIndex>=stops.length-1){stopPlayback();return}
+  if(activeIndex>=stops.length-1){
+    if(!returnGatewayPlayed){
+      playGatewayFlight('return',()=>{
+        returnGatewayPlayed=true;
+        stopPlayback();
+        document.getElementById('journeyNow').textContent='Landvetter';
+        document.getElementById('journeyCountry').textContent=' · home';
+        document.getElementById('journeyDate').textContent='2 May';
+      });
+    }else{
+      stopPlayback();
+    }
+    return;
+  }
   const legIndex=activeIndex;
   const a=stops[legIndex], b=stops[legIndex+1];
   const isFlight=a.country!==b.country;
@@ -2405,13 +2590,32 @@ function togglePlayback(){
   markers.forEach(marker=>marker.closePopup());
   markers[activeIndex]?.openPopup();
   renderRouteLinesOnly();
-  playTimer=setTimeout(()=>{
-    playTimer=null;
-    if(isPlaying) playAdvance();
-  },900);
+
+  if(activeIndex===0 && !outboundGatewayPlayed){
+    playTimer=setTimeout(()=>{
+      playTimer=null;
+      if(!isPlaying) return;
+      playGatewayFlight('outbound',()=>{
+        if(!isPlaying) return;
+        outboundGatewayPlayed=true;
+        setActiveStop(0,true,true);
+        playTimer=setTimeout(()=>{playTimer=null;if(isPlaying) playAdvance();},1000);
+      });
+    },650);
+  }else{
+    playTimer=setTimeout(()=>{
+      playTimer=null;
+      if(isPlaying) playAdvance();
+    },900);
+  }
 }
 function setActiveStop(index, fly=true, showPopup=false){
   activeIndex = Math.max(0, Math.min(index, currentRoute().stops.length - 1));
+  if(!isPlaying && activeIndex===0){
+    outboundGatewayPlayed=false;
+    returnGatewayPlayed=false;
+    gatewayPlaybackPhase=null;
+  }
   const stop = currentRoute().stops[activeIndex];
   currentFilter = stop.country;
   if(!isPlaying) hideFlightPlane();
@@ -2468,6 +2672,9 @@ document.getElementById('routeSelect').addEventListener('change', () => {
   stopPlayback();
   currentFilter = 'All';
   activeIndex = 0;
+  gatewayPlaybackPhase=null;
+  outboundGatewayPlayed=false;
+  returnGatewayPlayed=false;
   render();
 });
 document.getElementById('prevBtn').addEventListener('click', () => { stopPlayback(); setActiveStop(activeIndex - 1, true, true); });
