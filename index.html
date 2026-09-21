@@ -2009,6 +2009,175 @@ header p{display:none!important}
   backdrop-filter:blur(18px) saturate(120%);
   -webkit-backdrop-filter:blur(18px) saturate(120%);
 }
+
+/* ===== Point-to-point + cumulative distance UX ===== */
+.stop-main{min-width:0}
+.stop-distance{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:center;
+  gap:7px;
+  margin-top:6px;
+  padding-top:6px;
+  border-top:1px solid rgba(70,91,105,.10);
+}
+.distance-leg{
+  min-width:0;
+  display:flex;
+  align-items:baseline;
+  gap:5px;
+  font-size:8px;
+  color:#60707d;
+  overflow:hidden;
+}
+.distance-leg b{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-weight:760;
+  color:#465866;
+}
+.distance-leg em{
+  flex:0 0 auto;
+  font-style:normal;
+  font-weight:850;
+  color:#243b4a;
+}
+.distance-total{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-end;
+  line-height:1.05;
+  padding-left:7px;
+  border-left:1px solid rgba(70,91,105,.11);
+}
+.distance-total span{
+  font-size:6.8px;
+  text-transform:uppercase;
+  letter-spacing:.035em;
+  color:#7a8791;
+}
+.distance-total strong{
+  margin-top:2px;
+  font-size:8.4px;
+  color:#263d4b;
+}
+.stop-card.current .stop-distance{
+  border-top-color:color-mix(in srgb,var(--stop-accent) 24%,rgba(70,91,105,.10));
+}
+.stop-card.current .distance-leg em,
+.stop-card.current .distance-total strong{
+  color:var(--stop-accent);
+}
+
+.active-distance-summary{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:7px;
+  margin:8px 0 10px;
+}
+.active-distance-summary>span{
+  min-width:0;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:8px;
+  padding:7px 9px;
+  border-radius:12px;
+  background:rgba(255,255,255,.24);
+  border:1px solid rgba(255,255,255,.48);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.52);
+}
+.active-distance-summary small{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-size:8px;
+  color:#6b7884;
+}
+.active-distance-summary b{
+  flex:0 0 auto;
+  font-size:9.5px;
+  color:#263d4b;
+}
+
+.return-distance-card{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto auto;
+  align-items:center;
+  gap:10px;
+  margin:10px 0 6px;
+  padding:10px 11px;
+  border-radius:15px;
+  background:linear-gradient(145deg,rgba(211,229,239,.45),rgba(255,255,255,.28));
+  border:1px solid rgba(255,255,255,.55);
+  box-shadow:0 6px 18px rgba(20,39,53,.08),inset 0 1px 0 rgba(255,255,255,.62);
+  backdrop-filter:blur(18px) saturate(120%);
+  -webkit-backdrop-filter:blur(18px) saturate(120%);
+}
+.return-route{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  min-width:0;
+}
+.distance-plane{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:27px;height:27px;
+  border-radius:50%;
+  color:#fff;
+  background:#526b7a;
+  font-size:12px;
+}
+.return-route div{min-width:0}
+.return-route b{
+  display:block;
+  font-size:9.5px;
+  color:#263d4b;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.return-route span:not(.distance-plane){
+  display:block;
+  margin-top:2px;
+  font-size:7.5px;
+  color:#72808b;
+}
+.return-km{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-end;
+  padding-left:9px;
+  border-left:1px solid rgba(70,91,105,.12);
+}
+.return-km b{font-size:10px;color:#263d4b}
+.return-km span{margin-top:2px;font-size:6.8px;text-transform:uppercase;letter-spacing:.035em;color:#7a8791}
+.return-km.total b{font-size:11px;color:#354f60}
+.distance-method-note{
+  padding:0 4px 7px;
+  font-size:7.5px;
+  line-height:1.4;
+  color:#78858f;
+}
+
+@media(max-width:1250px){
+  .stop-distance{grid-template-columns:1fr}
+  .distance-total{
+    flex-direction:row;
+    justify-content:space-between;
+    align-items:center;
+    padding-left:0;
+    padding-top:4px;
+    border-left:0;
+    border-top:1px solid rgba(70,91,105,.08);
+  }
+  .distance-total strong{margin-top:0}
+}
 </style>
 </head>
 <body>
@@ -2569,6 +2738,37 @@ function routeFacts(route){
 }
 function formatKm(km,nearest=100){
   return Math.round(km/nearest)*nearest;
+}
+function itineraryDistanceData(route){
+  const stops=route.stops;
+  let cumulative=0;
+  const rows=stops.map((stop,index)=>{
+    const from=index===0?HOME_AIRPORT:stops[index-1];
+    const legKm=haversineKm(from,stop);
+    cumulative+=legKm;
+    return {
+      index,
+      from,
+      to:stop,
+      legKm,
+      cumulativeKm:cumulative,
+      isInternational:from.country!==stop.country
+    };
+  });
+  const finalStop=stops[stops.length-1];
+  const homeLegKm=haversineKm(finalStop,HOME_AIRPORT);
+  return {
+    rows,
+    homeLegKm,
+    totalKm:cumulative+homeLegKm
+  };
+}
+function displayDistanceKm(km){
+  const nearest=km<100?1:10;
+  return Math.round(km/nearest)*nearest;
+}
+function distanceLabel(km){
+  return '~'+displayDistanceKm(km).toLocaleString('en-GB')+' km';
 }
 function renderTripFacts(){
   const facts=routeFacts(currentRoute());
@@ -3135,18 +3335,27 @@ function renderTimeline(){
   const route = currentRoute();
   const grouped = groupByCountry(route.stops);
   const activeCountry = route.stops[activeIndex]?.country;
+  const distances=itineraryDistanceData(route);
+  const distanceByIndex=new Map(distances.rows.map(row=>[row.index,row]));
+
   const html = grouped.order.map(country => {
     const metrics = countryMetrics(route.stops, country);
     const body = grouped.groups[country].map(stop => {
       const state = stop._index < activeIndex ? 'past' : (stop._index === activeIndex ? 'active current' : 'future');
+      const distance=distanceByIndex.get(stop._index);
+      const fromLabel=stop._index===0?'Landvetter (GOT)':distance.from.place;
       return `
       <div class="stop-card ${state}" style="--stop-accent:${COLORS[country]}" data-index="${stop._index}" role="button" tabindex="0" aria-current="${stop._index === activeIndex ? 'step' : 'false'}" aria-label="${stop.place}, ${country}, ${fmtDate(stop.date)}">
         <div class="num" style="background:${COLORS[country]}">${stop._index + 1}</div>
         <div class="stop-date">${fmtDate(stop.date)}</div>
-        <div>
+        <div class="stop-main">
           <div class="stop-place">${stop.place}, <span style="color:${COLORS[country]}">${country}</span>${stop.optional ? '<span class="stop-tag">optional</span>' : ''}</div>
           <div class="stop-duration">${stop.days ? `${stop.days} day${stop.days === 1 ? '' : 's'}` : ''}</div>
           ${publicStopNote(stop) ? `<div class="stop-meta">${publicStopNote(stop)}</div>` : ''}
+          <div class="stop-distance">
+            <span class="distance-leg"><b>${fromLabel} → ${stop.place}</b><em>${distanceLabel(distance.legKm)}</em></span>
+            <span class="distance-total"><span>Cumulative</span><strong>${distanceLabel(distance.cumulativeKm)}</strong></span>
+          </div>
         </div>
         <div class="stop-thumb loading" data-place="${escapeHtml(stop.place)}" aria-label="Real image of ${escapeHtml(stop.place)}"></div>
       </div>
@@ -3163,7 +3372,18 @@ function renderTimeline(){
       </section>
     `;
   }).join('');
-  document.getElementById('timeline').innerHTML = html;
+
+  const finalStop=route.stops[route.stops.length-1];
+  const returnHome=`
+    <div class="return-distance-card">
+      <div class="return-route"><span class="distance-plane">✈</span><div><b>${finalStop.place} → Landvetter (GOT)</b><span>Journey home</span></div></div>
+      <div class="return-km"><b>${distanceLabel(distances.homeLegKm)}</b><span>leg distance</span></div>
+      <div class="return-km total"><b>${distanceLabel(distances.totalKm)}</b><span>whole trip</span></div>
+    </div>
+    <div class="distance-method-note">Distances are approximate great-circle distances between the mapped locations. They are particularly useful for flights; actual road, rail and ferry travel can be longer.</div>
+  `;
+
+  document.getElementById('timeline').innerHTML = html + returnHome;
   document.querySelectorAll('.stop-card').forEach(card => {
     const activate=()=>{
       setActiveStop(Number(card.dataset.index), true, false);
@@ -3175,10 +3395,17 @@ function renderTimeline(){
   window.setTimeout(scrollActiveItineraryCard, 80);
 }
 function renderActiveStop(){
-  const stop = currentRoute().stops[activeIndex];
+  const route=currentRoute();
+  const stop = route.stops[activeIndex];
+  const distance=itineraryDistanceData(route).rows[activeIndex];
+  const fromLabel=activeIndex===0?'Landvetter (GOT)':distance.from.place;
   document.getElementById('activeStop').innerHTML = `
-    <div class="active-topline"><span class="date">${fmtDate(stop.date)}</span><span class="stop-position">Stop ${activeIndex+1} of ${currentRoute().stops.length}</span></div>
+    <div class="active-topline"><span class="date">${fmtDate(stop.date)}</span><span class="stop-position">Stop ${activeIndex+1} of ${route.stops.length}</span></div>
     <div class="active-heading"><strong>${stop.place}, <span style="color:${COLORS[stop.country]}">${stop.country}</span> ·</strong> <span>${stop.days ? `${stop.days} day${stop.days === 1 ? '' : 's'}` : ''}</span>${stop.optional ? '<span class="stop-tag">optional</span>' : ''}</div>
+    <div class="active-distance-summary">
+      <span><small>From ${fromLabel}</small><b>${distanceLabel(distance.legKm)}</b></span>
+      <span><small>Cumulative</small><b>${distanceLabel(distance.cumulativeKm)}</b></span>
+    </div>
     <div class="active-photo loading" id="activePhoto" aria-label="Real image of ${escapeHtml(stop.place)}"></div>
     ${publicStopNote(stop) ? `<div class="note">${publicStopNote(stop)}</div>` : ''}
     <div id="activeMediaMeta"></div>
