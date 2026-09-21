@@ -1151,6 +1151,40 @@ header{
     transform .32s cubic-bezier(.2,.8,.2,1),
     opacity .20s ease!important;
 }
+
+/* ===== Map control visibility + curated-photo polish ===== */
+.sidebar-toggle{
+  color:#203746!important;
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.88),rgba(225,238,245,.72))!important;
+  border:1px solid rgba(255,255,255,.92)!important;
+  box-shadow:
+    0 9px 24px rgba(7,24,36,.25),
+    0 0 0 1px rgba(35,70,91,.10),
+    inset 0 1px 0 rgba(255,255,255,.98)!important;
+  text-shadow:0 1px 0 rgba(255,255,255,.56);
+  backdrop-filter:blur(22px) saturate(140%)!important;
+  -webkit-backdrop-filter:blur(22px) saturate(140%)!important;
+}
+.sidebar-toggle:hover{
+  color:#172d3a!important;
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.96),rgba(231,242,247,.84))!important;
+  box-shadow:
+    0 11px 28px rgba(7,24,36,.29),
+    0 0 0 1px rgba(35,70,91,.12),
+    inset 0 1px 0 rgba(255,255,255,1)!important;
+}
+.sidebar-toggle[aria-expanded="true"]{
+  color:#fff!important;
+  background:
+    radial-gradient(circle at 30% 16%,rgba(112,148,168,.90),rgba(43,68,83,.92) 48%,rgba(24,43,56,.96) 100%)!important;
+  border-color:rgba(237,249,255,.72)!important;
+  text-shadow:none;
+}
+.active-photo img,.stop-thumb img,.country-photo img,.country-nav-photo img{
+  filter:saturate(1.035) contrast(1.015);
+}
 </style>
 </head>
 <body>
@@ -1390,37 +1424,37 @@ const COUNTRY_MEDIA_TITLES = {
   'Japan':'Kiyomizu-dera'
 };
 const MEDIA_FOCAL = {
-  'Bangkok':'50% 43%',
-  'Chiang Mai':'50% 42%',
-  'Pai':'50% 50%',
+  'Bangkok':'50% 52%',
+  'Chiang Mai':'50% 48%',
+  'Pai':'50% 52%',
   'Krabi / Ao Nang':'50% 52%',
-  'Koh Yao Noi':'50% 52%',
-  'Khao Sok':'50% 52%',
-  'Hanoi':'50% 50%',
-  'Sapa':'50% 48%',
+  'Koh Yao Noi':'50% 50%',
+  'Khao Sok':'50% 50%',
+  'Hanoi':'50% 52%',
+  'Sapa':'50% 52%',
   'Ha Giang':'50% 50%',
   'Cat Ba':'50% 52%',
   'Ninh Binh':'50% 52%',
-  'Hue':'50% 46%',
-  'Da Nang':'50% 48%',
-  'Hoi An':'50% 50%',
-  'Ho Chi Minh City':'50% 48%',
-  'Cebu City':'50% 48%',
+  'Hue':'50% 52%',
+  'Da Nang':'50% 52%',
+  'Hoi An':'50% 54%',
+  'Ho Chi Minh City':'50% 50%',
+  'Cebu City':'50% 50%',
   'Moalboal':'50% 52%',
   'Bohol / Panglao':'50% 52%',
   'El Nido':'50% 52%',
   'Coron':'50% 52%',
-  'Yogyakarta':'50% 47%',
-  'Mount Bromo':'50% 54%',
-  'Ijen':'50% 52%',
-  'Ubud':'50% 50%',
-  'Canggu':'50% 54%',
-  'Uluwatu':'50% 47%',
-  'Osaka':'50% 46%',
-  'Kyoto':'50% 46%',
-  'Kinosaki Onsen':'50% 50%',
-  'Hakone':'50% 52%',
-  'Tokyo':'50% 46%'
+  'Yogyakarta':'50% 48%',
+  'Mount Bromo':'50% 50%',
+  'Ijen':'50% 50%',
+  'Ubud':'50% 52%',
+  'Canggu':'50% 52%',
+  'Uluwatu':'50% 50%',
+  'Osaka':'50% 48%',
+  'Kyoto':'50% 50%',
+  'Kinosaki Onsen':'50% 52%',
+  'Hakone':'50% 50%',
+  'Tokyo':'50% 52%'
 };
 const COUNTRY_FOCAL = {
   'Thailand':'50% 40%',
@@ -1429,7 +1463,60 @@ const COUNTRY_FOCAL = {
   'Indonesia':'50% 52%',
   'Japan':'50% 38%'
 };
-const DIRECT_MEDIA = {};
+function commonsDirect(filename){
+  const encoded=encodeURIComponent(filename.replaceAll(' ','_'));
+  return {
+    image:'https://commons.wikimedia.org/wiki/Special:FilePath/'+encoded+'?width=1600',
+    extract:'',
+    pageUrl:'https://commons.wikimedia.org/wiki/File:'+encoded,
+    resolvedTitle:filename
+  };
+}
+const DIRECT_MEDIA = {
+  'Bangkok':commonsDirect('The Grand Palace @ Bangkok.jpg'),
+  'Chiang Mai':commonsDirect('Wat Phra That Doi Suthep - Chiang Mai.jpg'),
+  'Pai':commonsDirect('Pai canyon 1.jpg'),
+  'Krabi / Ao Nang':commonsDirect('Railay, Krabi, Thailand.jpg'),
+  'Koh Yao Noi':commonsDirect('Koh Yao Noi, Limestone formations in Phang Nga Bay, Thailand.jpg'),
+  'Khao Sok':commonsDirect('Khao Sok National Park, Chiew Lan lake. 10.jpg'),
+
+  'Hanoi':commonsDirect('Vietnam, Hanoi, Streets of central Hanoi.jpg'),
+  'Sapa':commonsDirect('Rice Fields - Sapa, Vietnam - Landscape photography - Flickr - Giuseppe Milo (www.milo.photography).jpg'),
+  'Ha Giang':commonsDirect('Mountain road at Mã Pí Lèng Pass, Hà Giang Province, Vietnam.jpg'),
+  'Cat Ba':commonsDirect('Lan Ha Bay-Cat Ba Vietnam-Andres Larin.jpg'),
+  'Ninh Binh':commonsDirect('Vietnam, Ninh Binh, Limestone Landscape.jpg'),
+  'Hue':commonsDirect('Imperial City, Hue, Vietnam (7073507989).jpg'),
+  'Da Nang':commonsDirect('Panorama of Danang coast.jpg'),
+  'Hoi An':commonsDirect('Hoi An - HoiAn1441.jpg'),
+  'Ho Chi Minh City':commonsDirect('Ho Chi Minh City Skyline at Night.jpg'),
+
+  'Cebu City':commonsDirect('Cebu city skyline 2025.jpg'),
+  'Moalboal':commonsDirect('Sardine run over seafloor in Moalboal 01.jpg'),
+  'Bohol / Panglao':commonsDirect("Bohol's Chocolate Hills.jpg"),
+  'El Nido':commonsDirect('Tropical lagoon with limestone rocks, Bacuit Bay, Palawan, Philippines.jpg'),
+  'Coron':commonsDirect('Kayangan Lake - Coron, Palawan.jpg'),
+
+  'Yogyakarta':commonsDirect('Prambanan Temple Yogyakarta Indonesia.jpg'),
+  'Mount Bromo':commonsDirect('Mount Bromo After Sunrise.jpg'),
+  'Ijen':commonsDirect('IjenCrater.jpg'),
+  'Ubud':commonsDirect('1 Tegalalang rice terrace ubud bali.jpg'),
+  'Canggu':commonsDirect('Sunset at Canggu beach.jpg'),
+  'Uluwatu':commonsDirect('Pura Luhur Ukuwatu Temple on a steep cliff 70m. above the Indian ocean (16268088084).jpg'),
+
+  'Osaka':commonsDirect('Osaka Castle - Japan.jpg'),
+  'Kyoto':commonsDirect('Kiyomizu-dera panorama.jpg'),
+  'Kinosaki Onsen':commonsDirect('161030 Kinosaki Onsen Toyooka Hyogo pref Japan01s3.jpg'),
+  'Hakone':commonsDirect('LakeAshi and MtFuji Hakone.JPG'),
+  'Tokyo':commonsDirect('Shibuya crossing at night, Tokyo, Japan.jpg')
+};
+
+const COUNTRY_DIRECT_MEDIA = {
+  'Thailand':DIRECT_MEDIA['Bangkok'],
+  'Vietnam':DIRECT_MEDIA['Ninh Binh'],
+  'Philippines':DIRECT_MEDIA['El Nido'],
+  'Indonesia':DIRECT_MEDIA['Mount Bromo'],
+  'Japan':DIRECT_MEDIA['Kyoto']
+};
 const mediaCache = new Map();
 const commonsMediaCache = new Map();
 
@@ -1741,12 +1828,10 @@ async function getCommonsTravelMedia(place){
 
 async function getPlaceMedia(place){
   if(DIRECT_MEDIA[place]) return DIRECT_MEDIA[place];
-  const commons=await getCommonsTravelMedia(place);
-  if(commons?.image) return commons;
   return getWikiMedia(MEDIA_TITLES[place] || place);
 }
 async function getCountryMedia(country){
-  return getWikiMedia(COUNTRY_MEDIA_TITLES[country] || country);
+  return COUNTRY_DIRECT_MEDIA[country] || getWikiMedia(COUNTRY_MEDIA_TITLES[country] || country);
 }
 async function hydrateItineraryImages(){
   const thumbs = [...document.querySelectorAll('.stop-thumb[data-place]')];
