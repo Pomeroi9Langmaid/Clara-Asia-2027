@@ -171,13 +171,13 @@ header p{margin:5px 0 0;color:var(--muted);font-size:12px;max-width:720px}
 }
 .marker.optional{outline:2px dashed rgba(255,255,255,.95);outline-offset:2px}
 .marker.active{transform:scale(1.12);border-width:3px;box-shadow:0 7px 13px rgba(0,0,0,.28)}
-.flight-plane-overlay{position:absolute;left:0;top:0;width:56px;height:56px;z-index:850;pointer-events:none;display:none;align-items:center;justify-content:center;transform:translate(-50%,-50%);filter:drop-shadow(0 3px 3px rgba(0,0,0,.8)) drop-shadow(0 0 5px rgba(255,255,255,.92))}
+.flight-plane-overlay{position:absolute;left:0;top:0;width:68px;height:68px;z-index:1400;pointer-events:none;display:none;align-items:center;justify-content:center;transform:translate(-50%,-50%);filter:drop-shadow(0 4px 4px rgba(0,0,0,.88)) drop-shadow(0 0 7px rgba(255,255,255,1));will-change:left,top}
 .flight-plane-overlay.visible{display:flex}
-.flight-plane-overlay.moving{width:64px;height:64px;z-index:900}
+.flight-plane-overlay.moving{width:80px;height:80px;z-index:1450}
 .flight-plane-overlay svg{width:100%;height:100%;overflow:visible;transform-origin:50% 50%;transition:transform .12s linear}
-.flight-plane-overlay .plane-body{fill:#22313f;stroke:#fff;stroke-width:2.8;stroke-linejoin:round}
-.flight-plane-overlay .plane-window{fill:#d7eef9;stroke:#fff;stroke-width:1.2}
-.flight-plane-overlay .plane-label{position:absolute;top:50px;left:50%;transform:translateX(-50%);background:rgba(255,255,255,.94);border:1px solid rgba(255,255,255,.98);border-radius:999px;padding:2px 6px;font-size:8px;font-weight:850;letter-spacing:.05em;color:#263441;white-space:nowrap;box-shadow:0 2px 7px rgba(0,0,0,.16)}
+.flight-plane-overlay .plane-body{fill:#fff;stroke:#172635;stroke-width:3.4;stroke-linejoin:round}
+.flight-plane-overlay .plane-window{fill:#2d82bd;stroke:#172635;stroke-width:1}
+.flight-plane-overlay .plane-label{position:absolute;top:62px;left:50%;transform:translateX(-50%);background:rgba(23,38,53,.94);border:1px solid rgba(255,255,255,.96);border-radius:999px;padding:3px 7px;font-size:8px;font-weight:900;letter-spacing:.07em;color:#fff;white-space:nowrap;box-shadow:0 3px 9px rgba(0,0,0,.24)}
 .country-label{
   background:rgba(255,255,255,.9);border:1px solid rgba(255,255,255,.95);border-radius:999px;
   padding:6px 10px;font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#23303f;
@@ -835,7 +835,7 @@ function renderRouteLines(){
     const baseColor = sameCountry ? COLORS[a.country] : '#f8fafc';
     const line = L.polyline([[a.lat,a.lng],[b.lat,b.lng]], {
       color: baseColor,
-      weight: currentLeg ? (sameCountry?4.5:4.2) : (completed ? (sameCountry?3:2.5) : (sameCountry?1.8:2.2)),
+      weight: currentLeg ? (sameCountry?4.5:5) : (completed ? (sameCountry?3:2.5) : (sameCountry?1.8:2.2)),
       opacity: dimmed ? 0.10 : (currentLeg ? 1 : (completed ? 0.78 : (isFlight?0.58:0.30))),
       dashArray: isFlight ? (currentLeg ? '7 8' : '6 9') : null,
       lineCap:'round'
@@ -865,7 +865,7 @@ function renderMarkers(){
       autoPanPadding:L.point(28,28),
       offset:popupOffsetFor(stop)
     });
-    marker.on('click', () => setActiveStop(index, true));
+    marker.on('click', () => setActiveStop(index, true, true));
     markers.push(marker);
   });
 }
@@ -992,12 +992,6 @@ function updateJourneyControls(){
   document.getElementById('prevBtn').disabled = activeIndex === 0;
   document.getElementById('nextBtn').disabled = activeIndex === route.stops.length - 1;
 }
-function updateOpenPopup(){
-  markers.forEach((marker, i) => {
-    if(i === activeIndex) { marker.openPopup(); }
-    else { marker.closePopup(); }
-  });
-}
 function fitForCurrentView(){
   const stops = filteredStops();
   const bounds = L.latLngBounds(stops.map(s => [s.lat, s.lng]));
@@ -1005,6 +999,7 @@ function fitForCurrentView(){
 }
 function setFilter(country){
   currentFilter = country;
+  markers.forEach(marker => marker.closePopup());
   render();
   fitForCurrentView();
 }
@@ -1033,7 +1028,7 @@ function playAdvance(){
     playTimer=setTimeout(()=>{
       playTimer=null;
       if(!isPlaying) return;
-      animateFlightLeg(legIndex,4300,()=>{
+      animateFlightLeg(legIndex,5200,()=>{
         if(!isPlaying) return;
         setActiveStop(legIndex+1,true);
         playTimer=setTimeout(()=>{playTimer=null;playAdvance()},700);
@@ -1059,10 +1054,14 @@ function togglePlayback(){
   renderRouteLinesOnly();
   playAdvance();
 }
-function setActiveStop(index, fly=true){
+function setActiveStop(index, fly=true, showPopup=false){
   activeIndex = Math.max(0, Math.min(index, currentRoute().stops.length - 1));
   const stop = currentRoute().stops[activeIndex];
   currentFilter = stop.country;
+
+  // Popups are deliberately on-demand only: route navigation never opens one.
+  markers.forEach(marker => marker.closePopup());
+
   renderSummary();
   renderCountryBar();
   renderCountryOverview();
@@ -1072,8 +1071,11 @@ function setActiveStop(index, fly=true){
   renderTimeline();
   renderActiveStop();
   updateJourneyControls();
-  updateOpenPopup();
+
   if(fly) map.flyTo([stop.lat, stop.lng], Math.max(map.getZoom(), 6), { duration:.8 });
+  if(showPopup){
+    window.setTimeout(() => markers[activeIndex]?.openPopup(), fly ? 650 : 0);
+  }
 }
 function renderCountryOverlaysOnly(){
   countryLayers.forEach(layer => map.removeLayer(layer));
