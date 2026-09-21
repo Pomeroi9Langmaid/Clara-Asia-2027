@@ -53,6 +53,9 @@ header{
 header h1{margin:0;font-size:23px;line-height:1.05;letter-spacing:-.03em}
 header p{margin:5px 0 0;color:var(--muted);font-size:12px;max-width:720px}
 .control-row{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+.route-view-label{display:flex;align-items:center;gap:6px;font-size:10px;font-weight:750;color:#6b7280;background:#fff;border:1px solid var(--border);border-radius:10px;padding:0 0 0 8px}
+.route-view-label select{border:0;border-left:1px solid var(--border);border-radius:0 9px 9px 0;background:#fff;padding:7px 28px 7px 9px;box-shadow:none}
+.route-view-label select:focus-visible{outline:2px solid #7ea7d8;outline-offset:1px}
 .country-bar{display:flex;align-items:center;gap:7px;overflow-x:auto;overflow-y:hidden;min-height:47px;padding:9px 12px 9px;background:#fffaf4;border-bottom:1px solid var(--border);scrollbar-width:thin;scroll-padding-inline:12px;position:relative;z-index:900}
 .country-nav{min-width:max-content;min-height:29px;display:flex;align-items:center;gap:6px;border:1px solid var(--border);background:#fff;border-radius:999px;padding:4px 8px;font-size:11px;font-weight:750;color:#334155;box-shadow:0 1px 4px rgba(24,36,48,.04);white-space:nowrap}
 .country-nav:hover{border-color:#cbbda7;background:#fffdf8}
@@ -98,10 +101,11 @@ header p{margin:5px 0 0;color:var(--muted);font-size:12px;max-width:720px}
 .itinerary-photo-note{font-size:9px;color:#66717e;background:#f8f4ed;border:1px solid #e8dfd3;border-radius:9px;padding:7px 8px;margin-bottom:8px}
 .helper{font-size:10px;color:var(--muted);margin-top:6px;line-height:1.4}
 .active-stop{background:linear-gradient(180deg,#fff 0%,#fbf7ef 100%);border:1px solid #eadfcf;border-radius:12px;padding:10px;box-shadow:0 5px 14px rgba(27,39,51,.05)}
-.active-stop .kicker{font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:#9b6c2f;font-weight:800;margin-bottom:4px}
-.active-stop .date{font-size:10px;font-weight:800;color:#5a6472;margin-bottom:2px}
-.active-stop h2{font-size:19px;line-height:1.05;margin:0 0 3px;letter-spacing:-.03em}
-.active-stop .meta{font-size:11px;color:var(--muted)}
+.active-topline{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:3px}
+.active-stop .date{font-size:10px;font-weight:750;color:#66717e}
+.stop-position{font-size:9px;color:#87919c}
+.active-heading{font-size:14px;line-height:1.25;color:#65717e;margin-bottom:1px}
+.active-heading strong{font-size:19px;color:#202b36;letter-spacing:-.025em}
 .country-pill{display:inline-flex;align-items:center;gap:5px;border:1px solid;border-radius:999px;padding:2px 7px;font-size:10px;font-weight:850;vertical-align:middle}
 .country-dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex:0 0 auto}
 .popup-country{display:inline-flex;align-items:center;gap:5px;border:1px solid;border-radius:999px;padding:2px 6px;font-size:10px;font-weight:800;margin-right:3px}
@@ -147,7 +151,8 @@ header p{margin:5px 0 0;color:var(--muted);font-size:12px;max-width:720px}
 }
 .stop-date{font-size:9px;font-weight:800;padding-top:0;color:#44505e;line-height:1.25}
 .stop-place{font-size:11px;font-weight:750;line-height:1.25}
-.stop-meta{font-size:9px;color:var(--muted);margin-top:1px;line-height:1.35}
+.stop-duration{font-size:9px;font-weight:700;color:#66717e;margin-top:2px}
+.stop-meta{font-size:9px;color:var(--muted);margin-top:3px;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .stop-tag{display:inline-block;margin-left:6px;padding:2px 6px;border-radius:999px;border:1px solid #e4dbc9;font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:#77634d;background:#fbf7ef}
 .legend-note{font-size:12px;color:var(--muted);line-height:1.45}
 .leaflet-container{background:#d9ebf4}
@@ -156,8 +161,9 @@ header p{margin:5px 0 0;color:var(--muted);font-size:12px;max-width:720px}
 .leaflet-popup.stop-popup .leaflet-popup-tip{box-shadow:0 5px 12px rgba(0,0,0,.10)}
 .leaflet-popup.stop-popup .leaflet-popup-close-button{top:4px;right:5px;font-size:18px;color:#75808b}
 .popup-date{font-weight:700;font-size:10px;color:#687482;text-transform:none;letter-spacing:0;margin:0 22px 2px 0}
-.popup-place{font-size:16px;font-weight:800;letter-spacing:-.02em;margin-top:1px;color:#202b36}
-.popup-meta{font-size:10px;color:#687482;margin-top:4px}
+.popup-heading{font-size:14px;line-height:1.25;color:#5e6976;margin-top:2px}
+.popup-heading strong{font-size:16px;color:#202b36;letter-spacing:-.015em}
+.popup-optional{display:inline-block;margin-left:6px;padding:1px 5px;border:1px solid #e5ddd1;border-radius:999px;font-size:8px;text-transform:uppercase;letter-spacing:.04em;color:#7b6a58;background:#fbf7ef}
 .popup-note{font-size:10px;color:#3d4a58;margin-top:6px;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .marker{
   border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:800;font-size:11px;
@@ -191,6 +197,8 @@ header p{margin:5px 0 0;color:var(--muted);font-size:12px;max-width:720px}
 .journey-dock-main{min-width:0;flex:1;display:flex;flex-direction:column;gap:4px}
 .journey-dock-label{display:flex;gap:6px;align-items:baseline;min-width:0;font-size:10px;color:#66717e;white-space:nowrap}
 .journey-dock-label strong{font-size:11px;color:#263441;overflow:hidden;text-overflow:ellipsis}
+.journey-country{font-size:11px;font-weight:750}
+.journey-sep{color:#a0a8b0}
 .journey-dock input[type="range"]{width:100%;height:4px;accent-color:#263441;cursor:pointer}
 .journey-count{font-size:9px;color:#7a8590;white-space:nowrap}
 @media(max-width:700px){.journey-dock{bottom:12px;min-width:0;width:calc(100% - 28px);padding:7px 8px;gap:6px}.journey-dock .play-btn{min-width:50px;padding:0 9px}.journey-dock-label{font-size:9px}.journey-dock-label strong{font-size:10px}.journey-count{display:none}}
@@ -219,16 +227,17 @@ header p{margin:5px 0 0;color:var(--muted);font-size:12px;max-width:720px}
   <div class="header-row">
     <div>
       <h1>Clara Asia 2027</h1>
-      <p>An interactive route and timeline for Clara’s Asia trip. The dated route from her document is shown by default, with an alternate “possible revised route” view for planning ideas.</p>
+      <p>Follow Clara’s Asia journey from 1 February to 2 May 2027 — country by country and stop by stop.</p>
     </div>
     <div class="control-row">
-      <select id="routeSelect" aria-label="Route version">
-        <option value="written" selected>Clara’s itinerary (dated route)</option>
-        <option value="revised">Possible revised route (ideas)</option>
-      </select>
-      <button id="fitBtn" class="primary">Show whole route</button>
-      <button id="copyBtn">Copy itinerary</button>
-      <button id="shareBtn">Copy share link</button>
+      <label class="route-view-label">View
+        <select id="routeSelect" aria-label="Route view">
+          <option value="written" selected>Current itinerary</option>
+          <option value="revised">Planning ideas</option>
+        </select>
+      </label>
+      <button id="copyBtn" title="Copy the current trip plan">Copy trip</button>
+      <button id="shareBtn" title="Share this map">Share</button>
     </div>
   </div>
 </header>
@@ -242,7 +251,7 @@ header p{margin:5px 0 0;color:var(--muted);font-size:12px;max-width:720px}
       <button id="playBtn" class="play-btn" type="button" aria-label="Play route" title="Play or pause route (Space)">Play</button>
       <button id="nextBtn" type="button" aria-label="Next stop" title="Next stop (→)">→</button>
       <div class="journey-dock-main">
-        <div class="journey-dock-label"><span class="country-dot" id="journeyCountryDot"></span><strong id="journeyNow">Bangkok</strong><span id="journeyDate">Mon 1st February</span></div>
+        <div class="journey-dock-label"><strong id="journeyNow">Bangkok</strong><span class="journey-country" id="journeyCountry">, Thailand</span><span class="journey-sep">·</span><span id="journeyDate">Mon 1st February</span></div>
         <input id="journeySlider" type="range" min="0" max="0" value="0" step="1" aria-label="Jump to trip stop">
       </div>
       <div class="journey-count" id="routeStep">1 / 27</div>
@@ -261,16 +270,16 @@ header p{margin:5px 0 0;color:var(--muted);font-size:12px;max-width:720px}
       <div class="section active-stop" id="activeStop"></div>
 
       <details class="section planning-notes">
-        <summary>Planning notes & unresolved items</summary>
-        <div class="note-body"><strong>Timing:</strong> Clara’s document says “7 days to fill” after 28 April, while the saved flight is 2 May.</div>
-        <div class="note-body"><strong>Ideas:</strong> Khao Sok, Sapa and countryside/nature in Japan; possibly remove Coron; consider Indonesia before the Philippines.</div>
+        <summary>Still to decide</summary>
+        <div class="note-body"><strong>Final days:</strong> the last few days before the 2 May flight are still being planned.</div>
+        <div class="note-body"><strong>Possible changes:</strong> Khao Sok, Sapa and Hakone are being considered; Coron and the Philippines/Indonesia order may also change.</div>
       </details>
 
       <div class="section route-info" id="routeInfo"></div>
     </div>
 
     <div class="side-panel" id="panel-itinerary">
-      <div class="itinerary-photo-note">Each stop includes a real destination photograph.</div>
+      <div class="itinerary-photo-note">Choose a stop to centre it on the map. Each stop includes a real destination photograph.</div>
       <div id="timeline"></div>
     </div>
 
@@ -278,7 +287,7 @@ header p{margin:5px 0 0;color:var(--muted);font-size:12px;max-width:720px}
       <div class="section country-overview" id="countryOverview"></div>
     </div>
 
-    <div class="footer-note">Click a map marker for stop details. Use the country strip above the map to focus one country.</div><div class="photo-truth">All displayed destination and country images are real photographs sourced from Wikipedia/Wikimedia. No AI-generated imagery is used.</div>
+    <div class="footer-note">Map markers, the itinerary and the country strip all navigate the same route.</div><div class="photo-truth">Real destination photography: Wikipedia / Wikimedia.</div>
   </aside>
 </div>
 
@@ -290,32 +299,6 @@ const COLORS = {
   Indonesia:'#8f68c2',
   Philippines:'#3c79d4',
   Japan:'#ca5574'
-};
-
-const COUNTRY_LABEL_POS = {
-  Thailand:[15.3,100.5],
-  Vietnam:[16.7,107.4],
-  Philippines:[11.2,121.2],
-  Indonesia:[-7.4,113.0],
-  Japan:[36.0,137.5]
-};
-
-const COUNTRY_SHAPES = {
-  Thailand:[
-    [20.7,97.2],[20.3,100.6],[17.6,104.8],[13.9,100.8],[11.2,99.8],[8.5,98.8],[6.3,101.3],[6.1,98.2],[10.2,98.0],[14.5,100.2],[18.6,98.7]
-  ],
-  Vietnam:[
-    [23.3,103.6],[22.8,106.8],[21.3,109.2],[18.6,106.4],[16.0,108.6],[13.0,109.4],[10.3,107.1],[8.7,104.7],[11.4,106.0],[15.3,108.0],[19.1,105.3],[21.8,104.6]
-  ],
-  Philippines:[
-    [13.0,118.8],[15.8,120.0],[14.6,123.2],[11.2,125.4],[8.7,124.8],[8.7,122.1],[9.4,120.4],[11.0,119.2]
-  ],
-  Indonesia:[
-    [-6.0,108.1],[-6.4,111.6],[-7.1,114.8],[-8.3,115.7],[-8.9,114.6],[-8.7,112.2],[-7.7,109.8],[-7.0,108.1]
-  ],
-  Japan:[
-    [35.0,134.0],[35.6,136.4],[35.2,139.9],[36.2,140.2],[36.7,138.8],[35.9,135.0]
-  ]
 };
 
 const COORDS = {
@@ -562,6 +545,18 @@ function shortDate(dateString){
   const month = d.toLocaleDateString('en-GB',{month:'short'});
   return `${ordinalDay(d.getDate())} ${month}`;
 }
+function compactDateRange(startString,endString){
+  const a=new Date(startString+'T12:00:00'), b=new Date(endString+'T12:00:00');
+  const aMonth=a.toLocaleDateString('en-GB',{month:'short'});
+  const bMonth=b.toLocaleDateString('en-GB',{month:'short'});
+  return aMonth===bMonth
+    ? `${ordinalDay(a.getDate())}–${ordinalDay(b.getDate())} ${aMonth}`
+    : `${ordinalDay(a.getDate())} ${aMonth}–${ordinalDay(b.getDate())} ${bMonth}`;
+}
+function inclusiveDays(startString,endString){
+  const a=new Date(startString+'T00:00:00Z'), b=new Date(endString+'T00:00:00Z');
+  return Math.round((b-a)/86400000)+1;
+}
 function escapeHtml(value){
   return String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 }
@@ -621,10 +616,9 @@ async function hydrateActiveMedia(stop){
   photo.innerHTML = media.image
     ? `<img src="${media.image}" alt="${escapeHtml(expectedPlace)}" decoding="async" style="object-position:${MEDIA_FOCAL[expectedPlace] || '50% 50%'}">`
     : '';
-  const cleanCaption = PUBLIC_STOP_NOTES[expectedPlace] || '';
-  meta.innerHTML =
-    (cleanCaption ? `<div class="active-media-summary">${escapeHtml(cleanCaption)}</div>` : '') +
-    (media.pageUrl ? `<div class="active-media-source">Real photograph: <a href="${media.pageUrl}" target="_blank" rel="noopener noreferrer">Wikipedia / Wikimedia</a></div>` : '');
+  meta.innerHTML = media.pageUrl
+    ? `<div class="active-media-source">Photo: <a href="${media.pageUrl}" target="_blank" rel="noopener noreferrer">Wikipedia / Wikimedia</a></div>`
+    : '';
 }
 async function hydrateCountryImages(){
   const nodes = [...document.querySelectorAll('[data-country-photo]')];
@@ -684,8 +678,8 @@ function clearLayers(){
   flightLegMarkers = new Map();
 }
 function popupOffsetFor(stop){
-  const xByCountry = {Thailand:104,Vietnam:104,Philippines:-104,Indonesia:104,Japan:-104};
-  return L.point(xByCountry[stop.country] || 92, -8);
+  const xByCountry = {Thailand:118,Vietnam:118,Philippines:-118,Indonesia:118,Japan:-118};
+  return L.point(xByCountry[stop.country] || 118, -10);
 }
 
 function currentRoute(){
@@ -824,8 +818,7 @@ function renderMarkers(){
     const marker = L.marker([stop.lat, stop.lng], { icon: buildMarkerIcon(index, stop, index === activeIndex, dimmed) }).addTo(map);
     marker.bindPopup(`
       <div class="popup-date">${fmtDate(stop.date)}</div>
-      <div class="popup-place">${stop.place}</div>
-      <div class="popup-meta"><span class="popup-country" style="color:${COLORS[stop.country]};background:${COLORS[stop.country]}18;border-color:${COLORS[stop.country]}55"><span class="country-dot" style="background:${COLORS[stop.country]}"></span>${stop.country}</span>${stop.days ? ` · ${stop.days} day${stop.days === 1 ? '' : 's'}` : ''}${stop.optional ? ' · optional' : ''}</div>
+      <div class="popup-heading"><strong>${stop.place}, <span style="color:${COLORS[stop.country]}">${stop.country}</span> ·</strong> <span>${stop.days ? `${stop.days} day${stop.days === 1 ? '' : 's'}` : ''}</span>${stop.optional ? '<span class="popup-optional">optional</span>' : ''}</div>
       ${publicStopNote(stop) ? `<div class="popup-note">${publicStopNote(stop)}</div>` : ''}
     `,{
       className:'stop-popup',
@@ -844,29 +837,27 @@ function renderSummary(){
   const route = currentRoute();
   const stops = route.stops;
   const countries = [...new Set(stops.map(s => s.country))];
-  const listedDays = stops.reduce((sum, s) => sum + (s.days || 0), 0);
-  const filterLabel = currentFilter === 'All' ? 'whole trip' : currentFilter;
+  const tripEnd='2027-05-02';
   document.getElementById('summary').innerHTML = `
-    <div class="card"><b>${stops.length}</b><span>mapped stops</span></div>
+    <div class="card"><b>${stops.length}</b><span>stops</span></div>
     <div class="card"><b>${countries.length}</b><span>countries</span></div>
-    <div class="card"><b>${listedDays}</b><span>listed days</span></div>
-    <div class="card"><b>1 Feb → 2 May</b><span>planned trip window</span></div>
+    <div class="card"><b>${inclusiveDays(stops[0].date,tripEnd)}</b><span>calendar days</span></div>
+    <div class="card"><b>1 Feb → 2 May</b><span>travel dates</span></div>
   `;
 }
 function renderRouteInfo(){
-  const route = currentRoute();
-  document.getElementById('routeInfo').innerHTML = `
-    <h3>${route.title}</h3>
-    <p>${route.note}</p>
-  `;
+  const revised=document.getElementById('routeSelect').value==='revised';
+  document.getElementById('routeInfo').innerHTML = revised
+    ? '<h3>Planning ideas</h3><p>An alternative view of the extra stops and route changes Clara is considering.</p>'
+    : '<h3>Current itinerary</h3><p>Clara’s dated route. Choose a country, click a stop, or press Play to follow the journey.</p>';
 }
 function renderCountryBar(){
   const route = currentRoute();
   const countries = [...new Set(route.stops.map(s => s.country))];
-  const whole = `<button class="country-nav ${currentFilter === 'All' ? 'active' : ''}" data-country="All"><span class="country-order" style="background:#64748b">↔</span><span>Whole trip</span><small>${route.stops.length} stops</small></button>`;
+  const whole = `<button class="country-nav ${currentFilter === 'All' ? 'active' : ''}" data-country="All" aria-pressed="${currentFilter === 'All'}"><span class="country-order" style="background:#64748b">↔</span><span>Whole trip</span><small>1 Feb–2 May</small></button>`;
   document.getElementById('countryBar').innerHTML = whole + countries.map((country,index) => {
     const m = countryMetrics(route.stops,country);
-    return `<button class="country-nav ${currentFilter === country ? 'active' : ''}" data-country="${country}"><span class="country-order" style="background:${COLORS[country]}">${index+1}</span><span class="country-nav-photo loading" data-country-photo="${country}"></span><span style="color:${COLORS[country]}">${country}</span><small>${m.stops} stops · ${m.days} days</small></button>`;
+    return `<button class="country-nav ${currentFilter === country ? 'active' : ''}" data-country="${country}" aria-pressed="${currentFilter === country}"><span class="country-order" style="background:${COLORS[country]}">${index+1}</span><span class="country-nav-photo loading" data-country-photo="${country}"></span><span style="color:${COLORS[country]}">${country}</span><small>${m.stops} stops · ${compactDateRange(m.start,m.end)}</small></button>`;
   }).join('');
   document.querySelectorAll('.country-nav').forEach(btn => btn.addEventListener('click', () => setFilter(btn.dataset.country)));
   hydrateCountryImages();
@@ -876,17 +867,18 @@ function renderCountryOverview(){
   const countries = [...new Set(route.stops.map(s => s.country))];
   document.getElementById('countryOverview').innerHTML = '<h3>Country by country</h3>' + countries.map((country,index) => {
     const m = countryMetrics(route.stops,country);
-    return `<div class="country-row ${currentFilter === country ? 'active' : ''}" data-country="${country}">
+    return `<div class="country-row ${currentFilter === country ? 'active' : ''}" data-country="${country}" role="button" tabindex="0" aria-label="View ${country}">
       <div class="ord" style="background:${COLORS[country]}">${index+1}</div>
       <div class="country-photo loading" data-country-photo="${country}"></div>
-      <div><div class="name" style="color:${COLORS[country]}">${country}</div><div class="dates">${shortDate(m.start)} → ${shortDate(m.end)}</div><div class="country-dests">${m.destinations.join(' · ')}</div></div>
-      <div class="stats">${m.stops} stops<br>${m.days} days</div>
+      <div><div class="name" style="color:${COLORS[country]}">${country}</div><div class="dates">${compactDateRange(m.start,m.end)}</div><div class="country-dests">${m.destinations.join(' · ')}</div></div>
+      <div class="stats">${m.stops}<br>stops</div>
     </div>`;
   }).join('') + '<div class="helper">Click a country to zoom to it. Country borders and names are shown directly on the satellite map.</div>';
-  document.querySelectorAll('.country-row').forEach(row => row.addEventListener('click', () => {
-    setFilter(row.dataset.country);
-    setSideTab('countries');
-  }));
+  document.querySelectorAll('.country-row').forEach(row => {
+    const activate=()=>{ setFilter(row.dataset.country); setSideTab('countries'); };
+    row.addEventListener('click',activate);
+    row.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){e.preventDefault();activate();} });
+  });
   hydrateCountryImages();
 }
 function renderTimeline(){
@@ -895,12 +887,13 @@ function renderTimeline(){
   const html = grouped.order.map(country => {
     const metrics = countryMetrics(route.stops, country);
     const body = grouped.groups[country].map(stop => `
-      <div class="stop-card ${stop._index === activeIndex ? 'active' : ''}" data-index="${stop._index}">
+      <div class="stop-card ${stop._index === activeIndex ? 'active' : ''}" data-index="${stop._index}" role="button" tabindex="0" aria-label="${stop.place}, ${country}, ${fmtDate(stop.date)}">
         <div class="num" style="background:${COLORS[country]}">${stop._index + 1}</div>
         <div class="stop-date">${fmtDate(stop.date)}</div>
         <div>
-          <div class="stop-place">${stop.place}${stop.optional ? '<span class="stop-tag">optional</span>' : ''}</div>
-          <div class="stop-meta">${country}${stop.days ? ` · ${stop.days} day${stop.days === 1 ? '' : 's'}` : ''}${publicStopNote(stop) ? ` · ${publicStopNote(stop)}` : ''}</div>
+          <div class="stop-place">${stop.place}, <span style="color:${COLORS[country]}">${country}</span>${stop.optional ? '<span class="stop-tag">optional</span>' : ''}</div>
+          <div class="stop-duration">${stop.days ? `${stop.days} day${stop.days === 1 ? '' : 's'}` : ''}</div>
+          ${publicStopNote(stop) ? `<div class="stop-meta">${publicStopNote(stop)}</div>` : ''}
         </div>
         <div class="stop-thumb loading" data-place="${escapeHtml(stop.place)}" aria-label="Real image of ${escapeHtml(stop.place)}"></div>
       </div>
@@ -910,7 +903,7 @@ function renderTimeline(){
         <div class="group-header" style="background:${COLORS[country]}">
           <div class="group-title">
             <strong>${country}</strong>
-            <span>${metrics.stops} stops · ${metrics.days} days</span>
+            <span>${compactDateRange(metrics.start,metrics.end)} · ${metrics.stops} stops</span>
           </div>
         </div>
         <div class="group-body">${body}</div>
@@ -919,24 +912,24 @@ function renderTimeline(){
   }).join('');
   document.getElementById('timeline').innerHTML = html;
   document.querySelectorAll('.stop-card').forEach(card => {
-    card.addEventListener('click', () => {
+    const activate=()=>{
       setActiveStop(Number(card.dataset.index), true);
       setSideTab('itinerary');
-    });
+    };
+    card.addEventListener('click',activate);
+    card.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){e.preventDefault();activate();} });
   });
   hydrateItineraryImages();
 }
 function renderActiveStop(){
   const stop = currentRoute().stops[activeIndex];
   document.getElementById('activeStop').innerHTML = `
-    <div class="kicker">Selected stop · ${activeIndex+1} of ${currentRoute().stops.length}</div>
-    <div class="date">${fmtDate(stop.date)}</div>
-    <h2>${stop.place}</h2>
-    <div class="meta"><span class="country-pill" style="color:${COLORS[stop.country]};background:${COLORS[stop.country]}18;border-color:${COLORS[stop.country]}55"><span class="country-dot" style="background:${COLORS[stop.country]}"></span>${stop.country}</span>${stop.days ? ` · ${stop.days} day${stop.days === 1 ? '' : 's'}` : ''}${stop.optional ? ' · optional' : ''}</div>
+    <div class="active-topline"><span class="date">${fmtDate(stop.date)}</span><span class="stop-position">Stop ${activeIndex+1} of ${currentRoute().stops.length}</span></div>
+    <div class="active-heading"><strong>${stop.place}, <span style="color:${COLORS[stop.country]}">${stop.country}</span> ·</strong> <span>${stop.days ? `${stop.days} day${stop.days === 1 ? '' : 's'}` : ''}</span>${stop.optional ? '<span class="stop-tag">optional</span>' : ''}</div>
     <div class="active-photo loading" id="activePhoto" aria-label="Real image of ${escapeHtml(stop.place)}"></div>
     ${publicStopNote(stop) ? `<div class="note">${publicStopNote(stop)}</div>` : ''}
     <div id="activeMediaMeta"></div>
-    <button class="view-itinerary-btn" id="viewItineraryBtn" type="button">View full itinerary + photos →</button>
+    <button class="view-itinerary-btn" id="viewItineraryBtn" type="button">Open itinerary →</button>
   `;
   hydrateActiveMedia(stop);
   window.setTimeout(() => {
@@ -955,8 +948,11 @@ function updateJourneyControls(){
   document.getElementById('routeStep').textContent = `${activeIndex + 1} / ${route.stops.length}`;
   document.getElementById('journeyNow').textContent = stop?.place || '';
   document.getElementById('journeyDate').textContent = stop ? fmtDate(stop.date) : '';
-  const journeyDot = document.getElementById('journeyCountryDot');
-  if(journeyDot && stop) journeyDot.style.background = COLORS[stop.country];
+  const journeyCountry = document.getElementById('journeyCountry');
+  if(journeyCountry && stop){
+    journeyCountry.textContent = ', ' + stop.country;
+    journeyCountry.style.color = COLORS[stop.country];
+  }
   document.getElementById('prevBtn').disabled = activeIndex === 0;
   document.getElementById('nextBtn').disabled = activeIndex === route.stops.length - 1;
 }
@@ -1078,10 +1074,6 @@ document.getElementById('routeSelect').addEventListener('change', () => {
   activeIndex = 0;
   render();
 });
-document.getElementById('fitBtn').addEventListener('click', () => {
-  currentFilter = 'All';
-  render();
-});
 document.getElementById('prevBtn').addEventListener('click', () => { stopPlayback(); setActiveStop(activeIndex - 1, true); });
 document.getElementById('nextBtn').addEventListener('click', () => { stopPlayback(); setActiveStop(activeIndex + 1, true); });
 document.getElementById('playBtn').addEventListener('click', togglePlayback);
@@ -1094,7 +1086,11 @@ let activeSideTab = 'overview';
 
 function setSideTab(tab){
   activeSideTab = tab;
-  document.querySelectorAll('.side-tab').forEach(btn => btn.classList.toggle('active', btn.dataset.tab === tab));
+  document.querySelectorAll('.side-tab').forEach(btn => {
+    const selected=btn.dataset.tab===tab;
+    btn.classList.toggle('active',selected);
+    btn.setAttribute('aria-selected',String(selected));
+  });
   document.querySelectorAll('.side-panel').forEach(panel => panel.classList.toggle('active', panel.id === 'panel-' + tab));
   scheduleSidebarHide();
 }
@@ -1115,7 +1111,7 @@ function scheduleSidebarHide(){
     const side = document.getElementById('sidePanel');
     if(!side.matches(':hover')) setSidebarCollapsed(true);
     else scheduleSidebarHide();
-  }, 12000);
+  }, 18000);
 }
 
 document.querySelectorAll('.side-tab').forEach(btn => btn.addEventListener('click', () => setSideTab(btn.dataset.tab)));
@@ -1147,26 +1143,29 @@ document.addEventListener('keydown', (event) => {
 
 document.getElementById('shareBtn').addEventListener('click', async () => {
   const cleanUrl = 'https://clara-asia-2027.vercel.app/';
+  const btn = document.getElementById('shareBtn');
   try{
+    if(navigator.share){
+      await navigator.share({title:'Clara Asia 2027',text:'Clara’s Asia 2027 route and itinerary',url:cleanUrl});
+      return;
+    }
     await navigator.clipboard.writeText(cleanUrl);
-    const btn = document.getElementById('shareBtn');
     btn.textContent = 'Link copied';
-    setTimeout(() => btn.textContent = 'Copy share link', 1200);
+    setTimeout(() => btn.textContent = 'Share', 1200);
   }catch(e){
-    window.prompt('Share this link:', cleanUrl);
+    if(e?.name !== 'AbortError') window.prompt('Share this link:', cleanUrl);
   }
 });
 document.getElementById('copyBtn').addEventListener('click', async () => {
   const route = currentRoute();
-  const text = route.stops.map((s,i) => `${i+1}. ${s.date} — ${s.place}, ${s.country}${s.optional ? ' (optional)' : ''}`).join('\n');
+  const text = ['Clara Asia 2027','',...route.stops.map((s,i) => `${i+1}. ${fmtDate(s.date)} — ${s.place}, ${s.country}${s.days ? ` · ${s.days} day${s.days===1?'':'s'}` : ''}${s.optional ? ' · optional' : ''}`)].join('\n');
   try {
     await navigator.clipboard.writeText(text);
     const btn = document.getElementById('copyBtn');
-    const old = btn.textContent;
     btn.textContent = 'Copied';
-    setTimeout(() => btn.textContent = old, 1200);
+    setTimeout(() => btn.textContent = 'Copy trip', 1200);
   } catch(err) {
-    window.prompt('Copy this stop list:', text);
+    window.prompt('Copy this trip plan:', text);
   }
 });
 
