@@ -1723,6 +1723,136 @@ header p{display:none!important}
     width:40px!important;height:40px!important;min-width:40px!important;max-width:40px!important
   }
 }
+
+/* ===== Current-position emphasis + rewind control ===== */
+
+/* Four compact transport controls: rewind-to-start, previous, play/pause, next */
+.journey-dock{
+  grid-template-columns:30px 32px 40px 32px!important;
+  column-gap:5px!important;
+  padding:4px 6px!important;
+}
+.journey-dock button{
+  width:32px!important;
+  height:32px!important;
+  min-width:32px!important;
+  max-width:32px!important;
+}
+.journey-dock .restart-btn{
+  width:30px!important;
+  height:30px!important;
+  min-width:30px!important;
+  max-width:30px!important;
+  opacity:.86;
+}
+.journey-dock .restart-btn svg{width:17px!important;height:16px!important}
+.journey-dock .play-btn{
+  width:40px!important;
+  height:40px!important;
+  min-width:40px!important;
+  max-width:40px!important;
+}
+.journey-dock .play-btn svg{width:19px!important;height:19px!important}
+
+/* Active map location: a slow physical pulse plus a restrained expanding halo */
+.marker{
+  position:relative;
+  will-change:transform,box-shadow;
+}
+.marker.active{
+  z-index:2;
+  transform:scale(1.12);
+  border-width:3px;
+  box-shadow:
+    0 0 0 2px rgba(255,255,255,.22),
+    0 7px 15px rgba(0,0,0,.28);
+  animation:activeMarkerBreathe 1.7s cubic-bezier(.4,0,.2,1) infinite;
+}
+.marker.active::after{
+  content:"";
+  position:absolute;
+  inset:-5px;
+  border-radius:50%;
+  border:2px solid rgba(255,255,255,.72);
+  box-shadow:0 0 0 1px rgba(27,48,62,.10);
+  opacity:.70;
+  pointer-events:none;
+  animation:activeMarkerHalo 1.7s cubic-bezier(.22,.65,.32,1) infinite;
+}
+@keyframes activeMarkerBreathe{
+  0%,100%{
+    transform:scale(1.10);
+    box-shadow:0 0 0 2px rgba(255,255,255,.20),0 7px 15px rgba(0,0,0,.26);
+  }
+  50%{
+    transform:scale(1.24);
+    box-shadow:0 0 0 4px rgba(255,255,255,.16),0 9px 19px rgba(0,0,0,.30);
+  }
+}
+@keyframes activeMarkerHalo{
+  0%{opacity:.58;transform:scale(.88)}
+  72%,100%{opacity:0;transform:scale(1.58)}
+}
+
+/* Header: the country Clara is currently in breathes independently of the selected filter */
+.country-nav.journey-current{
+  position:relative;
+  overflow:visible!important;
+  z-index:3;
+  animation:currentCountryBreathe 1.9s cubic-bezier(.4,0,.2,1) infinite;
+}
+.country-nav.journey-current::after{
+  content:"";
+  position:absolute;
+  inset:-3px;
+  border-radius:999px;
+  border:1.5px solid var(--country-color);
+  opacity:.52;
+  pointer-events:none;
+  animation:currentCountryHalo 1.9s cubic-bezier(.22,.65,.32,1) infinite;
+}
+@keyframes currentCountryBreathe{
+  0%,100%{
+    transform:scale(1);
+    box-shadow:0 4px 12px rgba(20,39,53,.10),inset 0 1px 0 rgba(255,255,255,.54);
+  }
+  50%{
+    transform:scale(1.025);
+    box-shadow:0 7px 18px rgba(20,39,53,.14),inset 0 1px 0 rgba(255,255,255,.64);
+  }
+}
+@keyframes currentCountryHalo{
+  0%{opacity:.48;transform:scale(.99)}
+  70%,100%{opacity:0;transform:scale(1.055)}
+}
+
+/* Respect users who disable motion while keeping the current state obvious */
+@media(prefers-reduced-motion:reduce){
+  .marker.active,
+  .marker.active::after,
+  .country-nav.journey-current,
+  .country-nav.journey-current::after{
+    animation:none!important;
+  }
+  .marker.active{transform:scale(1.18)}
+  .country-nav.journey-current::after{opacity:.65}
+}
+
+@media(max-width:760px){
+  .journey-dock{
+    grid-template-columns:28px 30px 38px 30px!important;
+    column-gap:4px!important;
+  }
+  .journey-dock .restart-btn{
+    width:28px!important;height:28px!important;min-width:28px!important;max-width:28px!important
+  }
+  .journey-dock button{
+    width:30px!important;height:30px!important;min-width:30px!important;max-width:30px!important
+  }
+  .journey-dock .play-btn{
+    width:38px!important;height:38px!important;min-width:38px!important;max-width:38px!important
+  }
+}
 </style>
 </head>
 <body>
@@ -1760,6 +1890,13 @@ header p{display:none!important}
       </svg>
     </div>
     <div class="journey-dock" aria-label="Journey playback controls">
+      <button id="restartBtn" class="restart-btn" type="button" aria-label="Back to beginning" title="Back to beginning">
+        <svg viewBox="0 0 30 28" aria-hidden="true">
+          <path d="M6.5 6v16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+          <path d="M18 7.5 10.5 14 18 20.5Z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/>
+          <path d="M26 7.5 18.5 14 26 20.5Z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/>
+        </svg>
+      </button>
       <button id="prevBtn" type="button" aria-label="Previous stop" title="Previous stop">
         <svg viewBox="0 0 28 28" aria-hidden="true">
           <path d="M8.5 6v16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
@@ -2824,7 +2961,8 @@ function renderCountryBar(){
   document.getElementById('countryBar').innerHTML = whole + countries.map((country,index) => {
     const m = countryMetrics(route.stops,country);
     const stay=stays.find(s=>s.country===country);
-    return `<button class="country-nav ${currentFilter === country ? 'active' : ''}" data-country="${country}" aria-pressed="${currentFilter === country}"><span class="country-order" style="background:${COLORS[country]}">${index+1}</span><span class="country-nav-photo loading" data-country-photo="${country}"></span><span style="color:${COLORS[country]}">${country}</span><small>${compactDateRange(stay.start,stay.end)}</small></button>`;
+    const journeyCurrent=route.stops[activeIndex]?.country===country;
+    return `<button class="country-nav ${currentFilter === country ? 'active' : ''}${journeyCurrent?' journey-current':''}" style="--country-color:${COLORS[country]}" data-country="${country}" aria-pressed="${currentFilter === country}"><span class="country-order" style="background:${COLORS[country]}">${index+1}</span><span class="country-nav-photo loading" data-country-photo="${country}"></span><span style="color:${COLORS[country]}">${country}</span><small>${compactDateRange(stay.start,stay.end)}</small></button>`;
   }).join('');
   document.querySelectorAll('.country-nav').forEach(btn => btn.addEventListener('click', () => setFilter(btn.dataset.country)));
   hydrateCountryImages();
@@ -3092,6 +3230,13 @@ document.getElementById('routeSelect').addEventListener('change', () => {
   outboundGatewayPlayed=false;
   returnGatewayPlayed=false;
   render();
+});
+document.getElementById('restartBtn').addEventListener('click', () => {
+  stopPlayback();
+  gatewayPlaybackPhase=null;
+  outboundGatewayPlayed=false;
+  returnGatewayPlayed=false;
+  setActiveStop(0,true,true);
 });
 document.getElementById('prevBtn').addEventListener('click', () => { stopPlayback(); setActiveStop(activeIndex - 1, true, true); });
 document.getElementById('nextBtn').addEventListener('click', () => { stopPlayback(); setActiveStop(activeIndex + 1, true, true); });
