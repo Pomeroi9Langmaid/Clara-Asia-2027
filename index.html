@@ -1317,6 +1317,20 @@ header p{display:none!important}
   .calendar-stop{top:13px!important}
   .timeline-playhead::after,.timeline-playhead::before{top:18px!important}
 }
+
+.gateway-airport-label{
+  background:rgba(239,247,251,.80)!important;
+  color:#263c49!important;
+  border:1px solid rgba(255,255,255,.78)!important;
+  border-radius:999px!important;
+  padding:3px 7px!important;
+  font-size:8px!important;
+  font-weight:850!important;
+  box-shadow:0 5px 14px rgba(7,25,37,.16)!important;
+  backdrop-filter:blur(16px)!important;
+  -webkit-backdrop-filter:blur(16px)!important;
+}
+.gateway-airport-label::before{display:none!important}
 </style>
 </head>
 <body>
@@ -2313,7 +2327,31 @@ function playGatewayFlight(direction,onDone){
   document.getElementById('journeyNow').textContent=outbound?'Landvetter → Bangkok':'Tokyo → Landvetter';
   document.getElementById('journeyCountry').textContent='';
   document.getElementById('journeyDate').textContent=outbound?'Outbound flight':'Homeward flight';
+
+  // A dedicated active flight path keeps the aircraft visually tied to the route.
+  const gatewayLine=L.polyline([[a.lat,a.lng],[b.lat,b.lng]],{
+    color:'#f8fbfd',
+    weight:4.2,
+    opacity:.92,
+    dashArray:'7 9',
+    lineCap:'round'
+  }).addTo(map);
+  routeLayers.push(gatewayLine);
+
+  const airportMarker=L.circleMarker([HOME_AIRPORT.lat,HOME_AIRPORT.lng],{
+    radius:6,
+    color:'#ffffff',
+    weight:2,
+    fillColor:'#526b7a',
+    fillOpacity:.95
+  }).addTo(map);
+  airportMarker.bindTooltip('GOT · Landvetter',{permanent:true,direction:'right',offset:[8,0],className:'gateway-airport-label'});
+  routeLayers.push(airportMarker);
+
   map.fitBounds([[a.lat,a.lng],[b.lat,b.lng]],{padding:[95,95],animate:false,maxZoom:4});
+  gatewayLine.bringToFront();
+  airportMarker.bringToFront();
+
   playTimer=setTimeout(()=>{
     playTimer=null;
     if(!isPlaying) return;
