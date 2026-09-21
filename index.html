@@ -2483,7 +2483,7 @@ body.video-modal-open{overflow:hidden}
     </div>
 
     <div class="side-panel" id="panel-itinerary">
-      <div class="itinerary-photo-note">Choose a stop to centre it on the map. Each stop includes a real destination photograph.</div>
+      <div class="itinerary-photo-note">Choose a stop to centre it on the map. Real destination photos are shown throughout; a play icon appears when Clara has saved video inspiration for that stop.</div>
       <div id="timeline"></div>
     </div>
 
@@ -2494,6 +2494,28 @@ body.video-modal-open{overflow:hidden}
     <div class="footer-note">Map markers, the itinerary and the country strip all navigate the same route.</div><div class="photo-truth">Real destination photography: Wikipedia / Wikimedia.</div>
   </aside>
 </div>
+
+<div class="video-modal" id="videoModal" hidden aria-hidden="true">
+  <div class="video-modal-backdrop" data-video-close></div>
+  <section class="video-modal-card" role="dialog" aria-modal="true" aria-labelledby="videoModalTitle">
+    <button class="video-modal-close" type="button" data-video-close aria-label="Close video">×</button>
+    <div class="video-modal-head">
+      <div>
+        <span class="video-modal-eyebrow">Clara’s inspiration</span>
+        <h2 id="videoModalTitle"></h2>
+      </div>
+      <span class="video-platform" id="videoPlatform"></span>
+    </div>
+    <div class="video-player-shell landscape" id="videoPlayerShell"></div>
+    <div class="video-modal-footer">
+      <button class="video-nav-btn" id="videoPrev" type="button" aria-label="Previous video">‹</button>
+      <span class="video-position" id="videoPosition"></span>
+      <a class="video-source-link" id="videoSourceLink" target="_blank" rel="noopener noreferrer">Open original ↗</a>
+      <button class="video-nav-btn" id="videoNext" type="button" aria-label="Next video">›</button>
+    </div>
+  </section>
+</div>
+
 
 <script>
 const COUNTRY_ISO = {Thailand:'THA',Vietnam:'VNM',Philippines:'PHL',Indonesia:'IDN',Japan:'JPN'};
@@ -4112,25 +4134,5 @@ document.getElementById('videoNext').addEventListener('click',()=>{videoModalInd
 document.addEventListener('keydown',event=>{if(event.key==='Escape'&&!document.getElementById('videoModal').hidden)closeVideoModal();});
 </script>
 
-<div class="video-modal" id="videoModal" hidden aria-hidden="true">
-  <div class="video-modal-backdrop" data-video-close></div>
-  <section class="video-modal-card" role="dialog" aria-modal="true" aria-labelledby="videoModalTitle">
-    <button class="video-modal-close" type="button" data-video-close aria-label="Close video">×</button>
-    <div class="video-modal-head">
-      <div>
-        <span class="video-modal-eyebrow">Clara’s inspiration</span>
-        <h2 id="videoModalTitle"></h2>
-      </div>
-      <span class="video-platform" id="videoPlatform"></span>
-    </div>
-    <div class="video-player-shell landscape" id="videoPlayerShell"></div>
-    <div class="video-modal-footer">
-      <button class="video-nav-btn" id="videoPrev" type="button" aria-label="Previous video">‹</button>
-      <span class="video-position" id="videoPosition"></span>
-      <a class="video-source-link" id="videoSourceLink" target="_blank" rel="noopener noreferrer">Open original ↗</a>
-      <button class="video-nav-btn" id="videoNext" type="button" aria-label="Next video">›</button>
-    </div>
-  </section>
-</div>
 </body>
 </html>
