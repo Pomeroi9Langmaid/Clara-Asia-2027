@@ -188,11 +188,13 @@ header p{margin:5px 0 0;color:var(--muted);font-size:12px;max-width:720px}
 }
 .marker.optional{outline:2px dashed rgba(255,255,255,.95);outline-offset:2px}
 .marker.active{transform:scale(1.12);border-width:3px;box-shadow:0 7px 13px rgba(0,0,0,.28)}
-.flight-plane-overlay{position:absolute;left:0;top:0;width:54px;height:54px;z-index:1450;pointer-events:none;display:none;align-items:center;justify-content:center;transform:translate(-50%,-50%);filter:drop-shadow(0 3px 3px rgba(0,0,0,.72)) drop-shadow(0 0 5px rgba(255,255,255,.95));will-change:left,top}
+.flight-plane-overlay{position:absolute;left:0;top:0;width:48px;height:48px;z-index:1450;pointer-events:none;display:none;align-items:center;justify-content:center;transform:translate(-50%,-50%);filter:drop-shadow(0 2px 3px rgba(0,0,0,.62)) drop-shadow(0 0 3px rgba(255,255,255,.9));will-change:left,top}
 .flight-plane-overlay.visible{display:flex}
 .flight-plane-overlay svg{width:100%;height:100%;overflow:visible;transform-origin:50% 50%;will-change:transform}
-.flight-plane-overlay .plane-body{fill:#fff;stroke:#172635;stroke-width:3;stroke-linejoin:round}
-.flight-plane-overlay .plane-window{display:none}
+.flight-plane-overlay .plane-fuselage,.flight-plane-overlay .plane-wing,.flight-plane-overlay .plane-tail{fill:#f8fbfd;stroke:#172635;stroke-width:2.1;stroke-linejoin:round;stroke-linecap:round}
+.flight-plane-overlay .plane-wing{fill:#eaf1f6}
+.flight-plane-overlay .plane-tail{fill:#eef4f8}
+.flight-plane-overlay .plane-cockpit{fill:#4f8fb7;stroke:#172635;stroke-width:1.4}
 .country-label{
   background:rgba(255,255,255,.9);border:1px solid rgba(255,255,255,.95);border-radius:999px;
   padding:6px 10px;font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#23303f;
@@ -224,6 +226,16 @@ header p{margin:5px 0 0;color:var(--muted);font-size:12px;max-width:720px}
 .planning-notes{background:#fff8ef;border:1px solid #eed9b5;border-radius:10px;padding:0 9px}
 .planning-notes summary{cursor:pointer;font-size:10px;font-weight:800;color:#8f6127;padding:8px 0}
 .planning-notes .note-body{font-size:10px;line-height:1.45;color:#5d4b34;padding:0 0 8px}
+.trip-facts{background:#f8fafb;border:1px solid #dde4e8;border-radius:10px;padding:0 9px}
+.trip-facts summary{cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:10px;font-weight:800;color:#43515f;padding:8px 0}
+.trip-facts-glance{font-size:9px;font-weight:700;color:#7a8692;white-space:nowrap}
+.trip-facts-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:0 0 8px}
+.trip-fact{background:#fff;border:1px solid #e4e9ec;border-radius:8px;padding:7px 8px;min-width:0}
+.trip-fact b{display:block;font-size:14px;line-height:1.05;color:#243240;letter-spacing:-.02em}
+.trip-fact span{display:block;font-size:8px;line-height:1.25;color:#7a8692;margin-top:3px}
+.trip-fact.wide{grid-column:1/-1}
+.trip-fact.wide b{font-size:11px}
+.trip-facts-note{font-size:8px;line-height:1.35;color:#87919c;border-top:1px solid #e6ebee;padding:7px 0 8px}
 .footer-note{font-size:9px;color:var(--muted);line-height:1.4;margin-top:10px}
 @media (max-width:1100px){
   .shell{grid-template-columns:minmax(0,1fr) 330px}
@@ -267,8 +279,13 @@ header p{margin:5px 0 0;color:var(--muted);font-size:12px;max-width:720px}
     <button id="sidebarToggle" class="sidebar-toggle" aria-expanded="true">Trip details</button>
     <div id="map"></div>
     <div id="flightPlane" class="flight-plane-overlay" aria-hidden="true">
-      <svg viewBox="0 0 100 100" role="img" aria-label="Aircraft">
-        <path class="plane-body" d="M96 46 63 34 55 7C54 3 51 1 47 1s-7 2-8 6l4 29-25-6L8 20H2l7 30-7 30h6l10-10 25-6-4 29c1 4 4 6 8 6s7-2 8-6l8-27 33-12c5-2 5-6 0-8Z"/>
+      <svg viewBox="0 0 120 120" role="img" aria-label="Aircraft">
+        <path class="plane-wing" d="M55 52 43 14c-1-4 1-7 5-8l6-1 19 45Z"/>
+        <path class="plane-wing" d="M55 68 43 106c-1 4 1 7 5 8l6 1 19-45Z"/>
+        <path class="plane-tail" d="M28 54 15 35c-2-3 0-5 3-5h5l17 22Z"/>
+        <path class="plane-tail" d="M28 66 15 85c-2 3 0 5 3 5h5l17-22Z"/>
+        <path class="plane-fuselage" d="M9 60c0-4 3-7 8-8l73-7c12-1 21 5 25 15-4 10-13 16-25 15l-73-7c-5-1-8-4-8-8Z"/>
+        <path class="plane-cockpit" d="M94 50c7 0 12 3 15 10-3 7-8 10-15 10l5-10Z"/>
       </svg>
     </div>
     <div class="journey-dock" aria-label="Journey playback controls">
@@ -298,6 +315,12 @@ header p{margin:5px 0 0;color:var(--muted);font-size:12px;max-width:720px}
         <summary>Still to decide</summary>
         <div class="note-body"><strong>Final days:</strong> the last few days before the 2 May flight are still being planned.</div>
         <div class="note-body"><strong>Possible changes:</strong> Khao Sok, Sapa and Hakone are being considered; Coron and the Philippines/Indonesia order may also change.</div>
+      </details>
+
+      <details class="section trip-facts">
+        <summary><span>Trip facts</span><span class="trip-facts-glance" id="tripFactsGlance"></span></summary>
+        <div class="trip-facts-grid" id="tripFacts"></div>
+        <div class="trip-facts-note">Distance is an approximate straight-line total between mapped stops. Flight count covers the cross-country flight legs shown on this map.</div>
       </details>
 
       <div class="section route-info" id="routeInfo"></div>
@@ -618,6 +641,68 @@ function inclusiveDays(startString,endString){
   const a=new Date(startString+'T00:00:00Z'), b=new Date(endString+'T00:00:00Z');
   return Math.round((b-a)/86400000)+1;
 }
+function haversineKm(a,b){
+  const R=6371;
+  const rad=v=>v*Math.PI/180;
+  const dLat=rad(b.lat-a.lat), dLng=rad(b.lng-a.lng);
+  const x=Math.sin(dLat/2)**2 + Math.cos(rad(a.lat))*Math.cos(rad(b.lat))*Math.sin(dLng/2)**2;
+  return 2*R*Math.asin(Math.sqrt(x));
+}
+function routeFacts(route){
+  const stops=route.stops;
+  const countries=[...new Set(stops.map(s=>s.country))];
+  const legs=[];
+  for(let i=0;i<stops.length-1;i++){
+    const a=stops[i], b=stops[i+1];
+    legs.push({
+      from:a,
+      to:b,
+      km:haversineKm(a,b),
+      crossCountry:a.country!==b.country
+    });
+  }
+  const totalKm=legs.reduce((sum,leg)=>sum+leg.km,0);
+  const flightLegs=legs.filter(leg=>leg.crossCountry);
+  const longestLeg=legs.reduce((best,leg)=>!best||leg.km>best.km?leg:best,null);
+  const stays=countryStayWindows(route).map(stay=>({
+    ...stay,
+    days:daySerial(stay.endExclusive)-daySerial(stay.start)
+  }));
+  const longestStay=stays.reduce((best,stay)=>!best||stay.days>best.days?stay:best,null);
+  return {
+    countries:countries.length,
+    stops:stops.length,
+    routeLegs:legs.length,
+    totalKm,
+    flightLegs:flightLegs.length,
+    flightKm:flightLegs.reduce((sum,leg)=>sum+leg.km,0),
+    days:inclusiveDays(TRIP_START,TRIP_END),
+    longestLeg,
+    longestStay
+  };
+}
+function formatKm(km,nearest=100){
+  return Math.round(km/nearest)*nearest;
+}
+function renderTripFacts(){
+  const facts=routeFacts(currentRoute());
+  const glance=document.getElementById('tripFactsGlance');
+  const panel=document.getElementById('tripFacts');
+  if(!glance||!panel) return;
+  const total=formatKm(facts.totalKm,100);
+  glance.textContent=`~${total.toLocaleString('en-GB')} km · ${facts.flightLegs} flight legs`;
+  panel.innerHTML=`
+    <div class="trip-fact"><b>~${total.toLocaleString('en-GB')} km</b><span>mapped route distance</span></div>
+    <div class="trip-fact"><b>${facts.flightLegs}</b><span>cross-country flight legs</span></div>
+    <div class="trip-fact"><b>${facts.countries}</b><span>countries</span></div>
+    <div class="trip-fact"><b>${facts.stops}</b><span>mapped locations</span></div>
+    <div class="trip-fact"><b>${facts.days}</b><span>calendar days</span></div>
+    <div class="trip-fact"><b>${facts.routeLegs}</b><span>point-to-point route legs</span></div>
+    <div class="trip-fact wide"><b>${facts.longestStay.country} · ${facts.longestStay.days} days</b><span>longest country stay</span></div>
+    <div class="trip-fact wide"><b>${facts.longestLeg.from.place} → ${facts.longestLeg.to.place} · ~${formatKm(facts.longestLeg.km,10).toLocaleString('en-GB')} km</b><span>longest mapped leg</span></div>
+  `;
+}
+
 function escapeHtml(value){
   return String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 }
@@ -1233,6 +1318,7 @@ function render(){
   clearLayers();
   renderSummary();
   renderRouteInfo();
+  renderTripFacts();
   renderCountryBar();
   renderTripCalendar();
   renderCountryOverview();
