@@ -74,25 +74,22 @@ header p{margin:5px 0 0;color:var(--muted);font-size:12px;max-width:720px}
 .month-band.feb{background:#e8f1fb}.month-band.mar{background:#e8f6ef}.month-band.apr{background:#fff1da}.month-band.may{background:#f7eaf3}
 .country-stay{position:absolute;top:25px;height:8px;border-radius:999px;opacity:.92}
 .calendar-stop{position:absolute;top:22px;width:8px;height:16px;border:2px solid #fff;border-radius:999px;padding:0;transform:translateX(-50%);box-shadow:0 1px 4px rgba(0,0,0,.18);z-index:4;min-width:0}
-.calendar-stop.active{width:11px;height:20px;top:20px;box-shadow:0 0 0 2px rgba(31,41,51,.15),0 2px 6px rgba(0,0,0,.22)}
-.month-band{transition:opacity .25s ease,filter .25s ease,box-shadow .25s ease}
-.month-band.past-month{opacity:.58;filter:saturate(.28)}
-.month-band.active-month{font-weight:950;color:#172635;box-shadow:inset 0 -2px 0 rgba(23,38,53,.52)}
-.country-stay,.calendar-stop,.country-arrival{transition:opacity .25s ease,filter .25s ease}
-.country-stay.past{opacity:.28;filter:saturate(.15) grayscale(.55)}
-.country-stay.current{opacity:1}
-.country-stay.future{opacity:.72}
-.calendar-stop.past{opacity:.34;filter:saturate(.15) grayscale(.6)}
-.calendar-stop.future{opacity:.72}
-.country-arrival.past{opacity:.38;filter:saturate(.2)}
-.timeline-playhead{position:absolute;top:0;bottom:0;width:1px;background:rgba(23,38,53,.82);z-index:8;transform:translateX(-.5px);pointer-events:none}
-.timeline-playhead::after{content:"";position:absolute;top:28px;left:50%;width:10px;height:10px;border-radius:50%;background:var(--playhead-color,#172635);border:2px solid #fff;transform:translate(-50%,-50%);box-shadow:0 0 0 3px rgba(23,38,53,.12),0 2px 5px rgba(0,0,0,.22)}
-.timeline-playhead-label{position:absolute;top:2px;left:6px;background:rgba(23,38,53,.94);color:#fff;border-radius:999px;padding:2px 7px;font-size:8px;font-weight:800;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.14);letter-spacing:.01em}
-.timeline-playhead.edge-right .timeline-playhead-label{left:auto;right:6px}
-.trip-track.playing .timeline-playhead::after{animation:timelineBreath 1.9s cubic-bezier(.4,0,.2,1) infinite}
-@keyframes timelineBreath{
-  0%,100%{box-shadow:0 0 0 3px rgba(23,38,53,.10),0 2px 5px rgba(0,0,0,.22);transform:translate(-50%,-50%) scale(1)}
-  50%{box-shadow:0 0 0 7px rgba(23,38,53,.055),0 2px 5px rgba(0,0,0,.20);transform:translate(-50%,-50%) scale(1.06)}
+.calendar-stop.active{width:13px;height:20px;top:20px;z-index:7;border:3px solid #fff;box-shadow:0 0 0 2px rgba(38,52,65,.28),0 2px 7px rgba(0,0,0,.24)}
+.month-band{transition:background .25s ease,color .25s ease,box-shadow .25s ease}
+.month-band.active-month{font-weight:950;color:#172635;box-shadow:inset 0 -2px 0 rgba(23,38,53,.58)}
+.country-stay,.calendar-stop,.country-arrival{transition:background .25s ease,color .25s ease,opacity .25s ease,filter .25s ease}
+.calendar-stop.past{background:#b9c0c6!important;border-color:#f7f8f9;box-shadow:none;opacity:.72}
+.calendar-stop.future{opacity:.86}
+.country-arrival.past{color:#9aa2aa!important;opacity:.82}
+.timeline-playhead{position:absolute;top:0;bottom:0;width:2px;background:#263441;z-index:9;transform:translateX(-1px);pointer-events:none;box-shadow:0 0 0 1px rgba(255,255,255,.62)}
+.timeline-playhead::after{content:"";position:absolute;top:28px;left:50%;width:14px;height:14px;border-radius:50%;background:#fff;border:4px solid var(--playhead-color,#263441);transform:translate(-50%,-50%);box-shadow:0 2px 7px rgba(0,0,0,.28);z-index:2}
+.timeline-playhead::before{content:"";position:absolute;top:28px;left:50%;width:16px;height:16px;border-radius:50%;border:2px solid var(--playhead-color,#263441);transform:translate(-50%,-50%) scale(1);opacity:0;z-index:1}
+.timeline-playhead-label{position:absolute;top:2px;left:7px;background:rgba(255,255,255,.97);color:#263441;border:1px solid #cfd6dc;border-radius:999px;padding:2px 8px;font-size:8px;font-weight:850;white-space:nowrap;box-shadow:0 2px 7px rgba(0,0,0,.13);letter-spacing:.01em}
+.timeline-playhead.edge-right .timeline-playhead-label{left:auto;right:7px}
+.trip-track.playing .timeline-playhead::before{animation:timelineLocatorHalo 1.85s cubic-bezier(.2,.65,.35,1) infinite}
+@keyframes timelineLocatorHalo{
+  0%{opacity:.42;transform:translate(-50%,-50%) scale(.95)}
+  72%,100%{opacity:0;transform:translate(-50%,-50%) scale(2.15)}
 }
 .country-arrival{position:absolute;top:37px;font-size:8px;font-weight:800;white-space:nowrap;color:#42505e;transform:translateX(-50%);line-height:1.1}
 .country-arrival.edge-left{transform:none}.country-arrival.edge-right{transform:translateX(-100%)}
@@ -941,34 +938,49 @@ function renderTripCalendar(){
   const start=daySerial(TRIP_START), end=daySerial(TIMELINE_END_EXCLUSIVE), total=end-start;
   const activeStop=route.stops[activeIndex];
   const activeSerial=daySerial(activeStop.date);
+  const monthColours={feb:'#e8f1fb',mar:'#e8f6ef',apr:'#fff1da',may:'#f7eaf3'};
   const months=MONTHS_2027.map(month=>{
-    const left=((daySerial(month.start)-start)/total)*100;
-    const width=((daySerial(month.end)-daySerial(month.start))/total)*100;
     const monthStart=daySerial(month.start), monthEnd=daySerial(month.end);
+    const left=((monthStart-start)/total)*100;
+    const width=((monthEnd-monthStart)/total)*100;
     const activeMonth=activeSerial>=monthStart&&activeSerial<monthEnd;
-    const pastMonth=monthEnd<=activeSerial;
-    return `<div class="month-band ${month.className}${activeMonth?' active-month':''}${pastMonth?' past-month':''}" style="left:${left}%;width:${width}%">${month.name}</div>`;
+    const completedMonth=activeSerial>=monthEnd;
+    let background=monthColours[month.className];
+    if(completedMonth){
+      background='#eef0f2';
+    }else if(activeMonth){
+      const within=Math.max(0,Math.min(100,((activeSerial-monthStart)/(monthEnd-monthStart))*100));
+      background=`linear-gradient(90deg,#eef0f2 0%,#eef0f2 ${within}%,${monthColours[month.className]} ${within}%,${monthColours[month.className]} 100%)`;
+    }
+    return `<div class="month-band ${month.className}${activeMonth?' active-month':''}" style="left:${left}%;width:${width}%;background:${background}">${month.name}</div>`;
   }).join('');
 
   const windows=countryStayWindows(route);
   const bands=windows.map(w=>{
+    const stayStart=daySerial(w.start), stayEnd=daySerial(w.endExclusive);
     const left=timelinePct(w.start);
-    const width=((daySerial(w.endExclusive)-daySerial(w.start))/total)*100;
-    const state=daySerial(w.endExclusive)<=activeSerial?'past':daySerial(w.start)<=activeSerial?'current':'future';
-    return `<div class="country-stay ${state}" style="left:${left}%;width:${width}%;background:${COLORS[w.country]}" title="${w.country}: ${compactDateRange(w.start,w.end)}"></div>`;
+    const width=((stayEnd-stayStart)/total)*100;
+    let background=COLORS[w.country];
+    if(activeSerial>=stayEnd){
+      background='#b9c0c6';
+    }else if(activeSerial>stayStart && activeSerial<stayEnd){
+      const within=Math.max(0,Math.min(100,((activeSerial-stayStart)/(stayEnd-stayStart))*100));
+      background=`linear-gradient(90deg,#b9c0c6 0%,#b9c0c6 ${within}%,${COLORS[w.country]} ${within}%,${COLORS[w.country]} 100%)`;
+    }
+    return `<div class="country-stay" style="left:${left}%;width:${width}%;background:${background}" title="${w.country}: ${compactDateRange(w.start,w.end)}"></div>`;
   }).join('');
 
   const stops=route.stops.map((stop,index)=>{
     const left=timelinePct(stop.date);
     const state=index<activeIndex?' past':index>activeIndex?' future':'';
-    return `<button class="calendar-stop${index===activeIndex?' active':''}${state}" data-index="${index}" style="left:${left}%;background:${COLORS[stop.country]}" title="${fmtDate(stop.date)} · ${stop.place}, ${stop.country}" aria-label="${fmtDate(stop.date)}, ${stop.place}, ${stop.country}"></button>`;
+    return `<button class="calendar-stop${index===activeIndex?' active':''}${state}" data-index="${index}" style="left:${left}%;background:${index<activeIndex?'#b9c0c6':COLORS[stop.country]}" title="${fmtDate(stop.date)} · ${stop.place}, ${stop.country}" aria-label="${fmtDate(stop.date)}, ${stop.place}, ${stop.country}"></button>`;
   }).join('');
 
   const arrivals=windows.map(w=>{
     const left=timelinePct(w.start);
     const edge=left<6?' edge-left':left>91?' edge-right':'';
-    const state=daySerial(w.start)<activeSerial?' past':'';
-    return `<div class="country-arrival${edge}${state}" style="left:${left}%;color:${COLORS[w.country]}"><b>${shortDate(w.start)}</b> · ${w.entryStop.place}</div>`;
+    const past=daySerial(w.start)<activeSerial;
+    return `<div class="country-arrival${edge}${past?' past':''}" style="left:${left}%;color:${past?'#9aa2aa':COLORS[w.country]}"><b>${shortDate(w.start)}</b> · ${w.entryStop.place}</div>`;
   }).join('');
 
   const activeLeft=timelinePct(activeStop.date);
