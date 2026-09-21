@@ -75,25 +75,24 @@ header p{margin:5px 0 0;color:var(--muted);font-size:12px;max-width:720px}
 .country-stay{position:absolute;top:25px;height:8px;border-radius:999px;opacity:.92}
 .calendar-stop{position:absolute;top:22px;width:8px;height:16px;border:2px solid #fff;border-radius:999px;padding:0;transform:translateX(-50%);box-shadow:0 1px 4px rgba(0,0,0,.18);z-index:4;min-width:0}
 .calendar-stop.active{width:11px;height:20px;top:20px;box-shadow:0 0 0 2px rgba(31,41,51,.15),0 2px 6px rgba(0,0,0,.22)}
-.month-band.active-month{font-weight:950;color:#172635;box-shadow:inset 0 -2px 0 rgba(23,38,53,.42)}
-.timeline-playhead{position:absolute;top:0;bottom:0;width:2px;background:#172635;z-index:8;transform:translateX(-1px);pointer-events:none}
-.timeline-playhead::after{content:"";position:absolute;top:28px;left:50%;width:12px;height:12px;border-radius:50%;background:var(--playhead-color,#172635);border:3px solid #fff;transform:translate(-50%,-50%);box-shadow:0 0 0 2px rgba(23,38,53,.18),0 2px 6px rgba(0,0,0,.26)}
-.timeline-playhead-label{position:absolute;top:2px;left:6px;background:#172635;color:#fff;border-radius:999px;padding:2px 7px;font-size:8px;font-weight:850;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.18)}
+.month-band{transition:opacity .25s ease,filter .25s ease,box-shadow .25s ease}
+.month-band.past-month{opacity:.58;filter:saturate(.28)}
+.month-band.active-month{font-weight:950;color:#172635;box-shadow:inset 0 -2px 0 rgba(23,38,53,.52)}
+.country-stay,.calendar-stop,.country-arrival{transition:opacity .25s ease,filter .25s ease}
+.country-stay.past{opacity:.28;filter:saturate(.15) grayscale(.55)}
+.country-stay.current{opacity:1}
+.country-stay.future{opacity:.72}
+.calendar-stop.past{opacity:.34;filter:saturate(.15) grayscale(.6)}
+.calendar-stop.future{opacity:.72}
+.country-arrival.past{opacity:.38;filter:saturate(.2)}
+.timeline-playhead{position:absolute;top:0;bottom:0;width:1px;background:rgba(23,38,53,.82);z-index:8;transform:translateX(-.5px);pointer-events:none}
+.timeline-playhead::after{content:"";position:absolute;top:28px;left:50%;width:10px;height:10px;border-radius:50%;background:var(--playhead-color,#172635);border:2px solid #fff;transform:translate(-50%,-50%);box-shadow:0 0 0 3px rgba(23,38,53,.12),0 2px 5px rgba(0,0,0,.22)}
+.timeline-playhead-label{position:absolute;top:2px;left:6px;background:rgba(23,38,53,.94);color:#fff;border-radius:999px;padding:2px 7px;font-size:8px;font-weight:800;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.14);letter-spacing:.01em}
 .timeline-playhead.edge-right .timeline-playhead-label{left:auto;right:6px}
-.trip-track.playing .timeline-playhead::after{animation:timelinePulse 1.15s ease-in-out infinite}
-.trip-track.playing .timeline-playhead{animation:timelineLineGlow 1.15s ease-in-out infinite}
-.trip-track.playing .month-band.active-month{animation:monthPulse 1.6s ease-in-out infinite}
-@keyframes timelinePulse{
-  0%,100%{box-shadow:0 0 0 2px rgba(23,38,53,.18),0 2px 6px rgba(0,0,0,.26);transform:translate(-50%,-50%) scale(1)}
-  50%{box-shadow:0 0 0 7px rgba(23,38,53,.10),0 2px 7px rgba(0,0,0,.24);transform:translate(-50%,-50%) scale(1.16)}
-}
-@keyframes timelineLineGlow{
-  0%,100%{opacity:.72}
-  50%{opacity:1}
-}
-@keyframes monthPulse{
-  0%,100%{filter:brightness(1)}
-  50%{filter:brightness(.96);box-shadow:inset 0 -3px 0 rgba(23,38,53,.62)}
+.trip-track.playing .timeline-playhead::after{animation:timelineBreath 1.9s cubic-bezier(.4,0,.2,1) infinite}
+@keyframes timelineBreath{
+  0%,100%{box-shadow:0 0 0 3px rgba(23,38,53,.10),0 2px 5px rgba(0,0,0,.22);transform:translate(-50%,-50%) scale(1)}
+  50%{box-shadow:0 0 0 7px rgba(23,38,53,.055),0 2px 5px rgba(0,0,0,.20);transform:translate(-50%,-50%) scale(1.06)}
 }
 .country-arrival{position:absolute;top:37px;font-size:8px;font-weight:800;white-space:nowrap;color:#42505e;transform:translateX(-50%);line-height:1.1}
 .country-arrival.edge-left{transform:none}.country-arrival.edge-right{transform:translateX(-100%)}
@@ -451,6 +450,40 @@ const MEDIA_TITLES = {
   'Hakone':'Lake Ashi',
   'Tokyo':'Shibuya Crossing'
 };
+const COMMONS_SEARCH_TERMS = {
+  'Bangkok':'Grand Palace Bangkok Thailand panorama',
+  'Chiang Mai':'Wat Phra That Doi Suthep Chiang Mai Thailand',
+  'Pai':'Pai Canyon Thailand landscape',
+  'Krabi / Ao Nang':'Railay Beach Krabi Thailand limestone',
+  'Koh Yao Noi':'Koh Yao Noi Phang Nga Bay Thailand beach landscape',
+  'Khao Sok':'Khao Sok National Park Thailand lake limestone',
+  'Hanoi':'Hanoi Old Quarter Vietnam street',
+  'Sapa':'Sa Pa Vietnam rice terraces mountains',
+  'Ha Giang':'Ha Giang Vietnam mountain pass landscape',
+  'Cat Ba':'Lan Ha Bay Cat Ba Vietnam landscape',
+  'Ninh Binh':'Trang An Ninh Binh Vietnam limestone landscape',
+  'Hue':'Imperial City Hue Vietnam',
+  'Da Nang':'Da Nang Vietnam beach skyline',
+  'Hoi An':'Hoi An old town lantern Vietnam',
+  'Ho Chi Minh City':'Ho Chi Minh City Vietnam skyline',
+  'Cebu City':'Cebu City Philippines skyline',
+  'Moalboal':'Moalboal Philippines sardine run underwater',
+  'Bohol / Panglao':'Chocolate Hills Bohol Philippines landscape',
+  'El Nido':'El Nido Palawan Philippines lagoon limestone',
+  'Coron':'Kayangan Lake Coron Palawan Philippines',
+  'Yogyakarta':'Prambanan Yogyakarta Indonesia panorama',
+  'Mount Bromo':'Mount Bromo Indonesia sunrise landscape',
+  'Ijen':'Ijen crater Indonesia landscape',
+  'Ubud':'Tegallalang rice terraces Ubud Bali landscape',
+  'Canggu':'Canggu Bali beach sunset surf',
+  'Uluwatu':'Uluwatu Temple Bali cliff ocean',
+  'Osaka':'Osaka Castle Japan panorama',
+  'Kyoto':'Kiyomizu dera Kyoto Japan panorama',
+  'Kinosaki Onsen':'Kinosaki Onsen Japan canal ryokan',
+  'Hakone':'Lake Ashi Mount Fuji Hakone Japan',
+  'Tokyo':'Shibuya Crossing Tokyo Japan night'
+};
+
 const COUNTRY_MEDIA_TITLES = {
   'Thailand':'Grand Palace',
   'Vietnam':'Tràng An Scenic Landscape Complex',
@@ -498,14 +531,9 @@ const COUNTRY_FOCAL = {
   'Indonesia':'50% 52%',
   'Japan':'50% 38%'
 };
-const DIRECT_MEDIA = {
-  'Koh Yao Noi': {
-    image:'https://commons.wikimedia.org/wiki/Special:FilePath/Palms%20in%20Koh%20Yao%20Noi%2C%20Phang%20Nga%20Bay%2C%20Thailand.jpg?width=1200',
-    pageUrl:'https://commons.wikimedia.org/wiki/File:Palms_in_Koh_Yao_Noi,_Phang_Nga_Bay,_Thailand.jpg',
-    extract:'Ko Yao Noi is an island in Phang Nga Bay in southern Thailand.'
-  }
-};
+const DIRECT_MEDIA = {};
 const mediaCache = new Map();
+const commonsMediaCache = new Map();
 
 const ROUTES = {
   written: {
@@ -750,8 +778,60 @@ async function getWikiMedia(title){
   mediaCache.set(title, request);
   return request;
 }
+function mediaFilenameIsPoor(title){
+  return /\b(map|flag|logo|diagram|route|sign|signage|station|airport|ticket|poster|seal|coat of arms|locator|location map|icon|symbol|portrait)\b/i.test(title || '');
+}
+function commonsCandidateScore(page,rank){
+  const info=page?.imageinfo?.[0] || {};
+  const width=Number(info.width||0), height=Number(info.height||0);
+  if(!width||!height) return -999;
+  const ratio=width/height;
+  if(ratio<1.18 || ratio>2.65) return -999;
+  if(mediaFilenameIsPoor(page.title)) return -999;
+  const ratioScore=36-Math.abs(1.72-ratio)*28;
+  const resolutionScore=Math.min(24,Math.log2(Math.max(1,width*height/1000000))*8);
+  const rankScore=Math.max(0,34-rank*3);
+  return ratioScore+resolutionScore+rankScore;
+}
+async function getCommonsTravelMedia(place){
+  const query=COMMONS_SEARCH_TERMS[place];
+  if(!query) return null;
+  if(commonsMediaCache.has(query)) return commonsMediaCache.get(query);
+  const request=(async()=>{
+    try{
+      const url='https://commons.wikimedia.org/w/api.php?action=query&format=json&origin=*&generator=search&gsrnamespace=6&gsrlimit=12&gsrsearch='
+        +encodeURIComponent(query)
+        +'&prop=imageinfo&iiprop=url%7Csize%7Cmime&iiurlwidth=1600';
+      const response=await fetch(url);
+      if(!response.ok) throw new Error('Commons media search failed');
+      const data=await response.json();
+      const pages=Object.values(data?.query?.pages||{});
+      const ranked=pages
+        .map((page,index)=>({page,index,score:commonsCandidateScore(page,index)}))
+        .filter(item=>item.score>-100)
+        .sort((a,b)=>b.score-a.score);
+      const chosen=ranked[0]?.page;
+      const info=chosen?.imageinfo?.[0];
+      if(!chosen||!info) return null;
+      const title=String(chosen.title||'').replace(/^File:/,'');
+      return {
+        image:info.thumburl||info.url||'',
+        extract:'',
+        pageUrl:'https://commons.wikimedia.org/wiki/File:'+encodeURIComponent(title.replaceAll(' ','_')),
+        resolvedTitle:title
+      };
+    }catch(error){
+      return null;
+    }
+  })();
+  commonsMediaCache.set(query,request);
+  return request;
+}
+
 async function getPlaceMedia(place){
   if(DIRECT_MEDIA[place]) return DIRECT_MEDIA[place];
+  const commons=await getCommonsTravelMedia(place);
+  if(commons?.image) return commons;
   return getWikiMedia(MEDIA_TITLES[place] || place);
 }
 async function getCountryMedia(country){
@@ -783,7 +863,7 @@ async function hydrateActiveMedia(stop){
     ? `<img src="${media.image}" alt="${escapeHtml(expectedPlace)}" decoding="async" style="object-position:${MEDIA_FOCAL[expectedPlace] || '50% 50%'}">`
     : '';
   meta.innerHTML = media.pageUrl
-    ? `<div class="active-media-source">Photo: <a href="${media.pageUrl}" target="_blank" rel="noopener noreferrer">Wikipedia / Wikimedia</a></div>`
+    ? `<div class="active-media-source">Photo: <a href="${media.pageUrl}" target="_blank" rel="noopener noreferrer">Wikimedia / Wikipedia</a></div>`
     : '';
 }
 async function hydrateCountryImages(){
@@ -864,26 +944,31 @@ function renderTripCalendar(){
   const months=MONTHS_2027.map(month=>{
     const left=((daySerial(month.start)-start)/total)*100;
     const width=((daySerial(month.end)-daySerial(month.start))/total)*100;
-    const activeMonth=activeSerial>=daySerial(month.start)&&activeSerial<daySerial(month.end);
-    return `<div class="month-band ${month.className}${activeMonth?' active-month':''}" style="left:${left}%;width:${width}%">${month.name}</div>`;
+    const monthStart=daySerial(month.start), monthEnd=daySerial(month.end);
+    const activeMonth=activeSerial>=monthStart&&activeSerial<monthEnd;
+    const pastMonth=monthEnd<=activeSerial;
+    return `<div class="month-band ${month.className}${activeMonth?' active-month':''}${pastMonth?' past-month':''}" style="left:${left}%;width:${width}%">${month.name}</div>`;
   }).join('');
 
   const windows=countryStayWindows(route);
   const bands=windows.map(w=>{
     const left=timelinePct(w.start);
     const width=((daySerial(w.endExclusive)-daySerial(w.start))/total)*100;
-    return `<div class="country-stay" style="left:${left}%;width:${width}%;background:${COLORS[w.country]}" title="${w.country}: ${compactDateRange(w.start,w.end)}"></div>`;
+    const state=daySerial(w.endExclusive)<=activeSerial?'past':daySerial(w.start)<=activeSerial?'current':'future';
+    return `<div class="country-stay ${state}" style="left:${left}%;width:${width}%;background:${COLORS[w.country]}" title="${w.country}: ${compactDateRange(w.start,w.end)}"></div>`;
   }).join('');
 
   const stops=route.stops.map((stop,index)=>{
     const left=timelinePct(stop.date);
-    return `<button class="calendar-stop${index===activeIndex?' active':''}" data-index="${index}" style="left:${left}%;background:${COLORS[stop.country]}" title="${fmtDate(stop.date)} · ${stop.place}, ${stop.country}" aria-label="${fmtDate(stop.date)}, ${stop.place}, ${stop.country}"></button>`;
+    const state=index<activeIndex?' past':index>activeIndex?' future':'';
+    return `<button class="calendar-stop${index===activeIndex?' active':''}${state}" data-index="${index}" style="left:${left}%;background:${COLORS[stop.country]}" title="${fmtDate(stop.date)} · ${stop.place}, ${stop.country}" aria-label="${fmtDate(stop.date)}, ${stop.place}, ${stop.country}"></button>`;
   }).join('');
 
   const arrivals=windows.map(w=>{
     const left=timelinePct(w.start);
     const edge=left<6?' edge-left':left>91?' edge-right':'';
-    return `<div class="country-arrival${edge}" style="left:${left}%;color:${COLORS[w.country]}"><b>${shortDate(w.start)}</b> · ${w.entryStop.place}</div>`;
+    const state=daySerial(w.start)<activeSerial?' past':'';
+    return `<div class="country-arrival${edge}${state}" style="left:${left}%;color:${COLORS[w.country]}"><b>${shortDate(w.start)}</b> · ${w.entryStop.place}</div>`;
   }).join('');
 
   const activeLeft=timelinePct(activeStop.date);
@@ -904,7 +989,7 @@ function renderTripCalendar(){
   }
 
   document.getElementById('tripCalendar').innerHTML=`
-    <div class="trip-calendar-head"><strong>${isPlaying?'Playing the journey':'2027 journey timeline'}</strong><span class="trip-calendar-status">${isPlaying?`${shortDate(activeStop.date)} · ${activeStop.place}, ${activeStop.country}`:status}</span></div>
+    <div class="trip-calendar-head"><strong>${isPlaying?'Journey progress':'2027 journey timeline'}</strong><span class="trip-calendar-status">${isPlaying?`${shortDate(activeStop.date)} · ${activeStop.place}, ${activeStop.country}`:status}</span></div>
     <div class="trip-track${isPlaying?' playing':''}">${months}${bands}${stops}${arrivals}${playheadHtml}${todayHtml}</div>
   `;
 
