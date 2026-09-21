@@ -102,6 +102,9 @@ header p{margin:5px 0 0;color:var(--muted);font-size:12px;max-width:720px}
 .active-stop .date{font-size:10px;font-weight:800;color:#5a6472;margin-bottom:2px}
 .active-stop h2{font-size:19px;line-height:1.05;margin:0 0 3px;letter-spacing:-.03em}
 .active-stop .meta{font-size:11px;color:var(--muted)}
+.country-pill{display:inline-flex;align-items:center;gap:5px;border:1px solid;border-radius:999px;padding:2px 7px;font-size:10px;font-weight:850;vertical-align:middle}
+.country-dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex:0 0 auto}
+.popup-country{display:inline-flex;align-items:center;gap:5px;border:1px solid;border-radius:999px;padding:2px 6px;font-size:10px;font-weight:800;margin-right:3px}
 .active-stop .note{margin-top:6px;font-size:11px;line-height:1.45;color:#334155}
 .active-photo{height:118px;margin:8px 0 6px;border-radius:10px;overflow:hidden;background:linear-gradient(135deg,#dce7ed,#f4eadb);border:1px solid #e5ddd1;position:relative}
 .active-photo img{width:100%;height:100%;object-fit:cover;display:block}
@@ -133,7 +136,7 @@ header p{margin:5px 0 0;color:var(--muted);font-size:12px;max-width:720px}
 .group-title span{font-size:9px;opacity:.95}
 .group-body{padding:0}
 .stop-card{
-  display:grid;grid-template-columns:26px 48px minmax(0,1fr) 72px;gap:7px;align-items:center;
+  display:grid;grid-template-columns:26px 82px minmax(0,1fr) 72px;gap:7px;align-items:center;
   padding:7px 9px;border-top:1px solid #f1ece3;cursor:pointer;background:#fff;transition:background .15s ease,transform .15s ease;
 }
 .stop-card:first-child{border-top:none}
@@ -142,7 +145,7 @@ header p{margin:5px 0 0;color:var(--muted);font-size:12px;max-width:720px}
 .num{
   width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:9px;font-weight:800;box-shadow:0 2px 7px rgba(0,0,0,.14)
 }
-.stop-date{font-size:10px;font-weight:800;padding-top:3px;color:#44505e}
+.stop-date{font-size:9px;font-weight:800;padding-top:0;color:#44505e;line-height:1.25}
 .stop-place{font-size:11px;font-weight:750;line-height:1.25}
 .stop-meta{font-size:9px;color:var(--muted);margin-top:1px;line-height:1.35}
 .stop-tag{display:inline-block;margin-left:6px;padding:2px 6px;border-radius:999px;border:1px solid #e4dbc9;font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:#77634d;background:#fbf7ef}
@@ -161,6 +164,9 @@ header p{margin:5px 0 0;color:var(--muted);font-size:12px;max-width:720px}
 }
 .marker.optional{outline:2px dashed rgba(255,255,255,.95);outline-offset:2px}
 .marker.active{transform:scale(1.12);border-width:3px;box-shadow:0 7px 13px rgba(0,0,0,.28)}
+.flight-plane-wrap{width:26px;height:26px;display:flex;align-items:center;justify-content:center;filter:drop-shadow(0 2px 3px rgba(0,0,0,.65));pointer-events:none}
+.flight-plane{font-size:21px;line-height:1;color:#fff;-webkit-text-stroke:.7px rgba(25,38,51,.75);transform-origin:50% 50%}
+.flight-plane.moving{font-size:24px;filter:drop-shadow(0 0 4px rgba(255,255,255,.55))}
 .country-label{
   background:rgba(255,255,255,.9);border:1px solid rgba(255,255,255,.95);border-radius:999px;
   padding:6px 10px;font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#23303f;
@@ -234,7 +240,7 @@ header p{margin:5px 0 0;color:var(--muted);font-size:12px;max-width:720px}
       <button id="playBtn" class="play-btn" type="button" aria-label="Play route" title="Play or pause route (Space)">Play</button>
       <button id="nextBtn" type="button" aria-label="Next stop" title="Next stop (→)">→</button>
       <div class="journey-dock-main">
-        <div class="journey-dock-label"><strong id="journeyNow">Bangkok</strong><span id="journeyDate">1 Feb</span></div>
+        <div class="journey-dock-label"><span class="country-dot" id="journeyCountryDot"></span><strong id="journeyNow">Bangkok</strong><span id="journeyDate">Mon 1st February</span></div>
         <input id="journeySlider" type="range" min="0" max="0" value="0" step="1" aria-label="Jump to trip stop">
       </div>
       <div class="journey-count" id="routeStep">1 / 27</div>
@@ -362,47 +368,19 @@ const COUNTRY_MEDIA_TITLES = {
   'Japan':'Kiyomizu-dera'
 };
 const MEDIA_FOCAL = {
-  'Bangkok':'50% 52%','Chiang Mai':'50% 48%','Pai':'50% 55%','Krabi / Ao Nang':'50% 55%','Koh Yao Noi':'50% 55%','Khao Sok':'50% 55%',
-  'Hanoi':'50% 52%','Sapa':'50% 50%','Ha Giang':'50% 52%','Cat Ba':'50% 50%','Ninh Binh':'50% 55%','Hue':'50% 45%','Da Nang':'50% 50%','Hoi An':'50% 50%','Ho Chi Minh City':'50% 52%',
-  'Cebu City':'50% 50%','Moalboal':'50% 55%','Bohol / Panglao':'50% 55%','El Nido':'50% 55%','Coron':'50% 55%',
-  'Yogyakarta':'50% 50%','Mount Bromo':'50% 55%','Ijen':'50% 50%','Ubud':'50% 52%','Canggu':'50% 55%','Uluwatu':'50% 50%',
-  'Osaka':'50% 48%','Kyoto':'50% 50%','Kinosaki Onsen':'50% 50%','Hakone':'50% 55%','Tokyo':'50% 50%'
+  'Bangkok':'50% 40%','Chiang Mai':'50% 38%','Pai':'50% 48%','Krabi / Ao Nang':'50% 48%','Koh Yao Noi':'50% 50%','Khao Sok':'50% 52%',
+  'Hanoi':'50% 42%','Sapa':'50% 48%','Ha Giang':'50% 50%','Cat Ba':'50% 48%','Ninh Binh':'50% 50%','Hue':'50% 38%','Da Nang':'50% 43%','Hoi An':'50% 46%','Ho Chi Minh City':'50% 42%',
+  'Cebu City':'50% 42%','Moalboal':'50% 50%','Bohol / Panglao':'50% 50%','El Nido':'50% 48%','Coron':'50% 48%',
+  'Yogyakarta':'50% 36%','Mount Bromo':'50% 52%','Ijen':'50% 48%','Ubud':'50% 46%','Canggu':'50% 50%','Uluwatu':'50% 38%',
+  'Osaka':'50% 36%','Kyoto':'50% 38%','Kinosaki Onsen':'50% 46%','Hakone':'50% 48%','Tokyo':'50% 42%'
 };
-const COUNTRY_FOCAL = {'Thailand':'50% 50%','Vietnam':'50% 55%','Philippines':'50% 55%','Indonesia':'50% 55%','Japan':'50% 50%'};
-const LOCATION_CAPTIONS = {
-  'Bangkok':'Grand Palace and historic Bangkok — royal architecture, temples, street food and the city’s energetic centre.',
-  'Chiang Mai':'Northern Thailand’s cultural capital, known for old-city temples, night markets and mountain scenery.',
-  'Pai':'A relaxed mountain town surrounded by canyons, hot springs, viewpoints and countryside.',
-  'Krabi / Ao Nang':'A gateway to Railay, limestone cliffs, tropical beaches and island-hopping in the Andaman Sea.',
-  'Koh Yao Noi':'A quieter island in Phang Nga Bay with beaches, limestone views and a slower local pace.',
-  'Khao Sok':'Rainforest, limestone karsts and Cheow Lan Lake in one of southern Thailand’s most striking national parks.',
-  'Hanoi':'Vietnam’s capital — Old Quarter streets, lakes, cafés, food culture and layers of history.',
-  'Sapa':'Mountain landscapes, terraced rice fields and trekking country in northern Vietnam.',
-  'Ha Giang':'Dramatic mountain roads, valleys and highland scenery on the famous Ha Giang Loop.',
-  'Cat Ba':'Island base for Lan Ha Bay, kayaking, limestone scenery and Cat Ba National Park.',
-  'Ninh Binh':'Rivers, rice fields and limestone karsts around Trang An and Tam Coc.',
-  'Hue':'Vietnam’s former imperial capital, centred on the citadel, royal tombs and the Perfume River.',
-  'Da Nang':'Modern coastal city with beaches, cafés, Marble Mountains and easy access to central Vietnam.',
-  'Hoi An':'Lantern-lit historic town known for preserved architecture, riverside streets, tailoring and food.',
-  'Ho Chi Minh City':'Fast-paced southern metropolis with rooftop bars, historic sites, markets and modern city life.',
-  'Cebu City':'Major gateway to the central Philippines, connecting Clara onward to the islands and beaches.',
-  'Moalboal':'Coastal base famous for the sardine run, snorkelling, diving and nearby Kawasan Falls.',
-  'Bohol / Panglao':'Chocolate Hills, tarsiers and tropical beaches around Bohol and Panglao.',
-  'El Nido':'Palawan’s limestone lagoons, clear water, beaches and island-hopping routes.',
-  'Coron':'Turquoise lakes, limestone islands, snorkelling and dramatic seascapes in northern Palawan.',
-  'Yogyakarta':'Cultural centre of Java and a base for Borobudur, Prambanan and Javanese food and arts.',
-  'Mount Bromo':'Iconic volcanic landscape, best known for sunrise views across the Tengger caldera.',
-  'Ijen':'Volcanic crater landscape in East Java, known for its turquoise crater lake and sulphur-mining area.',
-  'Ubud':'Inland Bali — temples, rice terraces, waterfalls, wellness and Balinese culture.',
-  'Canggu':'Bali beach area known for surfing, cafés, restaurants and a lively social scene.',
-  'Uluwatu':'Clifftop southern Bali with beaches, surf, sunsets and the Uluwatu temple complex.',
-  'Osaka':'Energetic Japanese city known for food, nightlife, Dotonbori and Osaka Castle.',
-  'Kyoto':'Temples, shrines, traditional districts and gardens at the heart of historic Japan.',
-  'Kinosaki Onsen':'Traditional hot-spring town with ryokan stays, public baths and a walkable canal-side centre.',
-  'Hakone':'Mountain and lake scenery near Mount Fuji, with onsen, Lake Ashi and easy access from Tokyo.',
-  'Tokyo':'Japan’s vast capital — neighbourhoods, food, shopping, nightlife and an ideal final stop before flying home.'
+const COUNTRY_FOCAL = {
+  'Thailand':'50% 40%',
+  'Vietnam':'50% 50%',
+  'Philippines':'50% 48%',
+  'Indonesia':'50% 52%',
+  'Japan':'50% 38%'
 };
-
 const DIRECT_MEDIA = {
   'Koh Yao Noi': {
     image:'https://commons.wikimedia.org/wiki/Special:FilePath/Palms%20in%20Koh%20Yao%20Noi%2C%20Phang%20Nga%20Bay%2C%20Thailand.jpg?width=1200',
@@ -518,15 +496,31 @@ let countryLabels = [];
 let countryGeoData = null;
 let routeLayers = [];
 let markers = [];
+let flightLegMarkers = new Map();
+let planeAnimationFrame = null;
 let activeIndex = 0;
 let currentFilter = 'All';
 let playTimer = null;
+let isPlaying = false;
 
+function ordinalDay(day){
+  const mod100 = day % 100;
+  if(mod100 >= 11 && mod100 <= 13) return day + 'th';
+  if(day % 10 === 1) return day + 'st';
+  if(day % 10 === 2) return day + 'nd';
+  if(day % 10 === 3) return day + 'rd';
+  return day + 'th';
+}
 function fmtDate(dateString){
-  return new Date(dateString + 'T12:00:00').toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
+  const d = new Date(dateString + 'T12:00:00');
+  const weekday = d.toLocaleDateString('en-GB',{weekday:'short'});
+  const month = d.toLocaleDateString('en-GB',{month:'long'});
+  return `${weekday} ${ordinalDay(d.getDate())} ${month}`;
 }
 function shortDate(dateString){
-  return new Date(dateString + 'T12:00:00').toLocaleDateString('en-GB', { day:'numeric', month:'short' });
+  const d = new Date(dateString + 'T12:00:00');
+  const month = d.toLocaleDateString('en-GB',{month:'short'});
+  return `${ordinalDay(d.getDate())} ${month}`;
 }
 function escapeHtml(value){
   return String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
@@ -647,6 +641,7 @@ function clearLayers(){
   countryLabels = [];
   routeLayers = [];
   markers = [];
+  flightLegMarkers = new Map();
 }
 function currentRoute(){
   return ROUTES[document.getElementById('routeSelect').value];
@@ -664,53 +659,110 @@ function setMarkerStates(){
     marker.setOpacity(dimmed ? 0.28 : 1);
   });
 }
+function geoCountryName(feature){
+  const p = feature?.properties || {};
+  return p.ADMIN || p.NAME_EN || p.NAME_LONG || p.NAME || p.name || '';
+}
 function renderCountryOverlays(){
   if(!countryGeoData) return;
   const countries = new Set(currentRoute().stops.map(s => s.country));
   const layer = L.geoJSON(countryGeoData, {
-    filter: feature => countries.has(feature.properties.name),
+    filter: feature => countries.has(geoCountryName(feature)),
     style: feature => {
-      const country = feature.properties.name;
+      const country = geoCountryName(feature);
       const dimmed = currentFilter !== 'All' && country !== currentFilter;
       return {
         color: COLORS[country],
-        weight: dimmed ? 0.8 : 3,
-        opacity: dimmed ? 0.12 : 1,
+        weight: dimmed ? 0.65 : 2.25,
+        opacity: dimmed ? 0.10 : 0.95,
         fillColor: COLORS[country],
-        fillOpacity: dimmed ? 0.008 : 0.15
+        fillOpacity: dimmed ? 0.006 : 0.08,
+        lineJoin:'round'
       };
     },
-    onEachFeature: (feature, layer) => layer.bindTooltip(feature.properties.name, { sticky:true })
+    onEachFeature: (feature, layer) => layer.bindTooltip(geoCountryName(feature), { sticky:true })
   }).addTo(map);
   countryLayers.push(layer);
 }
 async function loadCountryGeo(){
   try{
-    const response = await fetch('https://raw.githubusercontent.com/johan/world.geo.json/master/countries.geo.json');
-    if(!response.ok) throw new Error('country boundaries unavailable');
+    const response = await fetch('https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_10m_admin_0_countries.geojson');
+    if(!response.ok) throw new Error('high-detail country boundaries unavailable');
     countryGeoData = await response.json();
     renderCountryOverlaysOnly();
   }catch(e){
-    // Esri reference tiles still provide accurate country borders and names.
+    // Esri's boundary reference layer remains visible if the high-detail overlay cannot load.
   }
 }
+function flightBearing(a,b){
+  const lat1=a.lat*Math.PI/180, lat2=b.lat*Math.PI/180;
+  const dLng=(b.lng-a.lng)*Math.PI/180;
+  const y=Math.sin(dLng)*Math.cos(lat2);
+  const x=Math.cos(lat1)*Math.sin(lat2)-Math.sin(lat1)*Math.cos(lat2)*Math.cos(dLng);
+  return (Math.atan2(y,x)*180/Math.PI+360)%360;
+}
+function flightPlaneIcon(a,b,moving=false){
+  const angle=flightBearing(a,b)-45;
+  return L.divIcon({
+    className:'',
+    html:`<div class="flight-plane-wrap"><span class="flight-plane ${moving?'moving':''}" style="transform:rotate(${angle}deg)">✈</span></div>`,
+    iconSize:[26,26],
+    iconAnchor:[13,13]
+  });
+}
+function interpolateLeg(a,b,t){
+  return [a.lat+(b.lat-a.lat)*t,a.lng+(b.lng-a.lng)*t];
+}
+function animateFlightLeg(index,duration,onDone){
+  const stops=currentRoute().stops;
+  const a=stops[index], b=stops[index+1];
+  const marker=flightLegMarkers.get(index);
+  if(!a||!b||!marker){onDone();return}
+  marker.setIcon(flightPlaneIcon(a,b,true));
+  const started=performance.now();
+  const frame=now=>{
+    if(!isPlaying) return;
+    const raw=Math.min(1,(now-started)/duration);
+    const t=raw<.5?2*raw*raw:1-Math.pow(-2*raw+2,2)/2;
+    marker.setLatLng(interpolateLeg(a,b,t));
+    if(raw<1) planeAnimationFrame=requestAnimationFrame(frame);
+    else {planeAnimationFrame=null;onDone()}
+  };
+  planeAnimationFrame=requestAnimationFrame(frame);
+}
+
 function renderRouteLines(){
   const stops = currentRoute().stops;
+  flightLegMarkers = new Map();
   for(let i=0;i<stops.length-1;i++){
     const a = stops[i], b = stops[i+1];
     const sameCountry = a.country === b.country;
+    const isFlight = !sameCountry;
     const dimmed = currentFilter !== 'All' && !(a.country === currentFilter || b.country === currentFilter);
     const completed = i < activeIndex;
     const currentLeg = i === activeIndex;
-    const baseColor = sameCountry ? COLORS[a.country] : '#d7dde4';
+    const baseColor = sameCountry ? COLORS[a.country] : '#f8fafc';
     const line = L.polyline([[a.lat,a.lng],[b.lat,b.lng]], {
-      color: currentLeg ? (sameCountry ? COLORS[a.country] : '#f3f6f8') : baseColor,
-      weight: currentLeg ? 4.5 : (completed ? 3 : 1.8),
-      opacity: dimmed ? 0.10 : (currentLeg ? 1 : (completed ? 0.78 : 0.30)),
-      dashArray: sameCountry ? null : (currentLeg ? '5 6' : '6 8'),
+      color: baseColor,
+      weight: currentLeg ? (sameCountry?4.5:3.5) : (completed ? (sameCountry?3:2.5) : (sameCountry?1.8:2.2)),
+      opacity: dimmed ? 0.10 : (currentLeg ? 1 : (completed ? 0.78 : (isFlight?0.58:0.30))),
+      dashArray: isFlight ? (currentLeg ? '7 8' : '6 9') : null,
       lineCap:'round'
     }).addTo(map);
     routeLayers.push(line);
+
+    if(isFlight){
+      const mid=interpolateLeg(a,b,0.5);
+      const plane=L.marker(mid,{
+        icon:flightPlaneIcon(a,b,false),
+        interactive:false,
+        keyboard:false,
+        opacity:dimmed?0.22:(currentLeg?1:0.78),
+        zIndexOffset:450
+      }).addTo(map);
+      routeLayers.push(plane);
+      flightLegMarkers.set(i,plane);
+    }
   }
 }
 function renderMarkers(){
@@ -721,7 +773,7 @@ function renderMarkers(){
     marker.bindPopup(`
       <div class="popup-date">${fmtDate(stop.date)}</div>
       <div class="popup-place">${stop.place}</div>
-      <div class="popup-meta">${stop.country}${stop.days ? ` · ${stop.days} day${stop.days === 1 ? '' : 's'}` : ''}${stop.optional ? ' · optional' : ''}</div>
+      <div class="popup-meta"><span class="popup-country" style="color:${COLORS[stop.country]};background:${COLORS[stop.country]}18;border-color:${COLORS[stop.country]}55"><span class="country-dot" style="background:${COLORS[stop.country]}"></span>${stop.country}</span>${stop.days ? ` · ${stop.days} day${stop.days === 1 ? '' : 's'}` : ''}${stop.optional ? ' · optional' : ''}</div>
       ${stop.note ? `<div class="popup-note">${stop.note}</div>` : ''}
     `);
     marker.on('click', () => setActiveStop(index, true));
@@ -785,7 +837,7 @@ function renderTimeline(){
     const body = grouped.groups[country].map(stop => `
       <div class="stop-card ${stop._index === activeIndex ? 'active' : ''}" data-index="${stop._index}">
         <div class="num" style="background:${COLORS[country]}">${stop._index + 1}</div>
-        <div class="stop-date">${shortDate(stop.date)}</div>
+        <div class="stop-date">${fmtDate(stop.date)}</div>
         <div>
           <div class="stop-place">${stop.place}${stop.optional ? '<span class="stop-tag">optional</span>' : ''}</div>
           <div class="stop-meta">${country}${stop.days ? ` · ${stop.days} day${stop.days === 1 ? '' : 's'}` : ''}${stop.note ? ` · ${stop.note}` : ''}</div>
@@ -820,7 +872,7 @@ function renderActiveStop(){
     <div class="kicker">Selected stop · ${activeIndex+1} of ${currentRoute().stops.length}</div>
     <div class="date">${fmtDate(stop.date)}</div>
     <h2>${stop.place}</h2>
-    <div class="meta"><strong style="color:${COLORS[stop.country]}">${stop.country}</strong>${stop.days ? ` · ${stop.days} day${stop.days === 1 ? '' : 's'}` : ''}${stop.optional ? ' · optional' : ''}</div>
+    <div class="meta"><span class="country-pill" style="color:${COLORS[stop.country]};background:${COLORS[stop.country]}18;border-color:${COLORS[stop.country]}55"><span class="country-dot" style="background:${COLORS[stop.country]}"></span>${stop.country}</span>${stop.days ? ` · ${stop.days} day${stop.days === 1 ? '' : 's'}` : ''}${stop.optional ? ' · optional' : ''}</div>
     <div class="active-photo loading" id="activePhoto" aria-label="Real image of ${escapeHtml(stop.place)}"></div>
     ${stop.note ? `<div class="note">${stop.note}</div>` : `<div class="note">No additional itinerary note has been added for this stop yet.</div>`}
     <div id="activeMediaMeta"></div>
@@ -842,7 +894,9 @@ function updateJourneyControls(){
   document.getElementById('journeySlider').value = String(activeIndex);
   document.getElementById('routeStep').textContent = `${activeIndex + 1} / ${route.stops.length}`;
   document.getElementById('journeyNow').textContent = stop?.place || '';
-  document.getElementById('journeyDate').textContent = stop ? shortDate(stop.date) : '';
+  document.getElementById('journeyDate').textContent = stop ? fmtDate(stop.date) : '';
+  const journeyDot = document.getElementById('journeyCountryDot');
+  if(journeyDot && stop) journeyDot.style.background = COLORS[stop.country];
   document.getElementById('prevBtn').disabled = activeIndex === 0;
   document.getElementById('nextBtn').disabled = activeIndex === route.stops.length - 1;
 }
@@ -863,23 +917,52 @@ function setFilter(country){
   fitForCurrentView();
 }
 function stopPlayback(){
-  if(playTimer){ clearInterval(playTimer); playTimer = null; }
-  const btn = document.getElementById('playBtn');
-  btn.textContent = 'Play';
+  isPlaying=false;
+  if(playTimer){ clearTimeout(playTimer); playTimer=null; }
+  if(planeAnimationFrame){ cancelAnimationFrame(planeAnimationFrame); planeAnimationFrame=null; }
+  const btn=document.getElementById('playBtn');
+  btn.textContent='Play';
   btn.setAttribute('aria-label','Play route');
+  renderRouteLinesOnly();
+}
+function playAdvance(){
+  if(!isPlaying) return;
+  const stops=currentRoute().stops;
+  if(activeIndex>=stops.length-1){stopPlayback();return}
+  const legIndex=activeIndex;
+  const a=stops[legIndex], b=stops[legIndex+1];
+  const isFlight=a.country!==b.country;
+
+  if(isFlight){
+    map.fitBounds([[a.lat,a.lng],[b.lat,b.lng]],{padding:[90,90],animate:true,duration:.55});
+    playTimer=setTimeout(()=>{
+      playTimer=null;
+      if(!isPlaying) return;
+      animateFlightLeg(legIndex,2400,()=>{
+        if(!isPlaying) return;
+        setActiveStop(legIndex+1,true);
+        playTimer=setTimeout(()=>{playTimer=null;playAdvance()},700);
+      });
+    },550);
+  }else{
+    playTimer=setTimeout(()=>{
+      playTimer=null;
+      if(!isPlaying) return;
+      setActiveStop(legIndex+1,true);
+      playTimer=setTimeout(()=>{playTimer=null;playAdvance()},650);
+    },1250);
+  }
 }
 function togglePlayback(){
-  const stops = currentRoute().stops;
-  if(playTimer){ stopPlayback(); return; }
-  if(activeIndex >= stops.length - 1) activeIndex = 0;
-  const playButton = document.getElementById('playBtn');
-  playButton.textContent = 'Pause';
+  const stops=currentRoute().stops;
+  if(isPlaying){stopPlayback();return}
+  if(activeIndex>=stops.length-1) setActiveStop(0,true);
+  isPlaying=true;
+  const playButton=document.getElementById('playBtn');
+  playButton.textContent='Pause';
   playButton.setAttribute('aria-label','Pause route');
-  setActiveStop(activeIndex, true);
-  playTimer = setInterval(() => {
-    if(activeIndex >= stops.length - 1){ stopPlayback(); return; }
-    setActiveStop(activeIndex + 1, true);
-  }, 1600);
+  renderRouteLinesOnly();
+  playAdvance();
 }
 function setActiveStop(index, fly=true){
   activeIndex = Math.max(0, Math.min(index, currentRoute().stops.length - 1));
@@ -906,6 +989,7 @@ function renderCountryOverlaysOnly(){
 function renderRouteLinesOnly(){
   routeLayers.forEach(layer => map.removeLayer(layer));
   routeLayers = [];
+  flightLegMarkers = new Map();
   renderRouteLines();
 }
 function render(){
@@ -935,8 +1019,8 @@ document.getElementById('fitBtn').addEventListener('click', () => {
   currentFilter = 'All';
   render();
 });
-document.getElementById('prevBtn').addEventListener('click', () => setActiveStop(activeIndex - 1, true));
-document.getElementById('nextBtn').addEventListener('click', () => setActiveStop(activeIndex + 1, true));
+document.getElementById('prevBtn').addEventListener('click', () => { stopPlayback(); setActiveStop(activeIndex - 1, true); });
+document.getElementById('nextBtn').addEventListener('click', () => { stopPlayback(); setActiveStop(activeIndex + 1, true); });
 document.getElementById('playBtn').addEventListener('click', togglePlayback);
 document.getElementById('journeySlider').addEventListener('input', (e) => {
   stopPlayback();
@@ -988,10 +1072,10 @@ document.addEventListener('keydown', (event) => {
   if(tag === 'input' || tag === 'select' || tag === 'textarea' || document.activeElement?.isContentEditable) return;
   if(event.key === 'ArrowLeft'){
     event.preventDefault();
-    if(activeIndex > 0) setActiveStop(activeIndex - 1, true);
+    if(activeIndex > 0){ stopPlayback(); setActiveStop(activeIndex - 1, true); }
   }else if(event.key === 'ArrowRight'){
     event.preventDefault();
-    if(activeIndex < currentRoute().stops.length - 1) setActiveStop(activeIndex + 1, true);
+    if(activeIndex < currentRoute().stops.length - 1){ stopPlayback(); setActiveStop(activeIndex + 1, true); }
   }else if(event.code === 'Space'){
     event.preventDefault();
     togglePlayback();
