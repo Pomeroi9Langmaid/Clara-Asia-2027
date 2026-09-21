@@ -444,6 +444,256 @@ header p{margin:5px 0 0;color:var(--muted);font-size:12px;max-width:720px}
   header p{display:none}
   .country-bar{padding-left:8px}
 }
+
+/* ===== Unified frosted-glass visual system ===== */
+:root{
+  --glass-bg:rgba(239,247,251,.36);
+  --glass-bg-strong:rgba(248,251,253,.58);
+  --glass-bg-soft:rgba(255,255,255,.22);
+  --glass-border:rgba(255,255,255,.52);
+  --glass-border-soft:rgba(118,145,160,.15);
+  --glass-shadow:0 10px 28px rgba(17,36,50,.10);
+  --glass-shadow-soft:0 5px 16px rgba(17,36,50,.07);
+  --glass-blur:24px;
+  --glass-radius:16px;
+}
+
+/* Global controls */
+button,select{
+  border-color:var(--glass-border);
+  background:rgba(255,255,255,.34);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.50),0 3px 10px rgba(26,48,62,.06);
+  backdrop-filter:blur(14px) saturate(125%);
+  -webkit-backdrop-filter:blur(14px) saturate(125%);
+}
+button:hover,select:hover{
+  border-color:rgba(255,255,255,.70);
+  background:rgba(255,255,255,.48);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.68),0 5px 14px rgba(26,48,62,.09);
+}
+button:active{transform:scale(.985)}
+button.primary{background:rgba(255,255,255,.42)}
+
+/* Header + route actions */
+header{
+  background:rgba(244,249,252,.56);
+  border-bottom:1px solid rgba(255,255,255,.54);
+  box-shadow:0 5px 18px rgba(18,37,50,.05);
+  backdrop-filter:blur(24px) saturate(130%);
+  -webkit-backdrop-filter:blur(24px) saturate(130%);
+}
+.route-view-label{
+  color:#62717e;
+  background:rgba(255,255,255,.28);
+  border:1px solid rgba(255,255,255,.48);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.48);
+  backdrop-filter:blur(14px);
+}
+.route-view-label select{
+  background:rgba(255,255,255,.22);
+  border-left-color:rgba(104,129,143,.13);
+}
+#copyBtn,#shareBtn{
+  border-radius:999px;
+  padding-inline:12px;
+  background:rgba(255,255,255,.28);
+}
+
+/* Country strip */
+.country-bar{
+  background:rgba(240,247,250,.34);
+  border-bottom:1px solid rgba(255,255,255,.44);
+  backdrop-filter:blur(22px) saturate(128%);
+  -webkit-backdrop-filter:blur(22px) saturate(128%);
+}
+.country-nav{
+  border:1px solid rgba(255,255,255,.46);
+  background:rgba(255,255,255,.26);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.48),0 3px 10px rgba(27,49,63,.05);
+}
+.country-nav:hover{background:rgba(255,255,255,.42);border-color:rgba(255,255,255,.68)}
+.country-nav.active{
+  background:rgba(255,255,255,.58);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.72),0 6px 16px rgba(27,49,63,.08);
+}
+.country-nav-photo{border-color:rgba(255,255,255,.48)}
+
+/* Journey timeline: same family as player */
+.trip-calendar{
+  margin:6px 10px 8px;
+  padding:7px 10px 8px;
+  border:1px solid rgba(255,255,255,.50);
+  border-radius:15px;
+  background:rgba(235,245,249,.30);
+  box-shadow:0 8px 22px rgba(18,38,52,.08),inset 0 1px 0 rgba(255,255,255,.50);
+  backdrop-filter:blur(24px) saturate(132%);
+  -webkit-backdrop-filter:blur(24px) saturate(132%);
+}
+.trip-calendar-head{margin-bottom:5px;padding-inline:2px}
+.trip-calendar-head strong{font-size:9px;letter-spacing:.01em;color:#344957}
+.trip-calendar-status{color:rgba(59,79,92,.58)}
+.trip-track{
+  height:50px;
+  border:1px solid rgba(255,255,255,.48);
+  border-radius:12px;
+  background:rgba(255,255,255,.20);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.44);
+}
+.month-band{
+  top:0;height:20px;
+  border-right:1px solid rgba(255,255,255,.48);
+  color:#3e5260;
+  backdrop-filter:blur(7px);
+}
+.country-stay{top:24px;height:7px;opacity:.76;box-shadow:0 1px 3px rgba(24,45,58,.10)}
+.calendar-stop{top:21px;width:7px;height:15px;border-color:rgba(255,255,255,.88);box-shadow:0 1px 4px rgba(20,40,54,.13)}
+.calendar-stop.active{top:19px;width:12px;height:19px;border-color:#fff;box-shadow:0 0 0 2px rgba(39,59,72,.20),0 3px 8px rgba(20,40,54,.18)}
+.country-arrival{top:36px;font-size:7.5px}
+.timeline-playhead{background:rgba(39,57,70,.78);box-shadow:0 0 0 1px rgba(255,255,255,.48)}
+.timeline-playhead-label{
+  background:rgba(245,249,251,.88);
+  color:#2d4250;
+  border-color:rgba(255,255,255,.74);
+  box-shadow:0 3px 10px rgba(20,39,53,.11);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+}
+
+/* Sidebar + panels */
+.side{
+  background:rgba(246,250,252,.78);
+  border-left:1px solid rgba(255,255,255,.54);
+  backdrop-filter:blur(22px) saturate(125%);
+  -webkit-backdrop-filter:blur(22px) saturate(125%);
+}
+.side-tabs{
+  gap:6px;
+  padding:1px 0 9px;
+  background:linear-gradient(180deg,rgba(246,250,252,.94) 68%,rgba(246,250,252,0));
+}
+.side-tab{
+  border-radius:999px;
+  background:rgba(255,255,255,.28);
+  border-color:rgba(255,255,255,.52);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.50);
+}
+.side-tab.active{
+  color:#233744;
+  background:rgba(255,255,255,.68);
+  border-color:rgba(255,255,255,.78);
+  box-shadow:0 5px 14px rgba(25,45,59,.09),inset 0 1px 0 rgba(255,255,255,.82);
+}
+.sidebar-toggle{
+  background:rgba(239,247,251,.38);
+  border-color:rgba(255,255,255,.56);
+  box-shadow:0 7px 20px rgba(17,35,49,.11),inset 0 1px 0 rgba(255,255,255,.58);
+  backdrop-filter:blur(20px) saturate(130%);
+  -webkit-backdrop-filter:blur(20px) saturate(130%);
+}
+.sidebar-toggle[aria-expanded="true"]{
+  color:#243945;
+  background:rgba(255,255,255,.58);
+  border-color:rgba(255,255,255,.72);
+}
+
+/* Glass cards */
+.card,.country-overview,.active-stop,.controls-box,.notice,.route-info,.group{
+  background:rgba(255,255,255,.46);
+  border-color:rgba(255,255,255,.58);
+  box-shadow:var(--glass-shadow-soft),inset 0 1px 0 rgba(255,255,255,.54);
+  backdrop-filter:blur(14px) saturate(118%);
+  -webkit-backdrop-filter:blur(14px) saturate(118%);
+}
+.card,.country-overview,.active-stop,.controls-box,.notice,.route-info{border-radius:14px}
+.active-stop{background:rgba(255,255,255,.50)}
+.notice{background:rgba(255,243,224,.48);border-color:rgba(255,234,199,.70)}
+.itinerary-photo-note{
+  background:rgba(244,248,250,.42);
+  border-color:rgba(255,255,255,.54);
+}
+.country-row{border-top-color:rgba(111,134,148,.10)}
+.country-row:hover{background:rgba(255,255,255,.34)}
+.country-row.active{background:rgba(255,255,255,.56);box-shadow:inset 0 0 0 1px rgba(255,255,255,.44)}
+.group{overflow:hidden}
+.stop-card{background:rgba(255,255,255,.28);border-top-color:rgba(110,132,145,.10)}
+.stop-card:hover{background:rgba(255,255,255,.42)}
+.stop-card.active{background:rgba(255,255,255,.58);transform:translateX(1px)}
+.active-photo,.stop-thumb,.country-photo{
+  border-color:rgba(255,255,255,.62);
+  box-shadow:0 4px 14px rgba(22,43,57,.07);
+}
+
+/* Action buttons inside cards */
+.view-itinerary-btn{
+  background:rgba(255,255,255,.30);
+  border-color:rgba(255,255,255,.56);
+  border-radius:999px;
+  padding:8px 12px;
+  text-align:center;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.52);
+}
+.view-itinerary-btn:hover{background:rgba(255,255,255,.50)}
+.nav-row button{
+  border-radius:999px;
+  background:rgba(255,255,255,.30);
+}
+.group-header{box-shadow:inset 0 1px 0 rgba(255,255,255,.20)}
+
+/* Trip Facts: pastel glass, visually useful but still secondary */
+.trip-facts{
+  background:rgba(242,248,251,.42);
+  border:1px solid rgba(255,255,255,.62);
+  border-radius:15px;
+  padding:0 9px 9px;
+  box-shadow:0 7px 20px rgba(20,41,55,.07),inset 0 1px 0 rgba(255,255,255,.58);
+  backdrop-filter:blur(16px) saturate(122%);
+  -webkit-backdrop-filter:blur(16px) saturate(122%);
+}
+.trip-facts summary{
+  min-height:38px;
+  margin:0 -2px 2px;
+  padding:8px 5px;
+  border-radius:12px;
+  color:#304552;
+}
+.trip-facts summary:hover{background:rgba(255,255,255,.26)}
+.trip-facts-glance{color:#71808c;font-weight:650}
+.trip-facts-grid{gap:7px;padding-bottom:7px}
+.trip-fact{
+  border:1px solid rgba(255,255,255,.58);
+  border-radius:12px;
+  padding:9px 10px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.52),0 4px 12px rgba(23,44,58,.05);
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+}
+.trip-fact b{font-size:15px;color:#263b48}
+.trip-fact span{font-size:8.5px;color:#6e7d89}
+.trip-fact.wide b{font-size:11.5px}
+.trip-fact.tone-sky{background:rgba(220,239,250,.58)}
+.trip-fact.tone-blue{background:rgba(221,232,250,.58)}
+.trip-fact.tone-mint{background:rgba(218,240,232,.58)}
+.trip-fact.tone-lilac{background:rgba(233,224,248,.58)}
+.trip-fact.tone-peach{background:rgba(250,229,214,.58)}
+.trip-fact.tone-rose{background:rgba(248,221,230,.58)}
+.trip-fact.tone-sage{background:rgba(229,239,219,.58)}
+.trip-fact.tone-sand{background:rgba(246,235,210,.58)}
+.trip-facts-note{border-top-color:rgba(112,135,149,.12);color:#7d8a94}
+
+/* Leaflet popup harmonised with glass system */
+.leaflet-popup.stop-popup .leaflet-popup-content-wrapper{
+  background:rgba(248,251,252,.92);
+  border-color:rgba(255,255,255,.74);
+  box-shadow:0 10px 28px rgba(16,35,49,.15);
+  backdrop-filter:blur(18px) saturate(120%);
+  -webkit-backdrop-filter:blur(18px) saturate(120%);
+}
+.leaflet-popup.stop-popup .leaflet-popup-tip{background:rgba(248,251,252,.92)}
+
+/* Keep responsive behaviour compact */
+@media(max-width:960px){
+  .trip-calendar{margin:5px 7px 7px}
+}
 </style>
 </head>
 <body>
@@ -908,16 +1158,26 @@ function routeFacts(route){
     days:daySerial(stay.endExclusive)-daySerial(stay.start)
   }));
   const longestStay=stays.reduce((best,stay)=>!best||stay.days>best.days?stay:best,null);
+  const stopCounts=countries.map(country=>({
+    country,
+    count:stops.filter(stop=>stop.country===country).length
+  }));
+  const mostStops=stopCounts.reduce((best,item)=>!best||item.count>best.count?item:best,null);
   return {
     countries:countries.length,
     stops:stops.length,
     routeLegs:legs.length,
     totalKm,
+    averageLegKm:legs.length?totalKm/legs.length:0,
     flightLegs:flightLegs.length,
     flightKm:flightLegs.reduce((sum,leg)=>sum+leg.km,0),
     days:inclusiveDays(TRIP_START,TRIP_END),
+    monthsTouched:4,
     longestLeg,
-    longestStay
+    longestStay,
+    mostStops,
+    firstStop:stops[0],
+    lastStop:stops[stops.length-1]
   };
 }
 function formatKm(km,nearest=100){
@@ -929,16 +1189,19 @@ function renderTripFacts(){
   const panel=document.getElementById('tripFacts');
   if(!glance||!panel) return;
   const total=formatKm(facts.totalKm,100);
-  glance.textContent=`~${total.toLocaleString('en-GB')} km · ${facts.flightLegs} flight legs`;
+  glance.textContent=`${facts.days} days · ${facts.countries} countries · ~${total.toLocaleString('en-GB')} km`;
   panel.innerHTML=`
-    <div class="trip-fact"><b>~${total.toLocaleString('en-GB')} km</b><span>mapped route distance</span></div>
-    <div class="trip-fact"><b>${facts.flightLegs}</b><span>cross-country flight legs</span></div>
-    <div class="trip-fact"><b>${facts.countries}</b><span>countries</span></div>
-    <div class="trip-fact"><b>${facts.stops}</b><span>mapped locations</span></div>
-    <div class="trip-fact"><b>${facts.days}</b><span>calendar days</span></div>
-    <div class="trip-fact"><b>${facts.routeLegs}</b><span>point-to-point route legs</span></div>
-    <div class="trip-fact wide"><b>${facts.longestStay.country} · ${facts.longestStay.days} days</b><span>longest country stay</span></div>
-    <div class="trip-fact wide"><b>${facts.longestLeg.from.place} → ${facts.longestLeg.to.place} · ~${formatKm(facts.longestLeg.km,10).toLocaleString('en-GB')} km</b><span>longest mapped leg</span></div>
+    <div class="trip-fact tone-sky"><b>~${total.toLocaleString('en-GB')} km</b><span>mapped route distance</span></div>
+    <div class="trip-fact tone-blue"><b>${facts.flightLegs}</b><span>cross-country flight legs</span></div>
+    <div class="trip-fact tone-mint"><b>${facts.countries}</b><span>countries</span></div>
+    <div class="trip-fact tone-lilac"><b>${facts.stops}</b><span>mapped locations</span></div>
+    <div class="trip-fact tone-peach"><b>${facts.days}</b><span>calendar days</span></div>
+    <div class="trip-fact tone-rose"><b>${facts.routeLegs}</b><span>point-to-point route legs</span></div>
+    <div class="trip-fact tone-sage"><b>${facts.mostStops.country} · ${facts.mostStops.count} stops</b><span>most stops in one country</span></div>
+    <div class="trip-fact tone-sand"><b>~${formatKm(facts.averageLegKm,10).toLocaleString('en-GB')} km</b><span>average mapped leg</span></div>
+    <div class="trip-fact wide tone-mint"><b>${facts.longestStay.country} · ${facts.longestStay.days} days</b><span>longest country stay</span></div>
+    <div class="trip-fact wide tone-lilac"><b>${facts.longestLeg.from.place} → ${facts.longestLeg.to.place} · ~${formatKm(facts.longestLeg.km,10).toLocaleString('en-GB')} km</b><span>longest mapped leg</span></div>
+    <div class="trip-fact wide tone-sky"><b>${facts.firstStop.place} → ${facts.lastStop.place}</b><span>journey from first stop to final stop · February to May 2027</span></div>
   `;
 }
 
@@ -1132,7 +1395,7 @@ function renderTripCalendar(){
   const start=daySerial(TRIP_START), end=daySerial(TIMELINE_END_EXCLUSIVE), total=end-start;
   const activeStop=route.stops[activeIndex];
   const activeSerial=daySerial(activeStop.date);
-  const monthColours={feb:'#e8f1fb',mar:'#e8f6ef',apr:'#fff1da',may:'#f7eaf3'};
+  const monthColours={feb:'rgba(214,231,246,.52)',mar:'rgba(215,238,229,.52)',apr:'rgba(250,232,198,.52)',may:'rgba(243,220,235,.52)'};
   const months=MONTHS_2027.map(month=>{
     const monthStart=daySerial(month.start), monthEnd=daySerial(month.end);
     const left=((monthStart-start)/total)*100;
@@ -1141,10 +1404,10 @@ function renderTripCalendar(){
     const completedMonth=activeSerial>=monthEnd;
     let background=monthColours[month.className];
     if(completedMonth){
-      background='#eef0f2';
+      background='rgba(202,210,216,.48)';
     }else if(activeMonth){
       const within=Math.max(0,Math.min(100,((activeSerial-monthStart)/(monthEnd-monthStart))*100));
-      background=`linear-gradient(90deg,#eef0f2 0%,#eef0f2 ${within}%,${monthColours[month.className]} ${within}%,${monthColours[month.className]} 100%)`;
+      background=`linear-gradient(90deg,rgba(202,210,216,.48) 0%,rgba(202,210,216,.48) ${within}%,${monthColours[month.className]} ${within}%,${monthColours[month.className]} 100%)`;
     }
     return `<div class="month-band ${month.className}${activeMonth?' active-month':''}" style="left:${left}%;width:${width}%;background:${background}">${month.name}</div>`;
   }).join('');
