@@ -694,6 +694,303 @@ header{
 @media(max-width:960px){
   .trip-calendar{margin:5px 7px 7px}
 }
+
+/* ===== Player-matched glass system v2 ===== */
+:root{
+  --pg-surface:rgba(232,242,248,.24);
+  --pg-surface-hover:rgba(255,255,255,.28);
+  --pg-surface-strong:rgba(255,255,255,.42);
+  --pg-border:rgba(255,255,255,.42);
+  --pg-border-strong:rgba(255,255,255,.62);
+  --pg-shadow:0 10px 30px rgba(15,31,45,.13),inset 0 1px 0 rgba(255,255,255,.52);
+  --pg-shadow-soft:0 6px 18px rgba(15,31,45,.09),inset 0 1px 0 rgba(255,255,255,.48);
+  --pg-dark:rgba(34,53,67,.72);
+  --pg-dark-hover:rgba(34,53,67,.80);
+}
+body{
+  background:
+    radial-gradient(circle at 12% 0%,rgba(211,229,239,.72),transparent 28%),
+    radial-gradient(circle at 88% 8%,rgba(229,221,241,.42),transparent 24%),
+    linear-gradient(180deg,#edf3f6 0%,#e7eef2 100%);
+}
+
+/* Exact player material for the major chrome */
+header,
+.country-bar,
+.trip-calendar,
+.side{
+  background:var(--pg-surface)!important;
+  border-color:var(--pg-border)!important;
+  box-shadow:var(--pg-shadow)!important;
+  backdrop-filter:blur(28px) saturate(135%)!important;
+  -webkit-backdrop-filter:blur(28px) saturate(135%)!important;
+}
+header{
+  border-left:0!important;
+  border-right:0!important;
+  border-top:0!important;
+}
+.country-bar{
+  margin:6px 10px 0;
+  min-height:43px;
+  border:1px solid var(--pg-border)!important;
+  border-radius:18px;
+  padding:7px 9px;
+}
+.trip-calendar{
+  margin:7px 10px 9px!important;
+  padding:7px 9px 8px!important;
+  border:1px solid var(--pg-border)!important;
+  border-radius:18px!important;
+}
+.side{
+  margin:8px 8px 8px 0;
+  border:1px solid var(--pg-border)!important;
+  border-radius:20px;
+  padding:10px;
+  background:rgba(232,242,248,.28)!important;
+}
+
+/* Timeline becomes a frosted control surface, not a white chart */
+.trip-calendar-head{
+  min-height:22px;
+  margin-bottom:5px!important;
+  padding:0 4px!important;
+}
+.trip-calendar-head strong{
+  font-size:10px!important;
+  color:rgba(36,55,68,.92)!important;
+}
+.trip-calendar-status{
+  color:rgba(49,70,84,.58)!important;
+}
+.trip-track{
+  height:50px!important;
+  border:1px solid rgba(255,255,255,.38)!important;
+  border-radius:14px!important;
+  background:rgba(255,255,255,.13)!important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.42),
+    inset 0 -1px 0 rgba(81,108,124,.06)!important;
+  backdrop-filter:blur(16px) saturate(122%);
+  -webkit-backdrop-filter:blur(16px) saturate(122%);
+}
+.month-band{
+  border-right-color:rgba(255,255,255,.50)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.30);
+}
+.timeline-playhead-label{
+  background:rgba(232,242,248,.70)!important;
+  border:1px solid rgba(255,255,255,.72)!important;
+  box-shadow:0 4px 13px rgba(15,31,45,.12),inset 0 1px 0 rgba(255,255,255,.66)!important;
+  backdrop-filter:blur(20px) saturate(130%)!important;
+  -webkit-backdrop-filter:blur(20px) saturate(130%)!important;
+}
+.timeline-playhead::after{
+  box-shadow:0 0 0 3px rgba(255,255,255,.55),0 3px 10px rgba(15,31,45,.24)!important;
+}
+
+/* Every nav/action button uses the same glass button language as Prev/Next */
+.control-row button,
+.country-nav,
+.side-tab,
+.sidebar-toggle,
+.view-itinerary-btn,
+.nav-row button,
+.route-view-label,
+.trip-facts summary{
+  background:rgba(255,255,255,.18)!important;
+  border:1px solid rgba(255,255,255,.34)!important;
+  box-shadow:
+    0 4px 12px rgba(20,39,53,.10),
+    inset 0 1px 0 rgba(255,255,255,.50)!important;
+  backdrop-filter:blur(18px) saturate(128%)!important;
+  -webkit-backdrop-filter:blur(18px) saturate(128%)!important;
+}
+.control-row button,
+.country-nav,
+.side-tab,
+.sidebar-toggle,
+.view-itinerary-btn,
+.nav-row button{
+  border-radius:999px!important;
+}
+.control-row button:hover,
+.country-nav:hover,
+.side-tab:hover,
+.sidebar-toggle:hover,
+.view-itinerary-btn:hover,
+.nav-row button:hover{
+  background:var(--pg-surface-hover)!important;
+  border-color:rgba(255,255,255,.50)!important;
+  box-shadow:
+    0 6px 16px rgba(20,39,53,.13),
+    inset 0 1px 0 rgba(255,255,255,.62)!important;
+}
+.country-nav.active,
+.side-tab.active,
+.sidebar-toggle[aria-expanded="true"]{
+  color:#f8fcff!important;
+  background:var(--pg-dark)!important;
+  border-color:rgba(255,255,255,.34)!important;
+  box-shadow:
+    0 7px 18px rgba(17,36,50,.18),
+    inset 0 1px 0 rgba(255,255,255,.22)!important;
+}
+.country-nav.active:hover,
+.side-tab.active:hover,
+.sidebar-toggle[aria-expanded="true"]:hover{
+  background:var(--pg-dark-hover)!important;
+}
+.country-nav.active span:not(.country-order),
+.country-nav.active small{color:rgba(255,255,255,.92)!important}
+.route-view-label{
+  border-radius:999px!important;
+  overflow:hidden;
+  padding-left:10px!important;
+}
+.route-view-label select{
+  background:transparent!important;
+  border-left:1px solid rgba(255,255,255,.26)!important;
+  box-shadow:none!important;
+}
+
+/* Sidebar cards use visible translucent glass rather than opaque white */
+.card,
+.country-overview,
+.active-stop,
+.controls-box,
+.notice,
+.route-info,
+.group,
+.itinerary-photo-note{
+  background:rgba(255,255,255,.20)!important;
+  border:1px solid rgba(255,255,255,.40)!important;
+  box-shadow:var(--pg-shadow-soft)!important;
+  backdrop-filter:blur(18px) saturate(122%)!important;
+  -webkit-backdrop-filter:blur(18px) saturate(122%)!important;
+}
+.card,
+.country-overview,
+.active-stop,
+.controls-box,
+.notice,
+.route-info,
+.group{border-radius:16px!important}
+.side-tabs{
+  background:linear-gradient(180deg,rgba(232,242,248,.92) 66%,rgba(232,242,248,0))!important;
+}
+.country-row,
+.stop-card{background:transparent!important}
+.country-row:hover,
+.stop-card:hover{background:rgba(255,255,255,.20)!important}
+.country-row.active,
+.stop-card.active{
+  background:rgba(255,255,255,.34)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.38)!important;
+}
+
+/* Trip Facts — pastel liquid-glass tiles */
+.trip-facts{
+  background:rgba(232,242,248,.24)!important;
+  border:1px solid var(--pg-border)!important;
+  border-radius:18px!important;
+  padding:7px!important;
+  box-shadow:var(--pg-shadow)!important;
+  backdrop-filter:blur(28px) saturate(135%)!important;
+  -webkit-backdrop-filter:blur(28px) saturate(135%)!important;
+}
+.trip-facts summary{
+  min-height:42px!important;
+  margin:0 0 7px!important;
+  padding:8px 12px!important;
+  border-radius:999px!important;
+  list-style:none;
+}
+.trip-facts summary::-webkit-details-marker{display:none}
+.trip-facts summary::after{
+  content:"›";
+  flex:0 0 auto;
+  width:24px;height:24px;
+  display:flex;align-items:center;justify-content:center;
+  border-radius:50%;
+  font-size:18px;line-height:1;
+  color:rgba(34,52,65,.82);
+  background:rgba(255,255,255,.18);
+  border:1px solid rgba(255,255,255,.36);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.48);
+  transform:rotate(90deg);
+  transition:transform .18s ease;
+}
+.trip-facts[open] summary::after{transform:rotate(-90deg)}
+.trip-facts-glance{
+  margin-left:auto;
+  color:rgba(53,72,85,.60)!important;
+  font-weight:650!important;
+}
+.trip-facts-grid{
+  gap:8px!important;
+  padding:0 0 2px!important;
+}
+.trip-fact{
+  position:relative;
+  overflow:hidden;
+  min-height:74px;
+  padding:10px 11px!important;
+  border:1px solid rgba(255,255,255,.52)!important;
+  border-radius:15px!important;
+  box-shadow:
+    0 6px 18px rgba(19,40,54,.08),
+    inset 0 1px 0 rgba(255,255,255,.60)!important;
+  backdrop-filter:blur(18px) saturate(126%)!important;
+  -webkit-backdrop-filter:blur(18px) saturate(126%)!important;
+}
+.trip-fact::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(145deg,rgba(255,255,255,.24),transparent 48%);
+  pointer-events:none;
+}
+.trip-fact b{position:relative;z-index:1;font-size:15px!important}
+.trip-fact span{position:relative;z-index:1;font-size:8.5px!important}
+.trip-fact.tone-sky{background:linear-gradient(145deg,rgba(199,229,246,.64),rgba(255,255,255,.14))!important}
+.trip-fact.tone-blue{background:linear-gradient(145deg,rgba(204,219,248,.64),rgba(255,255,255,.14))!important}
+.trip-fact.tone-mint{background:linear-gradient(145deg,rgba(199,235,222,.64),rgba(255,255,255,.14))!important}
+.trip-fact.tone-lilac{background:linear-gradient(145deg,rgba(225,211,247,.64),rgba(255,255,255,.14))!important}
+.trip-fact.tone-peach{background:linear-gradient(145deg,rgba(247,215,194,.64),rgba(255,255,255,.14))!important}
+.trip-fact.tone-rose{background:linear-gradient(145deg,rgba(245,207,221,.64),rgba(255,255,255,.14))!important}
+.trip-fact.tone-sage{background:linear-gradient(145deg,rgba(218,234,197,.64),rgba(255,255,255,.14))!important}
+.trip-fact.tone-sand{background:linear-gradient(145deg,rgba(241,224,188,.64),rgba(255,255,255,.14))!important}
+.trip-facts-note{
+  margin-top:7px;
+  padding:8px 5px 3px!important;
+  border-top:1px solid rgba(255,255,255,.36)!important;
+}
+
+/* Make imagery and card buttons sit naturally inside the glass */
+.active-photo,.stop-thumb,.country-photo{
+  border:1px solid rgba(255,255,255,.55)!important;
+  box-shadow:0 5px 16px rgba(19,40,54,.09)!important;
+}
+.view-itinerary-btn{
+  width:auto!important;
+  min-width:132px;
+  margin:8px auto 0!important;
+  display:block;
+  text-align:center!important;
+}
+
+/* Responsive: preserve material instead of reverting to flat panels */
+@media(max-width:960px){
+  .country-bar{margin:5px 7px 0}
+  .trip-calendar{margin:6px 7px 8px!important}
+  .side{
+    margin:7px;
+    border:1px solid var(--pg-border)!important;
+    border-radius:18px;
+  }
+}
 </style>
 </head>
 <body>
