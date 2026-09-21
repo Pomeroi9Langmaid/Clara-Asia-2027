@@ -224,21 +224,207 @@ header p{margin:5px 0 0;color:var(--muted);font-size:12px;max-width:720px}
 .sidebar-toggle{position:absolute;right:14px;top:14px;bottom:auto;z-index:650;border-radius:999px;background:rgba(255,255,255,.95);border:1px solid rgba(255,255,255,.98);box-shadow:0 6px 16px rgba(17,32,46,.16);backdrop-filter:blur(6px);font-weight:800;padding:7px 10px;color:#263441}
 .sidebar-toggle[aria-expanded="true"]{background:#263441;color:#fff;border-color:#263441}
 .shell:not(.sidebar-collapsed) .sidebar-toggle{right:14px}
-.journey-dock{position:fixed;left:50vw;bottom:18px;transform:translateX(-50%);z-index:1600;display:grid;grid-template-columns:44px 92px 44px minmax(0,1fr) 46px;align-items:center;column-gap:10px;width:min(840px,calc(100vw - 40px));min-width:0;max-width:none;box-sizing:border-box;padding:9px 12px;background:rgba(255,255,255,.96);border:1px solid rgba(255,255,255,.98);border-radius:18px;box-shadow:0 10px 28px rgba(17,32,46,.22);backdrop-filter:blur(10px)}
-.journey-dock button{width:44px;height:44px;min-width:44px;max-width:44px;padding:0;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:850;background:#fff;border:1px solid #dfe4e8;box-shadow:none;box-sizing:border-box}
-.journey-dock button:hover{background:#f8fafb;border-color:#bdc7cf}
-.journey-dock button:disabled{opacity:.35}
-.journey-dock .play-btn{width:92px;min-width:92px;max-width:92px;height:44px;border-radius:999px;padding:0;background:#263441;color:#fff;border-color:#263441;font-size:15px}
-.journey-dock .play-btn:hover{background:#344555;border-color:#344555}
-.journey-dock-main{min-width:0;width:100%;display:flex;flex-direction:column;gap:4px;overflow:hidden}
-.journey-dock-label{display:flex;gap:6px;align-items:baseline;min-width:0;width:100%;font-size:10px;color:#66717e;white-space:nowrap;overflow:hidden}
-.journey-dock-label strong{font-size:11px;color:#263441;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
-.journey-country{font-size:11px;font-weight:750;flex:0 0 auto}
-.journey-sep{color:#a0a8b0;flex:0 0 auto}
+.journey-dock{
+  position:fixed;
+  left:50vw;
+  bottom:20px;
+  transform:translateX(-50%);
+  z-index:1600;
+  display:grid;
+  grid-template-columns:50px 66px 50px minmax(0,1fr) 50px;
+  align-items:center;
+  column-gap:10px;
+  width:min(820px,calc(100vw - 40px));
+  min-width:0;
+  max-width:none;
+  box-sizing:border-box;
+  padding:10px 14px;
+  border-radius:30px;
+  background:
+    linear-gradient(180deg,rgba(245,250,253,.68),rgba(223,235,242,.48));
+  border:1px solid rgba(255,255,255,.72);
+  box-shadow:
+    0 16px 42px rgba(15,31,45,.19),
+    inset 0 1px 0 rgba(255,255,255,.92),
+    inset 0 -1px 0 rgba(120,145,160,.16);
+  backdrop-filter:blur(22px) saturate(150%);
+  -webkit-backdrop-filter:blur(22px) saturate(150%);
+}
+.journey-dock::before{
+  content:"";
+  position:absolute;
+  inset:1px 1px auto 1px;
+  height:48%;
+  border-radius:29px 29px 42% 42%;
+  background:linear-gradient(180deg,rgba(255,255,255,.30),rgba(255,255,255,0));
+  pointer-events:none;
+}
+.journey-dock button{
+  position:relative;
+  z-index:1;
+  width:50px;
+  height:50px;
+  min-width:50px;
+  max-width:50px;
+  padding:0;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-sizing:border-box;
+  color:#314554;
+  background:
+    radial-gradient(circle at 35% 24%,rgba(255,255,255,.82),rgba(255,255,255,.24) 42%,rgba(201,219,228,.28) 100%);
+  border:1px solid rgba(255,255,255,.82);
+  box-shadow:
+    0 7px 18px rgba(38,62,78,.14),
+    inset 0 1px 1px rgba(255,255,255,.96),
+    inset 0 -5px 12px rgba(127,153,168,.08);
+  transition:transform .16s ease,box-shadow .16s ease,background .16s ease;
+}
+.journey-dock button svg{width:23px;height:23px;display:block;overflow:visible}
+.journey-dock button svg *{vector-effect:non-scaling-stroke}
+.journey-dock button:hover:not(:disabled){
+  transform:translateY(-1px);
+  background:
+    radial-gradient(circle at 35% 24%,rgba(255,255,255,.94),rgba(255,255,255,.34) 44%,rgba(201,219,228,.34) 100%);
+  box-shadow:
+    0 10px 22px rgba(38,62,78,.18),
+    inset 0 1px 1px rgba(255,255,255,1),
+    inset 0 -5px 12px rgba(127,153,168,.07);
+}
+.journey-dock button:active:not(:disabled){
+  transform:translateY(1px) scale(.98);
+  box-shadow:
+    0 4px 10px rgba(38,62,78,.12),
+    inset 0 2px 5px rgba(75,104,120,.10);
+}
+.journey-dock button:focus-visible{outline:2px solid rgba(48,115,160,.72);outline-offset:3px}
+.journey-dock button:disabled{opacity:.30;filter:saturate(.35)}
+.journey-dock .play-btn{
+  width:66px;
+  height:66px;
+  min-width:66px;
+  max-width:66px;
+  border-radius:50%;
+  color:#f8fcff;
+  background:
+    radial-gradient(circle at 34% 22%,rgba(126,154,171,.96),rgba(67,94,111,.92) 48%,rgba(38,58,72,.97) 100%);
+  border:1px solid rgba(255,255,255,.78);
+  box-shadow:
+    0 11px 27px rgba(27,48,63,.26),
+    0 0 0 1px rgba(93,131,151,.12),
+    inset 0 2px 2px rgba(255,255,255,.42),
+    inset 0 -9px 18px rgba(17,35,48,.16);
+}
+.journey-dock .play-btn:hover:not(:disabled){
+  background:
+    radial-gradient(circle at 34% 22%,rgba(145,174,190,.98),rgba(72,101,119,.94) 48%,rgba(37,59,73,.98) 100%);
+  box-shadow:
+    0 14px 30px rgba(27,48,63,.30),
+    0 0 0 1px rgba(93,131,151,.14),
+    inset 0 2px 2px rgba(255,255,255,.46),
+    inset 0 -9px 18px rgba(17,35,48,.14);
+}
+.journey-dock .play-btn svg{width:28px;height:28px}
+.journey-dock .play-btn .pause-icon{display:none}
+.journey-dock .play-btn.is-playing .play-icon{display:none}
+.journey-dock .play-btn.is-playing .pause-icon{display:block}
+.journey-dock-main{
+  position:relative;
+  z-index:1;
+  min-width:0;
+  width:100%;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  overflow:hidden;
+  padding:1px 2px;
+}
+.journey-dock-label{
+  display:flex;
+  gap:6px;
+  align-items:baseline;
+  min-width:0;
+  width:100%;
+  font-size:10px;
+  color:rgba(61,79,92,.74);
+  white-space:nowrap;
+  overflow:hidden;
+}
+.journey-dock-label strong{
+  font-size:12px;
+  color:#253946;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  min-width:0;
+  letter-spacing:-.01em;
+}
+.journey-country{font-size:11px;font-weight:780;flex:0 0 auto}
+.journey-sep{color:rgba(88,108,121,.46);flex:0 0 auto}
 #journeyDate{flex:0 0 auto}
-.journey-dock input[type="range"]{width:100%;height:4px;accent-color:#263441;cursor:pointer}
-.journey-count{width:46px;text-align:right;font-size:9px;color:#7a8590;white-space:nowrap}
-@media(max-width:700px){.journey-dock{left:50vw;bottom:12px;width:calc(100vw - 20px);grid-template-columns:38px 72px 38px minmax(0,1fr);column-gap:7px;padding:7px 8px}.journey-dock button{width:38px;height:38px;min-width:38px;max-width:38px;font-size:16px}.journey-dock .play-btn{width:72px;min-width:72px;max-width:72px;height:38px;padding:0;font-size:13px}.journey-dock-label{font-size:9px}.journey-dock-label strong{font-size:10px}.journey-country{font-size:10px}.journey-count{display:none}}
+.journey-dock input[type="range"]{
+  appearance:none;
+  -webkit-appearance:none;
+  width:100%;
+  height:4px;
+  margin:0;
+  border-radius:999px;
+  cursor:pointer;
+  background:linear-gradient(90deg,rgba(49,69,84,.48),rgba(110,132,145,.22));
+  box-shadow:inset 0 1px 2px rgba(45,68,83,.12);
+}
+.journey-dock input[type="range"]::-webkit-slider-thumb{
+  appearance:none;
+  -webkit-appearance:none;
+  width:18px;
+  height:18px;
+  border-radius:50%;
+  background:linear-gradient(180deg,#ffffff,#dce7ed);
+  border:1px solid rgba(255,255,255,.92);
+  box-shadow:
+    0 3px 9px rgba(31,53,68,.24),
+    inset 0 1px 1px rgba(255,255,255,1),
+    0 0 0 1px rgba(74,103,120,.16);
+}
+.journey-dock input[type="range"]::-moz-range-thumb{
+  width:18px;
+  height:18px;
+  border-radius:50%;
+  background:linear-gradient(180deg,#ffffff,#dce7ed);
+  border:1px solid rgba(255,255,255,.92);
+  box-shadow:0 3px 9px rgba(31,53,68,.24);
+}
+.journey-count{
+  position:relative;
+  z-index:1;
+  width:50px;
+  text-align:right;
+  font-size:9px;
+  font-weight:700;
+  color:rgba(61,79,92,.58);
+  white-space:nowrap;
+}
+@media(max-width:700px){
+  .journey-dock{
+    left:50vw;
+    bottom:12px;
+    width:calc(100vw - 18px);
+    grid-template-columns:42px 54px 42px minmax(0,1fr);
+    column-gap:7px;
+    padding:8px 10px;
+    border-radius:25px;
+  }
+  .journey-dock button{width:42px;height:42px;min-width:42px;max-width:42px}
+  .journey-dock button svg{width:20px;height:20px}
+  .journey-dock .play-btn{width:54px;height:54px;min-width:54px;max-width:54px}
+  .journey-dock .play-btn svg{width:24px;height:24px}
+  .journey-dock-label{font-size:9px}
+  .journey-dock-label strong{font-size:10px}
+  .journey-country{font-size:10px}
+  .journey-count{display:none}
+}
 .planning-notes{background:#fff8ef;border:1px solid #eed9b5;border-radius:10px;padding:0 9px}
 .planning-notes summary{cursor:pointer;font-size:10px;font-weight:800;color:#8f6127;padding:8px 0}
 .planning-notes .note-body{font-size:10px;line-height:1.45;color:#5d4b34;padding:0 0 8px}
@@ -305,9 +491,26 @@ header p{margin:5px 0 0;color:var(--muted);font-size:12px;max-width:720px}
       </svg>
     </div>
     <div class="journey-dock" aria-label="Journey playback controls">
-      <button id="prevBtn" type="button" aria-label="Previous stop" title="Previous stop (←)">←</button>
-      <button id="playBtn" class="play-btn" type="button" aria-label="Play route" title="Play or pause route (Space)">Play</button>
-      <button id="nextBtn" type="button" aria-label="Next stop" title="Next stop (→)">→</button>
+      <button id="prevBtn" type="button" aria-label="Previous stop" title="Previous stop (←)">
+        <svg viewBox="0 0 28 28" aria-hidden="true">
+          <path d="M8.5 6v16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+          <path d="M21 7.2 11.2 14 21 20.8Z" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <button id="playBtn" class="play-btn" type="button" aria-label="Play route" title="Play or pause route (Space)">
+        <svg class="play-icon" viewBox="0 0 32 32" aria-hidden="true">
+          <path d="M11 7.5 24 16 11 24.5Z" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linejoin="round"/>
+        </svg>
+        <svg class="pause-icon" viewBox="0 0 32 32" aria-hidden="true">
+          <path d="M11 8v16M21 8v16" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/>
+        </svg>
+      </button>
+      <button id="nextBtn" type="button" aria-label="Next stop" title="Next stop (→)">
+        <svg viewBox="0 0 28 28" aria-hidden="true">
+          <path d="M19.5 6v16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+          <path d="M7 7.2 16.8 14 7 20.8Z" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/>
+        </svg>
+      </button>
       <div class="journey-dock-main">
         <div class="journey-dock-label"><strong id="journeyNow">Bangkok</strong><span class="journey-country" id="journeyCountry">, Thailand</span><span class="journey-sep">·</span><span id="journeyDate">Mon 1st February</span></div>
         <input id="journeySlider" type="range" min="0" max="0" value="0" step="1" aria-label="Jump to trip stop">
@@ -1349,7 +1552,7 @@ function stopPlayback(){
   if(planeAnimationFrame){ cancelAnimationFrame(planeAnimationFrame); planeAnimationFrame=null; }
   hideFlightPlane();
   const btn=document.getElementById('playBtn');
-  btn.textContent='Play';
+  btn.classList.remove('is-playing');
   btn.setAttribute('aria-label','Play route');
   renderTripCalendar();
   renderRouteLinesOnly();
@@ -1393,7 +1596,7 @@ function togglePlayback(){
   if(activeIndex>=stops.length-1) setActiveStop(0,true,true);
   isPlaying=true;
   const playButton=document.getElementById('playBtn');
-  playButton.textContent='Pause';
+  playButton.classList.add('is-playing');
   playButton.setAttribute('aria-label','Pause route');
   renderTripCalendar();
   markers.forEach(marker=>marker.closePopup());
