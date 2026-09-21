@@ -171,13 +171,11 @@ header p{margin:5px 0 0;color:var(--muted);font-size:12px;max-width:720px}
 }
 .marker.optional{outline:2px dashed rgba(255,255,255,.95);outline-offset:2px}
 .marker.active{transform:scale(1.12);border-width:3px;box-shadow:0 7px 13px rgba(0,0,0,.28)}
-.flight-plane-overlay{position:absolute;left:0;top:0;width:68px;height:68px;z-index:1400;pointer-events:none;display:none;align-items:center;justify-content:center;transform:translate(-50%,-50%);filter:drop-shadow(0 4px 4px rgba(0,0,0,.88)) drop-shadow(0 0 7px rgba(255,255,255,1));will-change:left,top}
+.flight-plane-overlay{position:absolute;left:0;top:0;width:54px;height:54px;z-index:1450;pointer-events:none;display:none;align-items:center;justify-content:center;transform:translate(-50%,-50%);filter:drop-shadow(0 3px 3px rgba(0,0,0,.72)) drop-shadow(0 0 5px rgba(255,255,255,.95));will-change:left,top}
 .flight-plane-overlay.visible{display:flex}
-.flight-plane-overlay.moving{width:80px;height:80px;z-index:1450}
-.flight-plane-overlay svg{width:100%;height:100%;overflow:visible;transform-origin:50% 50%;transition:transform .12s linear}
-.flight-plane-overlay .plane-body{fill:#fff;stroke:#172635;stroke-width:3.4;stroke-linejoin:round}
-.flight-plane-overlay .plane-window{fill:#2d82bd;stroke:#172635;stroke-width:1}
-.flight-plane-overlay .plane-label{position:absolute;top:62px;left:50%;transform:translateX(-50%);background:rgba(23,38,53,.94);border:1px solid rgba(255,255,255,.96);border-radius:999px;padding:3px 7px;font-size:8px;font-weight:900;letter-spacing:.07em;color:#fff;white-space:nowrap;box-shadow:0 3px 9px rgba(0,0,0,.24)}
+.flight-plane-overlay svg{width:100%;height:100%;overflow:visible;transform-origin:50% 50%;will-change:transform}
+.flight-plane-overlay .plane-body{fill:#fff;stroke:#172635;stroke-width:3;stroke-linejoin:round}
+.flight-plane-overlay .plane-window{display:none}
 .country-label{
   background:rgba(255,255,255,.9);border:1px solid rgba(255,255,255,.95);border-radius:999px;
   padding:6px 10px;font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#23303f;
@@ -250,11 +248,9 @@ header p{margin:5px 0 0;color:var(--muted);font-size:12px;max-width:720px}
     <button id="sidebarToggle" class="sidebar-toggle" aria-expanded="true">Trip details</button>
     <div id="map"></div>
     <div id="flightPlane" class="flight-plane-overlay" aria-hidden="true">
-      <svg viewBox="0 0 80 80">
-        <path class="plane-body" d="M73 35.5 48 27 37.5 7.5C36.2 5.1 33.7 3.5 31 3.5s-5.2 1.6-6.5 4L28.5 31 12 25.5 5 17H1.8L6 36 1.8 55H5l7-8.5L28.5 41l-4 23.5c1.3 2.4 3.8 4 6.5 4s5.2-1.6 6.5-4L48 45l25-8.5c3.6-1.2 3.6-5.8 0-7Z"/>
-        <ellipse class="plane-window" cx="33" cy="20" rx="2.4" ry="3.2"/>
+      <svg viewBox="0 0 100 100" role="img" aria-label="Aircraft">
+        <path class="plane-body" d="M96 46 63 34 55 7C54 3 51 1 47 1s-7 2-8 6l4 29-25-6L8 20H2l7 30-7 30h6l10-10 25-6-4 29c1 4 4 6 8 6s7-2 8-6l8-27 33-12c5-2 5-6 0-8Z"/>
       </svg>
-      <span class="plane-label">FLIGHT</span>
     </div>
     <div class="journey-dock" aria-label="Journey playback controls">
       <button id="prevBtn" type="button" aria-label="Previous stop" title="Previous stop (←)">←</button>
@@ -556,7 +552,6 @@ let countryGeoData = null;
 let routeLayers = [];
 let markers = [];
 let planeAnimationFrame = null;
-let activeFlightLeg = null;
 let activeIndex = 0;
 let currentFilter = 'All';
 let playTimer = null;
@@ -781,26 +776,22 @@ function flightScreenAngle(a,b){
   const pb=map.latLngToContainerPoint([b.lat,b.lng]);
   return Math.atan2(pb.y-pa.y,pb.x-pa.x)*180/Math.PI;
 }
-function setFlightPlane(a,b,t=0.48,moving=false){
+function setFlightPlane(a,b,t){
   const el=document.getElementById('flightPlane');
-  if(!el||!a||!b) return;
-  const latlng=interpolateLeg(a,b,t);
-  const p=map.latLngToContainerPoint(latlng);
+  if(!el||!a||!b||!isPlaying){ hideFlightPlane(); return; }
+  const pa=map.latLngToContainerPoint([a.lat,a.lng]);
+  const pb=map.latLngToContainerPoint([b.lat,b.lng]);
+  const x=pa.x+(pb.x-pa.x)*t;
+  const y=pa.y+(pb.y-pa.y)*t;
   const svg=el.querySelector('svg');
-  el.style.left=p.x+'px';
-  el.style.top=p.y+'px';
-  el.classList.toggle('moving',moving);
+  el.style.left=x+'px';
+  el.style.top=y+'px';
   el.classList.add('visible');
-  if(svg) svg.style.transform=`rotate(${flightScreenAngle(a,b)}deg)`;
-  activeFlightLeg={a,b,t,moving};
+  if(svg) svg.style.transform=`rotate(${Math.atan2(pb.y-pa.y,pb.x-pa.x)*180/Math.PI}deg)`;
 }
 function hideFlightPlane(){
   const el=document.getElementById('flightPlane');
-  if(el) el.classList.remove('visible','moving');
-  activeFlightLeg=null;
-}
-function syncFlightPlane(){
-  if(activeFlightLeg) setFlightPlane(activeFlightLeg.a,activeFlightLeg.b,activeFlightLeg.t,activeFlightLeg.moving);
+  if(el) el.classList.remove('visible');
 }
 function interpolateLeg(a,b,t){
   return [a.lat+(b.lat-a.lat)*t,a.lng+(b.lng-a.lng)*t];
@@ -808,23 +799,27 @@ function interpolateLeg(a,b,t){
 function animateFlightLeg(index,duration,onDone){
   const stops=currentRoute().stops;
   const a=stops[index], b=stops[index+1];
-  if(!a||!b){onDone();return}
+  if(!a||!b||a.country===b.country){ hideFlightPlane(); onDone(); return; }
   const started=performance.now();
   const frame=now=>{
-    if(!isPlaying) return;
+    if(!isPlaying || activeIndex!==index){ hideFlightPlane(); return; }
     const raw=Math.min(1,(now-started)/duration);
     const t=raw<.5?2*raw*raw:1-Math.pow(-2*raw+2,2)/2;
-    setFlightPlane(a,b,t,true);
+    setFlightPlane(a,b,t);
     if(raw<1) planeAnimationFrame=requestAnimationFrame(frame);
-    else {planeAnimationFrame=null;setFlightPlane(a,b,1,false);onDone()}
+    else{
+      planeAnimationFrame=null;
+      hideFlightPlane();
+      onDone();
+    }
   };
-  setFlightPlane(a,b,0,true);
+  setFlightPlane(a,b,0);
   planeAnimationFrame=requestAnimationFrame(frame);
 }
 
 function renderRouteLines(){
   const stops = currentRoute().stops;
-  hideFlightPlane();
+  if(!isPlaying) hideFlightPlane();
   for(let i=0;i<stops.length-1;i++){
     const a = stops[i], b = stops[i+1];
     const sameCountry = a.country === b.country;
@@ -841,10 +836,6 @@ function renderRouteLines(){
       lineCap:'round'
     }).addTo(map);
     routeLayers.push(line);
-  }
-  const a=stops[activeIndex], b=stops[activeIndex+1];
-  if(a&&b&&a.country!==b.country){
-    window.requestAnimationFrame(()=>setFlightPlane(a,b,0.48,false));
   }
 }
 function renderMarkers(){
@@ -999,6 +990,8 @@ function fitForCurrentView(){
 }
 function setFilter(country){
   currentFilter = country;
+  stopPlayback();
+  hideFlightPlane();
   markers.forEach(marker => marker.closePopup());
   render();
   fitForCurrentView();
@@ -1007,6 +1000,7 @@ function stopPlayback(){
   isPlaying=false;
   if(playTimer){ clearTimeout(playTimer); playTimer=null; }
   if(planeAnimationFrame){ cancelAnimationFrame(planeAnimationFrame); planeAnimationFrame=null; }
+  hideFlightPlane();
   const btn=document.getElementById('playBtn');
   btn.textContent='Play';
   btn.setAttribute('aria-label','Play route');
@@ -1022,18 +1016,19 @@ function playAdvance(){
 
   if(isFlight){
     markers.forEach(marker=>marker.closePopup());
+    hideFlightPlane();
     document.getElementById('journeyNow').textContent = `${a.place} → ${b.place}`;
     document.getElementById('journeyDate').textContent = 'Flight';
-    map.fitBounds([[a.lat,a.lng],[b.lat,b.lng]],{padding:[110,110],animate:true,duration:.65});
+    map.fitBounds([[a.lat,a.lng],[b.lat,b.lng]],{padding:[120,120],animate:false});
     playTimer=setTimeout(()=>{
       playTimer=null;
-      if(!isPlaying) return;
-      animateFlightLeg(legIndex,5200,()=>{
+      if(!isPlaying || activeIndex!==legIndex) return;
+      animateFlightLeg(legIndex,4600,()=>{
         if(!isPlaying) return;
-        setActiveStop(legIndex+1,true);
-        playTimer=setTimeout(()=>{playTimer=null;playAdvance()},700);
+        setActiveStop(legIndex+1,true,false);
+        playTimer=setTimeout(()=>{playTimer=null;playAdvance()},650);
       });
-    },550);
+    },180);
   }else{
     playTimer=setTimeout(()=>{
       playTimer=null;
@@ -1058,6 +1053,7 @@ function setActiveStop(index, fly=true, showPopup=false){
   activeIndex = Math.max(0, Math.min(index, currentRoute().stops.length - 1));
   const stop = currentRoute().stops[activeIndex];
   currentFilter = stop.country;
+  if(!isPlaying) hideFlightPlane();
 
   // Popups are deliberately on-demand only: route navigation never opens one.
   markers.forEach(marker => marker.closePopup());
@@ -1208,8 +1204,7 @@ document.getElementById('copyBtn').addEventListener('click', async () => {
 
 render();
 loadCountryGeo();
-map.on('zoomend moveend',()=>{ if(!isPlaying) renderRouteLinesOnly(); else syncFlightPlane(); });
-map.on('zoom move',()=>{ if(activeFlightLeg) syncFlightPlane(); });
+map.on('zoomend moveend',()=>{ if(!isPlaying) renderRouteLinesOnly(); });
 </script>
 </body>
 </html>
