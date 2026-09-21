@@ -206,20 +206,21 @@ header p{margin:5px 0 0;color:var(--muted);font-size:12px;max-width:720px}
 .sidebar-toggle{position:absolute;right:14px;top:14px;bottom:auto;z-index:650;border-radius:999px;background:rgba(255,255,255,.95);border:1px solid rgba(255,255,255,.98);box-shadow:0 6px 16px rgba(17,32,46,.16);backdrop-filter:blur(6px);font-weight:800;padding:7px 10px;color:#263441}
 .sidebar-toggle[aria-expanded="true"]{background:#263441;color:#fff;border-color:#263441}
 .shell:not(.sidebar-collapsed) .sidebar-toggle{right:14px}
-.journey-dock{position:fixed;left:50vw;bottom:18px;transform:translateX(-50%);z-index:1600;display:flex;align-items:center;gap:8px;min-width:360px;max-width:min(620px,calc(100vw - 48px));padding:8px 10px;background:rgba(255,255,255,.96);border:1px solid rgba(255,255,255,.98);border-radius:16px;box-shadow:0 10px 28px rgba(17,32,46,.22);backdrop-filter:blur(10px)}
-.journey-dock button{width:34px;height:34px;padding:0;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:850;background:#fff;border:1px solid #dfe4e8;box-shadow:none}
+.journey-dock{position:fixed;left:50vw;bottom:18px;transform:translateX(-50%);z-index:1600;display:grid;grid-template-columns:44px 92px 44px minmax(0,1fr) 46px;align-items:center;column-gap:10px;width:min(840px,calc(100vw - 40px));min-width:0;max-width:none;box-sizing:border-box;padding:9px 12px;background:rgba(255,255,255,.96);border:1px solid rgba(255,255,255,.98);border-radius:18px;box-shadow:0 10px 28px rgba(17,32,46,.22);backdrop-filter:blur(10px)}
+.journey-dock button{width:44px;height:44px;min-width:44px;max-width:44px;padding:0;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:850;background:#fff;border:1px solid #dfe4e8;box-shadow:none;box-sizing:border-box}
 .journey-dock button:hover{background:#f8fafb;border-color:#bdc7cf}
 .journey-dock button:disabled{opacity:.35}
-.journey-dock .play-btn{width:auto;min-width:58px;border-radius:999px;padding:0 12px;background:#263441;color:#fff;border-color:#263441}
+.journey-dock .play-btn{width:92px;min-width:92px;max-width:92px;height:44px;border-radius:999px;padding:0;background:#263441;color:#fff;border-color:#263441;font-size:15px}
 .journey-dock .play-btn:hover{background:#344555;border-color:#344555}
-.journey-dock-main{min-width:0;flex:1;display:flex;flex-direction:column;gap:4px}
-.journey-dock-label{display:flex;gap:6px;align-items:baseline;min-width:0;font-size:10px;color:#66717e;white-space:nowrap}
-.journey-dock-label strong{font-size:11px;color:#263441;overflow:hidden;text-overflow:ellipsis}
-.journey-country{font-size:11px;font-weight:750}
-.journey-sep{color:#a0a8b0}
+.journey-dock-main{min-width:0;width:100%;display:flex;flex-direction:column;gap:4px;overflow:hidden}
+.journey-dock-label{display:flex;gap:6px;align-items:baseline;min-width:0;width:100%;font-size:10px;color:#66717e;white-space:nowrap;overflow:hidden}
+.journey-dock-label strong{font-size:11px;color:#263441;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.journey-country{font-size:11px;font-weight:750;flex:0 0 auto}
+.journey-sep{color:#a0a8b0;flex:0 0 auto}
+#journeyDate{flex:0 0 auto}
 .journey-dock input[type="range"]{width:100%;height:4px;accent-color:#263441;cursor:pointer}
-.journey-count{font-size:9px;color:#7a8590;white-space:nowrap}
-@media(max-width:700px){.journey-dock{left:50vw;bottom:12px;min-width:0;width:calc(100vw - 28px);padding:7px 8px;gap:6px}.journey-dock .play-btn{min-width:50px;padding:0 9px}.journey-dock-label{font-size:9px}.journey-dock-label strong{font-size:10px}.journey-count{display:none}}
+.journey-count{width:46px;text-align:right;font-size:9px;color:#7a8590;white-space:nowrap}
+@media(max-width:700px){.journey-dock{left:50vw;bottom:12px;width:calc(100vw - 20px);grid-template-columns:38px 72px 38px minmax(0,1fr);column-gap:7px;padding:7px 8px}.journey-dock button{width:38px;height:38px;min-width:38px;max-width:38px;font-size:16px}.journey-dock .play-btn{width:72px;min-width:72px;max-width:72px;height:38px;padding:0;font-size:13px}.journey-dock-label{font-size:9px}.journey-dock-label strong{font-size:10px}.journey-country{font-size:10px}.journey-count{display:none}}
 .planning-notes{background:#fff8ef;border:1px solid #eed9b5;border-radius:10px;padding:0 9px}
 .planning-notes summary{cursor:pointer;font-size:10px;font-weight:800;color:#8f6127;padding:8px 0}
 .planning-notes .note-body{font-size:10px;line-height:1.45;color:#5d4b34;padding:0 0 8px}
