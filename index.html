@@ -1853,6 +1853,102 @@ header p{display:none!important}
     width:38px!important;height:38px!important;min-width:38px!important;max-width:38px!important
   }
 }
+
+/* ===== Synchronized journey focus ===== */
+.stop-card{
+  position:relative;
+  transition:
+    opacity .2s ease,
+    filter .2s ease,
+    background .2s ease,
+    transform .2s ease,
+    box-shadow .2s ease!important;
+}
+.stop-card.past{
+  opacity:.46!important;
+  filter:saturate(.55) contrast(.92);
+}
+.stop-card.future{
+  opacity:.76!important;
+  filter:saturate(.82);
+}
+.stop-card.current{
+  opacity:1!important;
+  filter:none!important;
+  transform:translateX(3px)!important;
+  background:
+    linear-gradient(90deg,color-mix(in srgb,var(--stop-accent) 9%,rgba(255,255,255,.82)),rgba(255,255,255,.60))!important;
+  box-shadow:
+    inset 3px 0 0 var(--stop-accent),
+    0 8px 18px rgba(20,39,53,.09),
+    inset 0 1px 0 rgba(255,255,255,.58)!important;
+  z-index:2;
+}
+.stop-card.current .num{
+  position:relative;
+  z-index:2;
+  animation:itineraryNumberBreathe 1.9s cubic-bezier(.4,0,.2,1) infinite;
+  box-shadow:
+    0 0 0 2px rgba(255,255,255,.75),
+    0 4px 11px rgba(20,39,53,.18)!important;
+}
+.stop-card.current .num::after{
+  content:"";
+  position:absolute;
+  inset:-5px;
+  border-radius:50%;
+  border:1.5px solid var(--stop-accent);
+  opacity:.42;
+  pointer-events:none;
+  animation:itineraryNumberHalo 1.9s cubic-bezier(.22,.65,.32,1) infinite;
+}
+.stop-card.current .stop-thumb{
+  box-shadow:0 6px 15px rgba(20,39,53,.10)!important;
+  border-color:rgba(255,255,255,.70)!important;
+}
+.group:not(.current-group){opacity:.83}
+.group.current-group{
+  opacity:1;
+  box-shadow:0 8px 20px rgba(20,39,53,.07);
+}
+@keyframes itineraryNumberBreathe{
+  0%,100%{transform:scale(1)}
+  50%{transform:scale(1.12)}
+}
+@keyframes itineraryNumberHalo{
+  0%{opacity:.42;transform:scale(.94)}
+  72%,100%{opacity:0;transform:scale(1.52)}
+}
+
+/* One-shot discoverability cue for the hidden details panel */
+.sidebar-toggle.attention-cue{
+  color:#1f3543!important;
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.94),rgba(220,236,244,.80))!important;
+  border-color:rgba(255,255,255,.92)!important;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.82),
+    0 0 0 5px rgba(211,233,244,.20),
+    0 11px 27px rgba(7,24,36,.24),
+    inset 0 1px 0 rgba(255,255,255,.98)!important;
+  animation:tripDetailsAttention 1.45s cubic-bezier(.2,.8,.2,1) 1;
+}
+@keyframes tripDetailsAttention{
+  0%{transform:scale(1)}
+  22%{transform:scale(1.055)}
+  48%{transform:scale(1.015)}
+  70%{transform:scale(1.04)}
+  100%{transform:scale(1)}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .stop-card.current .num,
+  .stop-card.current .num::after,
+  .sidebar-toggle.attention-cue{
+    animation:none!important;
+  }
+  .stop-card.current .num{transform:scale(1.08)}
+}
 </style>
 </head>
 <body>
@@ -2989,10 +3085,13 @@ function renderCountryOverview(){
 function renderTimeline(){
   const route = currentRoute();
   const grouped = groupByCountry(route.stops);
+  const activeCountry = route.stops[activeIndex]?.country;
   const html = grouped.order.map(country => {
     const metrics = countryMetrics(route.stops, country);
-    const body = grouped.groups[country].map(stop => `
-      <div class="stop-card ${stop._index === activeIndex ? 'active' : ''}" data-index="${stop._index}" role="button" tabindex="0" aria-label="${stop.place}, ${country}, ${fmtDate(stop.date)}">
+    const body = grouped.groups[country].map(stop => {
+      const state = stop._index < activeIndex ? 'past' : (stop._index === activeIndex ? 'active current' : 'future');
+      return `
+      <div class="stop-card ${state}" style="--stop-accent:${COLORS[country]}" data-index="${stop._index}" role="button" tabindex="0" aria-current="${stop._index === activeIndex ? 'step' : 'false'}" aria-label="${stop.place}, ${country}, ${fmtDate(stop.date)}">
         <div class="num" style="background:${COLORS[country]}">${stop._index + 1}</div>
         <div class="stop-date">${fmtDate(stop.date)}</div>
         <div>
@@ -3002,9 +3101,9 @@ function renderTimeline(){
         </div>
         <div class="stop-thumb loading" data-place="${escapeHtml(stop.place)}" aria-label="Real image of ${escapeHtml(stop.place)}"></div>
       </div>
-    `).join('');
+    `;}).join('');
     return `
-      <section class="group" id="group-${country.replace(/\s+/g,'-')}">
+      <section class="group ${country === activeCountry ? 'current-group' : ''}" id="group-${country.replace(/\s+/g,'-')}">
         <div class="group-header" style="background:${COLORS[country]}">
           <div class="group-title">
             <strong>${country}</strong>
@@ -3025,6 +3124,7 @@ function renderTimeline(){
     card.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){e.preventDefault();activate();} });
   });
   hydrateItineraryImages();
+  window.setTimeout(scrollActiveItineraryCard, 80);
 }
 function renderActiveStop(){
   const stop = currentRoute().stops[activeIndex];
@@ -3137,6 +3237,9 @@ function togglePlayback(){
   }
 
   isPlaying=true;
+  if(window.innerWidth > 960){
+    window.setTimeout(() => cueSidebarForStop(currentRoute().stops[activeIndex],{force:true}), 520);
+  }
   const playButton=document.getElementById('playBtn');
   playButton.classList.add('is-playing');
   playButton.setAttribute('aria-label','Pause route');
@@ -3164,6 +3267,7 @@ function togglePlayback(){
   }
 }
 function setActiveStop(index, fly=true, showPopup=false){
+  const previousStop = currentRoute().stops[activeIndex];
   activeIndex = Math.max(0, Math.min(index, currentRoute().stops.length - 1));
   if(!isPlaying && activeIndex===0){
     outboundGatewayPlayed=false;
@@ -3171,6 +3275,7 @@ function setActiveStop(index, fly=true, showPopup=false){
     gatewayPlaybackPhase=null;
   }
   const stop = currentRoute().stops[activeIndex];
+  const changedCountry = previousStop?.country !== stop.country;
   currentFilter = stop.country;
   if(!isPlaying) hideFlightPlane();
 
@@ -3191,6 +3296,13 @@ function setActiveStop(index, fly=true, showPopup=false){
   if(fly) map.flyTo([stop.lat, stop.lng], Math.max(map.getZoom(), 6), { duration:.8 });
   if(showPopup){
     window.setTimeout(() => markers[activeIndex]?.openPopup(), fly ? 650 : 0);
+  }
+
+  if(sidebarIsCollapsed()){
+    if(!isPlaying) cueSidebarForStop(stop,{force:true});
+    else if(changedCountry) cueSidebarForStop(stop,{force:true});
+  }else if(activeSideTab === 'itinerary'){
+    window.setTimeout(scrollActiveItineraryCard, 120);
   }
 }
 function renderCountryOverlaysOnly(){
@@ -3242,7 +3354,42 @@ document.getElementById('prevBtn').addEventListener('click', () => { stopPlaybac
 document.getElementById('nextBtn').addEventListener('click', () => { stopPlayback(); setActiveStop(activeIndex + 1, true, true); });
 document.getElementById('playBtn').addEventListener('click', togglePlayback);
 let sidebarHideTimer = null;
+let sidebarCueTimer = null;
+let sidebarCuePending = false;
+let lastSidebarCueCountry = null;
 let activeSideTab = 'overview';
+
+function sidebarIsCollapsed(){
+  return document.querySelector('.shell').classList.contains('sidebar-collapsed');
+}
+
+function scrollActiveItineraryCard(){
+  if(sidebarIsCollapsed() || activeSideTab !== 'itinerary') return;
+  const side = document.getElementById('sidePanel');
+  const card = document.querySelector('.stop-card.current');
+  if(!side || !card) return;
+  const sideRect = side.getBoundingClientRect();
+  const cardRect = card.getBoundingClientRect();
+  const target = side.scrollTop + (cardRect.top - sideRect.top) - side.clientHeight * .24;
+  side.scrollTo({top:Math.max(0,target),behavior:'smooth'});
+}
+
+function cueSidebarForStop(stop,{force=false}={}){
+  if(!stop || !sidebarIsCollapsed()) return;
+  if(isPlaying && !force && lastSidebarCueCountry === stop.country) return;
+  lastSidebarCueCountry = stop.country;
+  sidebarCuePending = true;
+  const toggle = document.getElementById('sidebarToggle');
+  clearTimeout(sidebarCueTimer);
+  toggle.classList.remove('attention-cue');
+  toggle.textContent = `${stop.place} details ›`;
+  void toggle.offsetWidth;
+  toggle.classList.add('attention-cue');
+  sidebarCueTimer = window.setTimeout(() => {
+    toggle.classList.remove('attention-cue');
+    if(sidebarIsCollapsed()) toggle.textContent = 'Trip details';
+  }, 2300);
+}
 
 function setSideTab(tab){
   activeSideTab = tab;
@@ -3252,6 +3399,7 @@ function setSideTab(tab){
     btn.setAttribute('aria-selected',String(selected));
   });
   document.querySelectorAll('.side-panel').forEach(panel => panel.classList.toggle('active', panel.id === 'panel-' + tab));
+  if(tab === 'itinerary') window.setTimeout(scrollActiveItineraryCard, 70);
   scheduleSidebarHide();
 }
 
@@ -3259,8 +3407,17 @@ function setSidebarCollapsed(collapsed){
   const shell = document.querySelector('.shell');
   const toggle = document.getElementById('sidebarToggle');
   shell.classList.toggle('sidebar-collapsed', collapsed);
-  toggle.textContent = 'Trip details';
+  toggle.classList.remove('attention-cue');
+  toggle.textContent = collapsed ? 'Trip details' : 'Hide details';
   toggle.setAttribute('aria-expanded', String(!collapsed));
+  if(!collapsed){
+    clearTimeout(sidebarCueTimer);
+    if(sidebarCuePending){
+      sidebarCuePending = false;
+      setSideTab('itinerary');
+      window.setTimeout(scrollActiveItineraryCard, 120);
+    }
+  }
   window.setTimeout(() => map.invalidateSize(), 300);
 }
 
@@ -3279,8 +3436,14 @@ document.querySelectorAll('.side-tab').forEach(btn => btn.addEventListener('clic
 document.getElementById('sidebarToggle').addEventListener('click', () => {
   const shell = document.querySelector('.shell');
   const opening = shell.classList.contains('sidebar-collapsed');
-  setSidebarCollapsed(!opening ? true : false);
-  if(opening) scheduleSidebarHide();
+  if(opening){
+    setSidebarCollapsed(false);
+    if(sidebarCuePending || activeSideTab !== 'itinerary') setSideTab('itinerary');
+    window.setTimeout(scrollActiveItineraryCard, 120);
+    scheduleSidebarHide();
+  }else{
+    setSidebarCollapsed(true);
+  }
 });
 document.getElementById('sidePanel').addEventListener('mouseenter', () => clearTimeout(sidebarHideTimer));
 document.getElementById('sidePanel').addEventListener('mouseleave', scheduleSidebarHide);
