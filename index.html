@@ -4531,20 +4531,8 @@ function popupOffsetFor(stop){
   return L.point(xByCountry[stop.country] || 118, -10);
 }
 
-const MAP_FOCUS_GROUPS = [
-  ['Bangkok'],
-  ['Chiang Mai','Pai'],
-  ['Krabi / Ao Nang','Koh Yao Noi','Khao Sok'],
-  ['Hanoi','Sapa','Ha Giang','Cat Ba','Ninh Binh'],
-  ['Hue','Da Nang','Hoi An'],
-  ['Ho Chi Minh City'],
-  ['Cebu City','Moalboal','Bohol / Panglao','El Nido','Coron'],
-  ['Yogyakarta'],
-  ['Mount Bromo','Ijen'],
-  ['Ubud','Canggu','Uluwatu'],
-  ['Osaka','Kyoto','Kinosaki Onsen'],
-  ['Hakone','Tokyo']
-];
+const LOCAL_CONTEXT_RADIUS_KM = 230;
+const LOCAL_CONTEXT_MAX_STOPS = 4;
 
 function currentRoute(){
   return ROUTES[document.getElementById('routeSelect').value];
@@ -4554,29 +4542,55 @@ function contextualStopsFor(index){
   const route=currentRoute();
   const stop=route.stops[index];
   if(!stop) return [];
-  const group=MAP_FOCUS_GROUPS.find(items=>items.includes(stop.place));
-  if(!group) return [stop];
-  const context=route.stops.filter(item=>group.includes(item.place));
-  return context.length?context:[stop];
+
+  const nearby=route.stops
+    .filter(item=>item.country===stop.country)
+    .map(item=>({item,km:haversineKm(stop,item)}))
+    .filter(entry=>entry.km<=LOCAL_CONTEXT_RADIUS_KM)
+    .sort((a,b)=>a.km-b.km)
+    .slice(0,LOCAL_CONTEXT_MAX_STOPS)
+    .map(entry=>entry.item);
+
+  return nearby.length?nearby:[stop];
+}
+
+function localContextMaxZoom(context){
+  if(context.length<=1) return window.innerWidth<=760?9.45:10.25;
+  let maxDistance=0;
+  for(let i=0;i<context.length;i++){
+    for(let j=i+1;j<context.length;j++){
+      maxDistance=Math.max(maxDistance,haversineKm(context[i],context[j]));
+    }
+  }
+  if(maxDistance<35) return window.innerWidth<=760?10.35:11.15;
+  if(maxDistance<80) return window.innerWidth<=760?9.65:10.35;
+  if(maxDistance<150) return window.innerWidth<=760?8.95:9.65;
+  if(maxDistance<240) return window.innerWidth<=760?8.30:9.05;
+  return window.innerWidth<=760?7.75:8.45;
 }
 
 function focusMapForStop(index,{animate=true}={}){
   const context=contextualStopsFor(index);
   if(!context.length) return;
+
+  const mobile=window.innerWidth<=760;
   if(context.length===1){
     const stop=context[0];
-    map.flyTo([stop.lat,stop.lng],8.35,{duration:animate?.72:0});
+    map.flyTo(
+      [stop.lat,stop.lng],
+      localContextMaxZoom(context),
+      {duration:animate?.72:0}
+    );
     return;
   }
 
   const bounds=L.latLngBounds(context.map(stop=>[stop.lat,stop.lng]));
   if(!bounds.isValid()) return;
-  const maxZoom=context.length<=2?8.6:(context.length<=4?7.9:7.4);
-  const mobile=window.innerWidth<=760;
-  map.flyToBounds(bounds.pad(.06),{
-    paddingTopLeft:mobile?[34,44]:[54,54],
-    paddingBottomRight:mobile?[34,145]:[54,150],
-    maxZoom:mobile?Math.min(maxZoom,8.2):maxZoom,
+
+  map.flyToBounds(bounds.pad(.035),{
+    paddingTopLeft:mobile?[24,34]:[38,38],
+    paddingBottomRight:mobile?[24,128]:[38,96],
+    maxZoom:localContextMaxZoom(context),
     duration:animate?.78:0
   });
 }
@@ -5272,7 +5286,16 @@ function playAdvance(){
   if(shouldAnimate){
     hideAllTransport();
     const framingPoints=[a,...(transport?.waypoints||[]),b].map(point=>[point.lat,point.lng]);
-    map.fitBounds(framingPoints,{padding:[110,110],animate:false,maxZoom:7.5});
+    const legKm=haversineKm(a,b);
+    const international=a.country!==b.country;
+    const legMaxZoom=international
+      ? 5.25
+      : (legKm<35?10.4:legKm<80?9.6:legKm<150?8.9:legKm<250?8.2:7.6);
+    map.fitBounds(framingPoints,{
+      padding:window.innerWidth<=760?[54,70]:[78,88],
+      animate:false,
+      maxZoom:window.innerWidth<=760?Math.min(legMaxZoom,9.8):legMaxZoom
+    });
     playTimer=setTimeout(()=>{
       playTimer=null;
       if(!isPlaying || activeIndex!==legIndex) return;
@@ -5294,7 +5317,14 @@ function playAdvance(){
 }
 function togglePlayback(){
   const stops=currentRoute().stops;
-  if(isPlaying){stopPlayback();return}
+  if(isPlaying){
+    stopPlayback();
+    window.setTimeout(()=>{
+      map.invalidateSize({pan:false});
+      focusMapForStop(activeIndex,{animate:true});
+    },40);
+    return;
+  }
   if(activeIndex>=stops.length-1) setActiveStop(0,true,false);
 
   // Playback is map + itinerary together. Keep the current stop visible in the right panel.
