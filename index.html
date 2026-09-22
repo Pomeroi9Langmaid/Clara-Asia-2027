@@ -2295,87 +2295,158 @@ body.video-modal-open{overflow:hidden}
   display:flex;
   align-items:center;
   justify-content:center;
-  padding:28px;
+  padding:24px;
+  isolation:isolate;
 }
 .video-modal-backdrop{
   position:absolute;
   inset:0;
-  background:rgba(8,21,31,.44);
-  backdrop-filter:blur(18px) saturate(108%);
-  -webkit-backdrop-filter:blur(18px) saturate(108%);
+  background:
+    radial-gradient(circle at 50% 30%,rgba(66,92,108,.16),transparent 42%),
+    rgba(5,13,19,.76);
+  backdrop-filter:blur(10px) saturate(108%);
+  -webkit-backdrop-filter:blur(10px) saturate(108%);
 }
 .video-modal-card{
   position:relative;
   z-index:1;
-  width:min(900px,calc(100vw - 56px));
-  max-height:calc(100vh - 56px);
+  width:min(940px,calc(100vw - 48px));
+  max-height:calc(100vh - 48px);
   overflow:auto;
-  padding:14px;
-  border-radius:24px;
-  background:linear-gradient(145deg,rgba(237,247,251,.82),rgba(210,229,239,.64));
-  border:1px solid rgba(255,255,255,.78);
+  padding:16px;
+  border-radius:28px;
+  color:#eef6fa;
+  background:
+    linear-gradient(160deg,rgba(24,39,50,.96),rgba(10,22,31,.95) 62%,rgba(15,30,40,.96));
+  border:1px solid rgba(255,255,255,.14);
   box-shadow:
-    0 28px 70px rgba(5,20,30,.32),
-    inset 0 1px 0 rgba(255,255,255,.88);
-  backdrop-filter:blur(30px) saturate(126%);
-  -webkit-backdrop-filter:blur(30px) saturate(126%);
+    0 36px 90px rgba(0,0,0,.52),
+    0 10px 30px rgba(0,0,0,.34),
+    inset 0 1px 0 rgba(255,255,255,.16),
+    inset 0 -1px 0 rgba(255,255,255,.04);
+  backdrop-filter:blur(28px) saturate(120%);
+  -webkit-backdrop-filter:blur(28px) saturate(120%);
+  animation:videoModalIn .24s cubic-bezier(.2,.72,.25,1) both;
+}
+.video-modal-glow{
+  position:absolute;
+  inset:1px;
+  border-radius:27px;
+  pointer-events:none;
+  background:
+    radial-gradient(circle at 18% 0%,rgba(255,255,255,.10),transparent 24%),
+    linear-gradient(180deg,rgba(255,255,255,.045),transparent 24%);
 }
 .video-modal-close{
   position:absolute;
-  top:10px;right:10px;
-  z-index:3;
-  width:31px!important;height:31px!important;
-  min-width:31px!important;max-width:31px!important;
+  top:13px;right:13px;
+  z-index:5;
+  width:34px!important;height:34px!important;
+  min-width:34px!important;max-width:34px!important;
   padding:0!important;
   border-radius:50%!important;
+  display:flex;align-items:center;justify-content:center;
   font-size:20px;
   line-height:1;
-  color:#334b59!important;
-  background:rgba(255,255,255,.32)!important;
-  border:1px solid rgba(255,255,255,.64)!important;
+  color:#f2f7fa!important;
+  background:rgba(255,255,255,.08)!important;
+  border:1px solid rgba(255,255,255,.16)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.10)!important;
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+}
+.video-modal-close:hover{
+  background:rgba(255,255,255,.15)!important;
+  transform:scale(1.035);
 }
 .video-modal-head{
+  position:relative;
+  z-index:2;
   display:flex;
   align-items:flex-end;
   justify-content:space-between;
-  gap:14px;
-  padding:4px 42px 11px 4px;
+  gap:18px;
+  padding:4px 44px 13px 4px;
+}
+.video-heading-copy{min-width:0}
+.video-context-row{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  flex-wrap:wrap;
+  margin-bottom:5px;
 }
 .video-modal-eyebrow{
   display:block;
-  margin-bottom:3px;
   font-size:8px;
   font-weight:900;
   text-transform:uppercase;
-  letter-spacing:.06em;
-  color:#71818c;
+  letter-spacing:.10em;
+  color:#9db0bc;
+}
+.video-place-chip{
+  display:inline-flex;
+  align-items:center;
+  min-height:20px;
+  padding:3px 7px;
+  border-radius:999px;
+  font-size:7.5px;
+  line-height:1;
+  font-weight:850;
+  color:#dce8ee;
+  background:rgba(255,255,255,.07);
+  border:1px solid rgba(255,255,255,.11);
 }
 .video-modal-head h2{
   margin:0;
-  font-size:19px;
-  line-height:1.1;
-  color:#203744;
+  max-width:720px;
+  font-size:20px;
+  line-height:1.12;
+  letter-spacing:-.024em;
+  color:#f5f9fb;
 }
 .video-platform{
   flex:0 0 auto;
-  padding:5px 8px;
+  padding:6px 9px;
   border-radius:999px;
-  font-size:8px;
-  font-weight:850;
-  color:#314958;
-  background:rgba(255,255,255,.34);
-  border:1px solid rgba(255,255,255,.58);
+  font-size:7.5px;
+  font-weight:900;
+  letter-spacing:.025em;
+  color:#dbe8ee;
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.13);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08);
+}
+.video-stage{
+  position:relative;
+  z-index:2;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:10px;
+  border-radius:21px;
+  background:
+    radial-gradient(circle at 50% 0%,rgba(96,126,143,.16),transparent 48%),
+    rgba(0,0,0,.28);
+  border:1px solid rgba(255,255,255,.07);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.04),
+    inset 0 0 0 1px rgba(0,0,0,.08);
 }
 .video-player-shell{
   width:100%;
   overflow:hidden;
-  border-radius:18px;
-  background:#0b141b;
-  box-shadow:0 12px 28px rgba(7,22,32,.18);
+  border-radius:16px;
+  background:#03070a;
+  border:1px solid rgba(255,255,255,.08);
+  box-shadow:
+    0 18px 42px rgba(0,0,0,.42),
+    0 2px 8px rgba(0,0,0,.36),
+    0 0 0 1px rgba(0,0,0,.26);
 }
 .video-player-shell.landscape{aspect-ratio:16/9}
 .video-player-shell.portrait{
-  width:min(420px,100%);
+  width:min(390px,100%);
   margin-inline:auto;
   aspect-ratio:9/16;
 }
@@ -2384,6 +2455,7 @@ body.video-modal-open{overflow:hidden}
   width:100%;
   height:100%;
   border:0;
+  background:#000;
 }
 .video-fallback{
   height:100%;
@@ -2399,69 +2471,142 @@ body.video-modal-open{overflow:hidden}
 .video-fallback>span{width:44px;height:44px;color:#fff}
 .video-fallback svg{width:44px;height:44px}
 .video-fallback b{font-size:14px}
-.video-fallback p{max-width:420px;margin:0;font-size:10px;color:#a9bbc6}
+.video-fallback p{max-width:420px;margin:0;font-size:10px;color:#9fb1bc}
 .video-fallback a{color:#fff;font-weight:800}
 .video-modal-footer{
+  position:relative;
+  z-index:2;
   display:grid;
-  grid-template-columns:34px 1fr auto 34px;
+  grid-template-columns:36px minmax(0,1fr) auto 36px;
   align-items:center;
-  gap:8px;
-  margin-top:10px;
+  gap:9px;
+  padding:11px 2px 1px;
 }
 .video-nav-btn{
-  width:34px!important;height:34px!important;
-  min-width:34px!important;max-width:34px!important;
+  width:36px!important;height:36px!important;
+  min-width:36px!important;max-width:36px!important;
   padding:0!important;
   border-radius:50%!important;
-  font-size:20px;
+  font-size:21px;
+  line-height:1;
+  color:#eff6f9!important;
+  background:rgba(255,255,255,.07)!important;
+  border:1px solid rgba(255,255,255,.12)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08)!important;
 }
-.video-position{font-size:8px;font-weight:750;color:#70808b}
-.video-source-link{
-  font-size:9px;
+.video-nav-btn:hover:not(:disabled){
+  background:rgba(255,255,255,.13)!important;
+}
+.video-nav-btn:disabled{
+  opacity:.24!important;
+}
+.video-footer-meta{
+  min-width:0;
+  display:flex;
+  align-items:center;
+  gap:7px;
+}
+.video-position{
+  font-size:8px;
   font-weight:850;
-  color:#2b495a;
+  color:#d6e2e8;
+}
+.video-footer-label{
+  font-size:7.5px;
+  color:#8195a1;
+}
+.video-source-link{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:32px;
+  padding:7px 11px;
+  border-radius:999px;
+  font-size:8.5px;
+  font-weight:900;
+  color:#e8f1f5;
   text-decoration:none;
+  background:rgba(255,255,255,.07);
+  border:1px solid rgba(255,255,255,.12);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.06);
+}
+.video-source-link:hover{
+  background:rgba(255,255,255,.13);
+}
+@keyframes videoModalIn{
+  from{opacity:0;transform:translateY(8px) scale(.986)}
+  to{opacity:1;transform:translateY(0) scale(1)}
 }
 @media(max-width:700px){
-  .video-modal{padding:12px}
+  .video-modal{padding:10px}
   .video-modal-card{
-    width:calc(100vw - 24px);
-    max-height:calc(100vh - 24px);
-    padding:10px;
-    border-radius:19px;
+    width:calc(100vw - 20px);
+    max-height:calc(100vh - 20px);
+    padding:11px;
+    border-radius:22px;
+  }
+  .video-modal-head{
+    align-items:flex-start;
+    flex-direction:column;
+    gap:8px;
+    padding:3px 40px 11px 2px;
   }
   .video-modal-head h2{font-size:16px}
-  .video-modal-footer{grid-template-columns:31px 1fr auto 31px}
-  .video-source-link{font-size:8px}
+  .video-stage{padding:7px;border-radius:17px}
+  .video-modal-footer{
+    grid-template-columns:32px minmax(0,1fr) auto 32px;
+    gap:6px;
+  }
+  .video-nav-btn{
+    width:32px!important;height:32px!important;
+    min-width:32px!important;max-width:32px!important;
+  }
+  .video-footer-label{display:none}
+  .video-source-link{font-size:7.8px;padding:6px 9px;min-height:29px}
 }
 
-/* Portrait sources such as YouTube Shorts and TikTok should feel native, not letterboxed. */
+/* Portrait sources such as YouTube Shorts and TikTok use a native reel-style stage. */
 .video-modal-card.portrait-video{
-  width:min(455px,calc(100vw - 44px))!important;
+  width:min(470px,calc(100vw - 40px))!important;
 }
 .video-modal-card.portrait-video .video-modal-head{
   align-items:center;
 }
+.video-modal-card.portrait-video .video-stage{
+  padding:9px 16px;
+}
 .video-player-shell.portrait{
-  width:min(370px,100%)!important;
-  max-height:min(68vh,720px);
+  width:min(350px,100%)!important;
+  max-height:min(70vh,760px);
   margin-inline:auto;
   aspect-ratio:9/16!important;
-  background:#05090c!important;
+  background:#000!important;
+  border-radius:19px;
 }
 .video-modal-card.portrait-video .video-modal-footer{
-  max-width:370px;
+  max-width:380px;
   margin-left:auto;
   margin-right:auto;
 }
+.video-modal-card.landscape-video .video-player-shell{
+  max-width:860px;
+  margin-inline:auto;
+}
 @media(max-width:700px){
   .video-modal-card.portrait-video{
-    width:min(410px,calc(100vw - 20px))!important;
+    width:min(410px,calc(100vw - 16px))!important;
+  }
+  .video-modal-card.portrait-video .video-stage{
+    padding:6px 8px;
   }
   .video-player-shell.portrait{
-    width:min(340px,100%)!important;
-    max-height:66vh;
+    width:min(330px,100%)!important;
+    max-height:68vh;
+    border-radius:16px;
   }
+}
+@media(prefers-reduced-motion:reduce){
+  .video-modal-card{animation:none!important}
 }
 </style>
 </head>
@@ -2572,18 +2717,30 @@ body.video-modal-open{overflow:hidden}
 <div class="video-modal" id="videoModal" hidden aria-hidden="true">
   <div class="video-modal-backdrop" data-video-close></div>
   <section class="video-modal-card" role="dialog" aria-modal="true" aria-labelledby="videoModalTitle">
+    <div class="video-modal-glow" aria-hidden="true"></div>
     <button class="video-modal-close" type="button" data-video-close aria-label="Close video">×</button>
+
     <div class="video-modal-head">
-      <div>
-        <span class="video-modal-eyebrow">Clara’s inspiration</span>
+      <div class="video-heading-copy">
+        <div class="video-context-row">
+          <span class="video-modal-eyebrow">Clara’s inspiration</span>
+          <span class="video-place-chip" id="videoPlaceLabel"></span>
+        </div>
         <h2 id="videoModalTitle"></h2>
       </div>
       <span class="video-platform" id="videoPlatform"></span>
     </div>
-    <div class="video-player-shell landscape" id="videoPlayerShell"></div>
+
+    <div class="video-stage">
+      <div class="video-player-shell landscape" id="videoPlayerShell"></div>
+    </div>
+
     <div class="video-modal-footer">
       <button class="video-nav-btn" id="videoPrev" type="button" aria-label="Previous video">‹</button>
-      <span class="video-position" id="videoPosition"></span>
+      <div class="video-footer-meta">
+        <span class="video-position" id="videoPosition"></span>
+        <span class="video-footer-label">Saved inspiration clip</span>
+      </div>
       <a class="video-source-link" id="videoSourceLink" target="_blank" rel="noopener noreferrer">Open original ↗</a>
       <button class="video-nav-btn" id="videoNext" type="button" aria-label="Next video">›</button>
     </div>
@@ -4182,6 +4339,7 @@ function renderVideoModal(){
   const card=modal.querySelector('.video-modal-card');
   const shell=document.getElementById('videoPlayerShell');
   document.getElementById('videoModalTitle').textContent=clip.title || videoModalPlace;
+  document.getElementById('videoPlaceLabel').textContent=videoModalPlace;
   document.getElementById('videoPlatform').textContent=parsed.platform;
   document.getElementById('videoPosition').textContent=clips.length>1?`${videoModalIndex+1} of ${clips.length}`:'';
   const source=document.getElementById('videoSourceLink');
