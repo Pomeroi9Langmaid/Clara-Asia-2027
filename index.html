@@ -195,7 +195,7 @@ header p{margin:5px 0 0;color:var(--muted);font-size:12px;max-width:720px}
 .leaflet-popup.stop-popup .leaflet-popup-close-button{top:4px;right:5px;font-size:18px;color:#75808b}
 .popup-date{font-weight:700;font-size:10px;color:#687482;text-transform:none;letter-spacing:0;margin:0 22px 2px 0}
 .popup-heading{font-size:14px;line-height:1.25;color:#5e6976;margin-top:2px}
-.popup-heading strong{font-size:16px;color:#202b36;letter-spacing:-.015em}
+.popup-heading strong{font-size:14px;color:#202b36;letter-spacing:-.015em}
 .popup-optional{display:inline-block;margin-left:6px;padding:1px 5px;border:1px solid #e5ddd1;border-radius:999px;font-size:8px;text-transform:uppercase;letter-spacing:.04em;color:#7b6a58;background:#fbf7ef}
 .popup-note{font-size:10px;color:#3d4a58;margin-top:6px;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .marker{
@@ -3239,20 +3239,32 @@ body.video-modal-open{overflow:hidden}
 /* ===== Country-entry choreography during international flights ===== */
 .country-entry-outline{
   vector-effect:non-scaling-stroke;
-  animation:countryEntryPulse 1.7s ease-in-out infinite;
-  filter:drop-shadow(0 0 5px rgba(255,255,255,.38));
+  fill:var(--entry-fill,#7f9baa)!important;
+  stroke:var(--entry-fill,#7f9baa)!important;
+  animation:countryEntryPulse 1.65s ease-in-out infinite;
+  filter:
+    drop-shadow(0 0 4px rgba(255,255,255,.58))
+    drop-shadow(0 0 10px color-mix(in srgb,var(--entry-fill,#7f9baa) 58%,transparent));
 }
 @keyframes countryEntryPulse{
-  0%,100%{stroke-opacity:.68;fill-opacity:.08;stroke-width:3}
-  50%{stroke-opacity:1;fill-opacity:.18;stroke-width:5}
+  0%,100%{
+    stroke-opacity:.78;
+    fill-opacity:.18;
+    stroke-width:3.4
+  }
+  50%{
+    stroke-opacity:1;
+    fill-opacity:.36;
+    stroke-width:5.8
+  }
 }
 .country-entry-label-wrap{
   background:transparent!important;
   border:0!important;
 }
 .country-entry-label{
-  min-width:122px;
-  padding:7px 11px 8px;
+  min-width:112px;
+  padding:6px 10px 7px;
   border-radius:13px;
   text-align:center;
   color:#fff;
@@ -4643,10 +4655,10 @@ function showCountryEntry(country){
       interactive:false,
       style:{
         color,
-        weight:3.4,
-        opacity:.92,
+        weight:3.8,
+        opacity:.96,
         fillColor:color,
-        fillOpacity:.11,
+        fillOpacity:.24,
         lineCap:'round',
         lineJoin:'round'
       }
@@ -4655,7 +4667,10 @@ function showCountryEntry(country){
     requestAnimationFrame(()=>{
       countryEntryLayer?.eachLayer(layer=>{
         const el=layer.getElement?.();
-        if(el) el.classList.add('country-entry-outline');
+        if(el){
+          el.style.setProperty('--entry-fill',color);
+          el.classList.add('country-entry-outline');
+        }
       });
     });
   }
@@ -4682,20 +4697,55 @@ function focusDestinationCountry(country){
   const bounds=countryBounds(country);
   if(!bounds?.isValid()) return;
   const mobile=window.innerWidth<=760;
-  map.flyToBounds(bounds.pad(.055),{
-    paddingTopLeft:mobile?[36,50]:[58,58],
-    paddingBottomRight:mobile?[36,142]:[58,120],
-    maxZoom:5.25,
-    duration:1.05
+  map.flyToBounds(bounds.pad(.045),{
+    paddingTopLeft:mobile?[28,42]:[48,50],
+    paddingBottomRight:mobile?[28,136]:[48,112],
+    maxZoom:4.95,
+    duration:.78
+  });
+}
+function routeStopsInCountry(country){
+  return currentRoute().stops.filter(stop=>stop.country===country);
+}
+function focusCountryRoutePins(country){
+  const stops=routeStopsInCountry(country);
+  if(!stops.length) return;
+  const bounds=L.latLngBounds(stops.map(stop=>[stop.lat,stop.lng]));
+  if(!bounds.isValid()) return;
+  const mobile=window.innerWidth<=760;
+  map.flyToBounds(bounds.pad(.12),{
+    paddingTopLeft:mobile?[34,46]:[54,52],
+    paddingBottomRight:mobile?[34,140]:[54,118],
+    maxZoom:mobile?5.85:6.35,
+    duration:.72
   });
 }
 function focusFlightArrivalRegion(destination){
   if(!destination) return;
+  const route=currentRoute();
+  const index=route.stops.findIndex(stop=>stop.place===destination.place && stop.country===destination.country);
+  const context=index>=0?contextualStopsFor(index):[destination];
   const mobile=window.innerWidth<=760;
-  const zoom=COUNTRY_APPROACH_ZOOM[destination.country] || 6;
-  map.flyTo([destination.lat,destination.lng],mobile?Math.min(zoom,5.9):zoom,{
-    duration:.82
-  });
+
+  if(context.length>1){
+    const bounds=L.latLngBounds(context.map(stop=>[stop.lat,stop.lng]));
+    if(bounds.isValid()){
+      map.flyToBounds(bounds.pad(.10),{
+        paddingTopLeft:mobile?[38,48]:[58,54],
+        paddingBottomRight:mobile?[38,142]:[58,122],
+        maxZoom:mobile?6.65:7.15,
+        duration:.72
+      });
+      return;
+    }
+  }
+
+  map.flyTo([destination.lat,destination.lng],mobile?6.65:7.25,{duration:.72});
+}
+function focusFlightPinpoint(destination){
+  if(!destination) return;
+  const mobile=window.innerWidth<=760;
+  map.flyTo([destination.lat,destination.lng],mobile?7.35:8.05,{duration:.62});
 }
 function renderCountryOverlays(){
   if(!countryGeoData) return;
@@ -4807,14 +4857,22 @@ function animateTransportBetween(a,b,mode,duration,onDone,startT=0,endT=1){
     const eased=raw<.5?2*raw*raw:1-Math.pow(-2*raw+2,2)/2;
     const t=startT+(endT-startT)*eased;
 
-    if(crossCountryFlight && raw>=.28 && countryStage<1){
+    if(crossCountryFlight && raw>=.16 && countryStage<1){
       countryStage=1;
       showCountryEntry(b.country);
       focusDestinationCountry(b.country);
     }
-    if(crossCountryFlight && raw>=.72 && countryStage<2){
+    if(crossCountryFlight && raw>=.43 && countryStage<2){
       countryStage=2;
+      focusCountryRoutePins(b.country);
+    }
+    if(crossCountryFlight && raw>=.68 && countryStage<3){
+      countryStage=3;
       focusFlightArrivalRegion(b);
+    }
+    if(crossCountryFlight && raw>=.86 && countryStage<4){
+      countryStage=4;
+      focusFlightPinpoint(b);
     }
 
     setTransportVehicle(a,b,t,mode);
@@ -5221,7 +5279,7 @@ function playAdvance(){
       animateFlightLeg(legIndex,4300,()=>{
         if(!isPlaying) return;
         setActiveStop(legIndex+1,true,false);
-        if(a.country!==b.country) scheduleCountryEntryClear(1800);
+        if(a.country!==b.country) scheduleCountryEntryClear(2400);
         playTimer=setTimeout(()=>{playTimer=null;playAdvance()},ARRIVAL_DWELL_MS);
       });
     },180);
@@ -5261,7 +5319,7 @@ function togglePlayback(){
         if(!isPlaying) return;
         outboundGatewayPlayed=true;
         setActiveStop(0,true,false);
-        scheduleCountryEntryClear(1800);
+        scheduleCountryEntryClear(2400);
         playTimer=setTimeout(()=>{playTimer=null;if(isPlaying) playAdvance();},ARRIVAL_DWELL_MS);
       });
     },650);
