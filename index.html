@@ -2172,6 +2172,66 @@ header p{display:none!important}
   }
 }
 
+/* ===== Directional route arrows ===== */
+.route-direction-arrow{
+  position:relative;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:999px;
+  color:var(--arrow-color,#334155);
+  background:rgba(255,255,255,.88);
+  border:1px solid rgba(255,255,255,.96);
+  box-shadow:
+    0 3px 9px rgba(5,20,30,.25),
+    0 0 0 1px rgba(28,48,62,.10);
+  backdrop-filter:blur(8px) saturate(115%);
+  -webkit-backdrop-filter:blur(8px) saturate(115%);
+  opacity:var(--arrow-opacity,1);
+  transform:rotate(var(--arrow-angle,0deg));
+  transform-origin:50% 50%;
+  pointer-events:none;
+}
+.route-direction-arrow svg{
+  width:72%;
+  height:72%;
+  display:block;
+  overflow:visible;
+}
+.route-direction-arrow path{
+  fill:none;
+  stroke:currentColor;
+  stroke-width:2.35;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+.route-direction-arrow.flight{
+  color:#ffffff;
+  background:rgba(29,45,57,.86);
+  border-color:rgba(255,255,255,.78);
+}
+.route-direction-arrow.current{
+  box-shadow:
+    0 4px 13px rgba(5,20,30,.34),
+    0 0 0 2px rgba(255,255,255,.48);
+}
+.route-direction-arrow.current::after{
+  content:"";
+  position:absolute;
+  inset:-4px;
+  border-radius:inherit;
+  border:1.5px solid currentColor;
+  opacity:.20;
+  animation:routeArrowHalo 1.8s ease-out infinite;
+}
+@keyframes routeArrowHalo{
+  0%{opacity:.28;transform:scale(.86)}
+  72%,100%{opacity:0;transform:scale(1.42)}
+}
+@media(prefers-reduced-motion:reduce){
+  .route-direction-arrow.current::after{animation:none}
+}
+
 /* ===== Clara inspiration video coverage ===== */
 .stop-thumb,.active-photo{position:relative;overflow:hidden}
 .video-availability{
@@ -3916,6 +3976,19 @@ function playGatewayFlight(direction,onDone){
   },220);
 }
 
+function routeDirectionIcon(a,b,{color,isFlight,dimmed,currentLeg,completed}={}){
+  const angle=flightScreenAngle(a,b);
+  const size=currentLeg?24:(currentFilter==='All'?17:20);
+  const opacity=dimmed?0.08:(currentLeg?1:(completed?.78:(isFlight?.68:.54)));
+  const classes=['route-direction-arrow',isFlight?'flight':'',currentLeg?'current':''].filter(Boolean).join(' ');
+  return L.divIcon({
+    className:'',
+    html:`<div class="${classes}" style="width:${size}px;height:${size}px;--arrow-angle:${angle}deg;--arrow-opacity:${opacity};--arrow-color:${color || '#334155'}"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 8h9"></path><path d="m8.8 4.5 3.6 3.5-3.6 3.5"></path></svg></div>`,
+    iconSize:[size,size],
+    iconAnchor:[size/2,size/2]
+  });
+}
+
 function renderRouteLines(){
   const stops = currentRoute().stops;
   if(!isPlaying) hideFlightPlane();
@@ -3935,6 +4008,22 @@ function renderRouteLines(){
       lineCap:'round'
     }).addTo(map);
     routeLayers.push(line);
+
+    // A single arrow on each leg makes the travel order legible without turning the map into a chevron pattern.
+    const arrowPoint=interpolateLeg(a,b,0.58);
+    const arrow=L.marker(arrowPoint,{
+      icon:routeDirectionIcon(a,b,{
+        color:sameCountry?COLORS[a.country]:'#ffffff',
+        isFlight,
+        dimmed,
+        currentLeg,
+        completed
+      }),
+      interactive:false,
+      keyboard:false,
+      zIndexOffset:currentLeg?420:260
+    }).addTo(map);
+    routeLayers.push(arrow);
   }
 }
 function renderMarkers(){
