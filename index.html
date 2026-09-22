@@ -2177,43 +2177,83 @@ header p{display:none!important}
 .video-availability{
   position:absolute;
   z-index:6;
+  border:0!important;
+  transition:transform .16s ease,box-shadow .16s ease,filter .16s ease!important;
+}
+.video-availability.thumb{
+  top:5px!important;
+  right:5px!important;
+  left:auto!important;
+  bottom:auto!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  gap:4px!important;
+  width:auto!important;
+  min-width:0!important;
+  max-width:none!important;
+  height:24px!important;
+  padding:3px 6px 3px 4px!important;
+  border-radius:7px!important;
+  color:#fff!important;
+  background:#ff1738!important;
+  border:1px solid rgba(255,255,255,.94)!important;
+  box-shadow:
+    0 3px 9px rgba(0,0,0,.30),
+    0 0 0 1px rgba(118,0,18,.14)!important;
+}
+.video-red-mark{
+  width:20px;
+  height:16px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#fff;
+}
+.video-red-mark svg{
+  width:18px!important;
+  height:18px!important;
+  display:block;
+}
+.video-thumb-label{
+  font-size:7px;
+  line-height:1;
+  font-weight:950;
+  letter-spacing:.055em;
+  color:#fff;
+}
+.video-availability.thumb:hover{
+  transform:translateY(-1px) scale(1.045);
+  filter:brightness(1.03);
+  box-shadow:
+    0 5px 12px rgba(0,0,0,.35),
+    0 0 0 1px rgba(118,0,18,.16)!important;
+}
+.video-availability.active{
+  left:12px;right:auto;bottom:12px;top:auto;
   display:inline-flex;
   align-items:center;
   justify-content:center;
   gap:5px;
   width:auto!important;
   min-width:0!important;
-  max-width:calc(100% - 10px)!important;
+  max-width:calc(100% - 24px)!important;
   height:auto!important;
-  padding:5px 7px!important;
+  padding:8px 11px!important;
   border-radius:999px!important;
   color:#fff!important;
-  background:linear-gradient(180deg,rgba(25,45,58,.91),rgba(16,33,44,.84))!important;
-  border:1px solid rgba(255,255,255,.72)!important;
+  background:linear-gradient(180deg,rgba(25,45,58,.93),rgba(16,33,44,.88))!important;
+  border:1px solid rgba(255,255,255,.74)!important;
   box-shadow:
-    0 7px 18px rgba(9,26,38,.28),
-    inset 0 1px 0 rgba(255,255,255,.28)!important;
+    0 10px 24px rgba(9,26,38,.34),
+    inset 0 1px 0 rgba(255,255,255,.32)!important;
   backdrop-filter:blur(14px) saturate(125%)!important;
   -webkit-backdrop-filter:blur(14px) saturate(125%)!important;
-  transition:transform .16s ease,background .16s ease,box-shadow .16s ease!important;
-}
-.video-availability.thumb{
-  left:5px;right:auto;bottom:5px;
-  font-size:7.2px!important;
-}
-.video-availability.active{
-  left:12px;right:auto;bottom:12px;
-  padding:7px 10px!important;
   font-size:9.5px!important;
-  box-shadow:
-    0 10px 24px rgba(9,26,38,.32),
-    inset 0 1px 0 rgba(255,255,255,.32)!important;
 }
-.video-availability svg{
+.video-availability.active svg{
   flex:0 0 auto;
-  width:14px;height:14px;display:block
+  width:18px;height:18px;display:block
 }
-.video-availability.active svg{width:18px;height:18px}
 .video-cta-text{
   min-width:0;
   overflow:hidden;
@@ -2224,20 +2264,17 @@ header p{display:none!important}
 }
 .video-provider{
   flex:0 0 auto;
-  padding-left:5px;
+  padding-left:6px;
   border-left:1px solid rgba(255,255,255,.28);
-  font-size:6.4px;
-  font-weight:760;
-  opacity:.76;
+  font-size:7px;
+  font-weight:800;
+  opacity:.80;
 }
-.video-availability.active .video-provider{font-size:7px}
-.video-availability:hover{
+.video-availability.active:hover{
   transform:translateY(-1px) scale(1.025);
-  background:linear-gradient(180deg,rgba(31,54,69,.97),rgba(17,36,48,.94))!important;
-  box-shadow:
-    0 10px 24px rgba(9,26,38,.34),
-    inset 0 1px 0 rgba(255,255,255,.34)!important;
+  background:linear-gradient(180deg,rgba(31,54,69,.98),rgba(17,36,48,.95))!important;
 }
+
 .video-coverage-note{
   width:100%!important;
   display:grid!important;
@@ -2310,8 +2347,8 @@ body.video-modal-open{overflow:hidden}
 .video-modal-card{
   position:relative;
   z-index:1;
-  width:min(940px,calc(100vw - 48px));
-  max-height:calc(100vh - 48px);
+  width:min(1080px,calc(100vw - 36px));
+  max-height:calc(100vh - 28px);
   overflow:auto;
   padding:16px;
   border-radius:28px;
@@ -2567,7 +2604,7 @@ body.video-modal-open{overflow:hidden}
 
 /* Portrait sources such as YouTube Shorts and TikTok use a native reel-style stage. */
 .video-modal-card.portrait-video{
-  width:min(470px,calc(100vw - 40px))!important;
+  width:min(590px,calc(100vw - 28px))!important;
 }
 .video-modal-card.portrait-video .video-modal-head{
   align-items:center;
@@ -2576,32 +2613,32 @@ body.video-modal-open{overflow:hidden}
   padding:9px 16px;
 }
 .video-player-shell.portrait{
-  width:min(350px,100%)!important;
-  max-height:min(70vh,760px);
+  width:min(450px,100%)!important;
+  max-height:min(78vh,860px);
   margin-inline:auto;
   aspect-ratio:9/16!important;
   background:#000!important;
   border-radius:19px;
 }
 .video-modal-card.portrait-video .video-modal-footer{
-  max-width:380px;
+  max-width:470px;
   margin-left:auto;
   margin-right:auto;
 }
 .video-modal-card.landscape-video .video-player-shell{
-  max-width:860px;
+  max-width:1000px;
   margin-inline:auto;
 }
 @media(max-width:700px){
   .video-modal-card.portrait-video{
-    width:min(410px,calc(100vw - 16px))!important;
+    width:min(500px,calc(100vw - 12px))!important;
   }
   .video-modal-card.portrait-video .video-stage{
     padding:6px 8px;
   }
   .video-player-shell.portrait{
-    width:min(330px,100%)!important;
-    max-height:68vh;
+    width:min(390px,100%)!important;
+    max-height:74vh;
     border-radius:16px;
   }
 }
@@ -3119,7 +3156,7 @@ function parseVideoUrl(url,options={}){
         platform,
         id,
         aspect:aspect || 'landscape',
-        embedUrl:'https://www.youtube-nocookie.com/embed/'+encodeURIComponent(id)+'?rel=0&playsinline=1'
+        embedUrl:'https://www.youtube-nocookie.com/embed/'+encodeURIComponent(id)+'?rel=0&playsinline=1&autoplay=1'
       };
     }
 
@@ -3130,7 +3167,7 @@ function parseVideoUrl(url,options={}){
           platform:'TikTok',
           id:match[1],
           aspect:aspect || 'portrait',
-          embedUrl:'https://www.tiktok.com/player/v1/'+match[1]+'?autoplay=0&controls=1&loop=0&music_info=1&description=1'
+          embedUrl:'https://www.tiktok.com/player/v1/'+match[1]+'?autoplay=1&controls=1&loop=0&music_info=1&description=1'
         };
       }
       return {platform:'TikTok',id:'',aspect:aspect || 'portrait',embedUrl:''};
@@ -3147,11 +3184,14 @@ function videoButtonHtml(place,variant='thumb'){
   const first=parseVideoUrl(clips[0].url,clips[0]);
   const count=clips.length;
   const label=count>1?`${count} video clips for ${place}`:`Watch video clip for ${place}`;
-  const buttonText=variant==='active'
-    ? (count>1?`Watch ${count} clips`:'Watch Clara’s clip')
-    : (count>1?`${count} clips`:'Watch clip');
   const platform=first.platform==='YouTube Short'?'Short':first.platform;
-  return `<button class="video-availability ${variant}" type="button" data-video-place="${escapeHtml(place)}" aria-label="${escapeHtml(label)}" title="${escapeHtml(label)}">${videoIconSvg()}<span class="video-cta-text">${buttonText}</span><span class="video-provider">${platform}</span></button>`;
+
+  if(variant==='thumb'){
+    return `<button class="video-availability thumb" type="button" data-video-place="${escapeHtml(place)}" aria-label="${escapeHtml(label)}" title="${escapeHtml(label)}"><span class="video-red-mark" aria-hidden="true">${videoIconSvg()}</span><span class="video-thumb-label">VIDEO</span></button>`;
+  }
+
+  const buttonText=count>1?`Watch ${count} clips`:'Watch Clara’s clip';
+  return `<button class="video-availability active" type="button" data-video-place="${escapeHtml(place)}" aria-label="${escapeHtml(label)}" title="${escapeHtml(label)}">${videoIconSvg()}<span class="video-cta-text">${buttonText}</span><span class="video-provider">${platform}</span></button>`;
 }
 
 const mediaCache = new Map();
