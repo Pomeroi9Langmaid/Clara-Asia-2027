@@ -3426,8 +3426,8 @@ body.video-modal-open{overflow:hidden}
 
 /* ===== Map-anchored moving transport: remains exactly on route during camera movement ===== */
 .moving-transport-marker{
-  width:52px;
-  height:52px;
+  width:60px;
+  height:60px;
   display:flex;
   align-items:center;
   justify-content:center;
@@ -3437,20 +3437,18 @@ body.video-modal-open{overflow:hidden}
     drop-shadow(0 0 3px rgba(255,255,255,.96));
 }
 .moving-transport-marker .moving-transport-art{
-  width:100%;
-  height:100%;
   display:block;
   object-fit:contain;
   transform-origin:50% 50%;
   will-change:transform;
 }
-.moving-transport-marker.plane{width:49px;height:49px}
-.moving-transport-marker.bus{width:50px;height:50px}
-.moving-transport-marker.minibus{width:47px;height:47px}
-.moving-transport-marker.taxi{width:45px;height:45px}
-.moving-transport-marker.train{width:54px;height:54px}
-.moving-transport-marker.ferry{width:58px;height:58px}
-.moving-transport-marker.boat{width:52px;height:52px}
+.moving-transport-marker.plane .moving-transport-art{width:49px;height:49px}
+.moving-transport-marker.bus .moving-transport-art{width:50px;height:50px}
+.moving-transport-marker.minibus .moving-transport-art{width:47px;height:47px}
+.moving-transport-marker.taxi .moving-transport-art{width:45px;height:45px}
+.moving-transport-marker.train .moving-transport-art{width:54px;height:54px}
+.moving-transport-marker.ferry .moving-transport-art{width:58px;height:58px}
+.moving-transport-marker.boat .moving-transport-art{width:52px;height:52px}
 .moving-plane-svg .plane-fuselage,
 .moving-plane-svg .plane-wing,
 .moving-plane-svg .plane-tail{
@@ -3464,9 +3462,14 @@ body.video-modal-open{overflow:hidden}
 .moving-plane-svg .plane-tail{fill:#eef4f8}
 .moving-plane-svg .plane-cockpit{fill:#4f8fb7;stroke:#172635;stroke-width:1.4}
 @media(max-width:760px){
-  .moving-transport-marker{width:46px;height:46px}
-  .moving-transport-marker.train{width:48px;height:48px}
-  .moving-transport-marker.ferry{width:50px;height:50px}
+  .moving-transport-marker{width:60px;height:60px}
+  .moving-transport-marker.plane .moving-transport-art{width:44px;height:44px}
+  .moving-transport-marker.bus .moving-transport-art{width:44px;height:44px}
+  .moving-transport-marker.minibus .moving-transport-art{width:42px;height:42px}
+  .moving-transport-marker.taxi .moving-transport-art{width:40px;height:40px}
+  .moving-transport-marker.train .moving-transport-art{width:48px;height:48px}
+  .moving-transport-marker.ferry .moving-transport-art{width:50px;height:50px}
+  .moving-transport-marker.boat .moving-transport-art{width:46px;height:46px}
 }
 </style>
 </head>
