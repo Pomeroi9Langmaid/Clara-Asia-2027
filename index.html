@@ -3138,6 +3138,103 @@ body.video-modal-open{overflow:hidden}
   .country-stay-name{font-size:6.6px!important}
   .side-tab{font-size:10px!important}
 }
+
+/* ===== Animated transport modes ===== */
+.transport-vehicle-overlay{
+  position:absolute;
+  left:0;top:0;
+  width:52px;height:52px;
+  z-index:1460;
+  pointer-events:none;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  transform:translate(-50%,-50%);
+  filter:
+    drop-shadow(0 3px 4px rgba(0,0,0,.62))
+    drop-shadow(0 0 3px rgba(255,255,255,.96));
+  will-change:left,top;
+}
+.transport-vehicle-overlay.visible{display:flex}
+.transport-vehicle-overlay img{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  display:block;
+  transform-origin:50% 50%;
+  will-change:transform;
+}
+.transport-vehicle-overlay.mode-bus{width:50px;height:50px}
+.transport-vehicle-overlay.mode-minibus{width:47px;height:47px}
+.transport-vehicle-overlay.mode-taxi{width:45px;height:45px}
+.transport-vehicle-overlay.mode-train{width:54px;height:54px}
+.transport-vehicle-overlay.mode-ferry{width:58px;height:58px}
+.transport-vehicle-overlay.mode-boat{width:52px;height:52px}
+
+.transport-leg-info{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  margin-top:6px;
+  min-width:0;
+}
+.transport-mode-icons{
+  display:flex;
+  align-items:center;
+  gap:2px;
+  flex:0 0 auto;
+}
+.transport-mode-icon{
+  width:22px;
+  height:22px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:7px;
+  background:rgba(255,255,255,.62);
+  border:1px solid rgba(255,255,255,.82);
+  box-shadow:0 2px 6px rgba(18,35,47,.10);
+  overflow:hidden;
+}
+.transport-mode-icon img{
+  width:20px;
+  height:20px;
+  object-fit:contain;
+}
+.transport-mode-icon.flight{
+  color:#314b5c;
+  font-size:15px;
+  font-weight:900;
+}
+.transport-leg-copy{
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  gap:1px;
+}
+.transport-leg-copy b{
+  font-size:8px;
+  line-height:1.1;
+  color:#324b5a;
+}
+.transport-leg-copy small{
+  margin:0!important;
+  font-size:7px!important;
+  line-height:1.15!important;
+  color:#73818a!important;
+}
+.stop-card.current .transport-mode-icon{
+  background:rgba(255,255,255,.82);
+  border-color:rgba(255,255,255,.96);
+}
+@media(max-width:760px){
+  .transport-vehicle-overlay{width:46px;height:46px}
+  .transport-vehicle-overlay.mode-train{width:48px;height:48px}
+  .transport-vehicle-overlay.mode-ferry{width:50px;height:50px}
+  .transport-mode-icon{width:24px;height:24px}
+  .transport-mode-icon img{width:22px;height:22px}
+  .transport-leg-copy b{font-size:8.5px}
+}
 </style>
 </head>
 <body>
@@ -3173,6 +3270,9 @@ body.video-modal-open{overflow:hidden}
         <path class="plane-fuselage" d="M9 60c0-4 3-7 8-8l73-7c12-1 21 5 25 15-4 10-13 16-25 15l-73-7c-5-1-8-4-8-8Z"/>
         <path class="plane-cockpit" d="M94 50c7 0 12 3 15 10-3 7-8 10-15 10l5-10Z"/>
       </svg>
+    </div>
+    <div id="transportVehicle" class="transport-vehicle-overlay" aria-hidden="true">
+      <img id="transportVehicleImage" alt="">
     </div>
     <div class="journey-dock" aria-label="Journey playback controls">
       <button id="restartBtn" class="restart-btn" type="button" aria-label="Back to beginning" title="Back to beginning">
@@ -3762,6 +3862,87 @@ const ROUTES = {
     ]
   }
 };
+
+const TRANSPORT_ICONS = {
+  bus:'assets/transport/bus.webp',
+  minibus:'assets/transport/minibus.webp',
+  taxi:'assets/transport/taxi.webp',
+  train:'assets/transport/train.webp',
+  ferry:'assets/transport/ferry.webp',
+  boat:'assets/transport/boat.webp'
+};
+
+const TRANSPORT_MODE_LABELS = {
+  flight:'Flight',
+  bus:'Bus',
+  minibus:'Minibus',
+  taxi:'Taxi',
+  train:'Train',
+  ferry:'Ferry',
+  boat:'Boat'
+};
+
+/*
+  Clara's transport notes for the current dated itinerary.
+  Only transport supported by her notes is encoded; pricing is deliberately omitted.
+  A couple of current map stops split a broader note (for example Osaka–Kinosaki via Kyoto),
+  so the same stated rail mode is carried across those adjacent mapped legs.
+*/
+const TRANSPORT_LEGS = {
+  'Bangkok|Chiang Mai':{modes:['flight'],label:'Flight'},
+  'Chiang Mai|Pai':{modes:['minibus'],label:'Minibus'},
+  'Pai|Krabi / Ao Nang':{modes:['minibus','flight'],label:'Minibus + flight'},
+  'Hanoi|Ha Giang':{modes:['bus'],label:'Bus'},
+  'Ha Giang|Cat Ba':{modes:['bus'],label:'Night bus',night:true},
+  'Cat Ba|Ninh Binh':{modes:['bus'],label:'Bus',note:'to Tam Coc / Ninh Binh'},
+  'Ninh Binh|Hue':{modes:['bus'],label:'Bus'},
+  'Hue|Da Nang':{modes:['minibus'],label:'Minibus'},
+  'Da Nang|Hoi An':{modes:['minibus'],label:'Minibus'},
+  'Hoi An|Ho Chi Minh City':{modes:['minibus','flight'],label:'Minibus + flight'},
+  'Ho Chi Minh City|Cebu City':{modes:['flight'],label:'Flight'},
+  'Cebu City|Moalboal':{modes:['bus'],label:'Bus'},
+  'Moalboal|El Nido':{modes:['bus','flight'],label:'Bus + flight'},
+  'El Nido|Coron':{modes:['boat'],label:'Island-hopping boat'},
+  'Coron|Yogyakarta':{
+    modes:['flight','flight'],
+    label:'Flights via Jakarta',
+    waypoints:[{place:'Jakarta',lat:-6.2088,lng:106.8456}]
+  },
+  'Yogyakarta|Mount Bromo':{modes:['bus'],label:'Bus',note:'via Malang'},
+  'Ubud|Canggu':{modes:['taxi'],label:'Taxi'},
+  'Canggu|Uluwatu':{modes:['taxi'],label:'Taxi'},
+  'Uluwatu|Osaka':{modes:['flight'],label:'Flight'},
+  'Osaka|Kyoto':{modes:['train'],label:'Train'},
+  'Kyoto|Kinosaki Onsen':{modes:['train'],label:'Train'},
+  'Kinosaki Onsen|Tokyo':{modes:['train'],label:'Train'}
+};
+
+function transportKey(a,b){
+  return a&&b ? a.place+'|'+b.place : '';
+}
+function transportForLeg(a,b){
+  const routeSelect=document.getElementById('routeSelect');
+  if(routeSelect && routeSelect.value!=='written') return null;
+  return TRANSPORT_LEGS[transportKey(a,b)] || null;
+}
+function transportHasFlight(info){
+  return !!info?.modes?.includes('flight');
+}
+function transportHasWater(info){
+  return !!info?.modes?.some(mode=>mode==='boat'||mode==='ferry');
+}
+function transportModeIconHtml(mode){
+  if(mode==='flight') return '<span class="transport-mode-icon flight" aria-hidden="true">✈</span>';
+  const src=TRANSPORT_ICONS[mode];
+  return src ? `<span class="transport-mode-icon" aria-hidden="true"><img src="${src}" alt=""></span>` : '';
+}
+function transportLegHtml(a,b){
+  const info=transportForLeg(a,b);
+  if(!info) return '';
+  const icons=info.modes.map(transportModeIconHtml).join('');
+  const note=info.note ? `<small>${escapeHtml(info.note)}</small>` : '';
+  return `<div class="transport-leg-info" aria-label="${escapeHtml(info.label)}"><span class="transport-mode-icons">${icons}</span><span class="transport-leg-copy"><b>${escapeHtml(info.label)}</b>${note}</span></div>`;
+}
 
 const map = L.map('map', {
   worldCopyJump:true,
@@ -4384,32 +4565,111 @@ function hideFlightPlane(){
   const el=document.getElementById('flightPlane');
   if(el) el.classList.remove('visible');
 }
+function hideTransportVehicle(){
+  const el=document.getElementById('transportVehicle');
+  if(el){
+    el.classList.remove('visible','mode-bus','mode-minibus','mode-taxi','mode-train','mode-ferry','mode-boat');
+  }
+}
+function hideAllTransport(){
+  hideFlightPlane();
+  hideTransportVehicle();
+}
+function setTransportVehicle(a,b,t,mode){
+  if(mode==='flight'){
+    hideTransportVehicle();
+    setFlightPlane(a,b,t);
+    return;
+  }
+  const src=TRANSPORT_ICONS[mode];
+  const el=document.getElementById('transportVehicle');
+  const img=document.getElementById('transportVehicleImage');
+  if(!el||!img||!src||!a||!b||!isPlaying){ hideTransportVehicle(); return; }
+  hideFlightPlane();
+  const pa=map.latLngToContainerPoint([a.lat,a.lng]);
+  const pb=map.latLngToContainerPoint([b.lat,b.lng]);
+  const x=pa.x+(pb.x-pa.x)*t;
+  const y=pa.y+(pb.y-pa.y)*t;
+  const angle=Math.atan2(pb.y-pa.y,pb.x-pa.x)*180/Math.PI;
+  img.src=src;
+  img.alt=TRANSPORT_MODE_LABELS[mode] || mode;
+  img.style.transform=`rotate(${angle+90}deg)`;
+  el.style.left=x+'px';
+  el.style.top=y+'px';
+  el.className='transport-vehicle-overlay visible mode-'+mode;
+}
 function interpolateLeg(a,b,t){
   return [a.lat+(b.lat-a.lat)*t,a.lng+(b.lng-a.lng)*t];
 }
-function animateFlightBetween(a,b,duration,onDone){
-  if(!a||!b){ hideFlightPlane(); onDone(); return; }
+function animateTransportBetween(a,b,mode,duration,onDone,startT=0,endT=1){
+  if(!a||!b){ hideAllTransport(); if(onDone) onDone(); return; }
   const started=performance.now();
   const frame=now=>{
-    if(!isPlaying){ hideFlightPlane(); return; }
+    if(!isPlaying){ hideAllTransport(); return; }
     const raw=Math.min(1,(now-started)/duration);
-    const t=raw<.5?2*raw*raw:1-Math.pow(-2*raw+2,2)/2;
-    setFlightPlane(a,b,t);
+    const eased=raw<.5?2*raw*raw:1-Math.pow(-2*raw+2,2)/2;
+    const t=startT+(endT-startT)*eased;
+    setTransportVehicle(a,b,t,mode);
     if(raw<1) planeAnimationFrame=requestAnimationFrame(frame);
     else{
       planeAnimationFrame=null;
-      hideFlightPlane();
-      onDone();
+      hideAllTransport();
+      if(onDone) onDone();
     }
   };
-  setFlightPlane(a,b,0);
+  setTransportVehicle(a,b,startT,mode);
   planeAnimationFrame=requestAnimationFrame(frame);
+}
+function transportModeDuration(mode){
+  return ({flight:4200,bus:3200,minibus:2900,taxi:2600,train:3300,ferry:3600,boat:3500})[mode] || 3000;
+}
+function animateTransportSequence(a,b,info,onDone){
+  const modes=info?.modes?.length ? info.modes : ['flight'];
+  const points=[a,...(info?.waypoints||[]),b];
+
+  // Explicit waypoint routing (e.g. Coron → Jakarta → Yogyakarta).
+  if(points.length===modes.length+1){
+    let segment=0;
+    const next=()=>{
+      if(segment>=modes.length){ hideAllTransport(); if(onDone) onDone(); return; }
+      const mode=modes[segment], from=points[segment], to=points[segment+1];
+      segment++;
+      animateTransportBetween(from,to,mode,transportModeDuration(mode),next,0,1);
+    };
+    next();
+    return;
+  }
+
+  // Mixed-mode same-leg journeys share the line sequentially.
+  let part=0;
+  const nextPart=()=>{
+    if(part>=modes.length){ hideAllTransport(); if(onDone) onDone(); return; }
+    const mode=modes[part];
+    const start=part/modes.length;
+    const end=(part+1)/modes.length;
+    part++;
+    animateTransportBetween(a,b,mode,Math.max(1800,transportModeDuration(mode)/modes.length*1.45),nextPart,start,end);
+  };
+  nextPart();
+}
+function animateFlightBetween(a,b,duration,onDone){
+  animateTransportBetween(a,b,'flight',duration,onDone,0,1);
 }
 function animateFlightLeg(index,duration,onDone){
   const stops=currentRoute().stops;
   const a=stops[index], b=stops[index+1];
-  if(!a||!b||a.country===b.country){ hideFlightPlane(); onDone(); return; }
-  animateFlightBetween(a,b,duration,onDone);
+  if(!a||!b){ hideAllTransport(); onDone(); return; }
+  const info=transportForLeg(a,b);
+  if(info){
+    animateTransportSequence(a,b,info,onDone);
+    return;
+  }
+  if(a.country!==b.country){
+    animateFlightBetween(a,b,duration,onDone);
+    return;
+  }
+  hideAllTransport();
+  onDone();
 }
 function playGatewayFlight(direction,onDone){
   const stops=currentRoute().stops;
@@ -4470,11 +4730,13 @@ function routeDirectionIcon(a,b,{color,isFlight,dimmed,currentLeg,completed}={})
 
 function renderRouteLines(){
   const stops = currentRoute().stops;
-  if(!isPlaying) hideFlightPlane();
+  if(!isPlaying) hideAllTransport();
   for(let i=0;i<stops.length-1;i++){
     const a = stops[i], b = stops[i+1];
     const sameCountry = a.country === b.country;
-    const isFlight = !sameCountry;
+    const transport=transportForLeg(a,b);
+    const isFlight = transport ? transportHasFlight(transport) : !sameCountry;
+    const isWater = transportHasWater(transport);
     const dimmed = currentFilter !== 'All' && !(a.country === currentFilter || b.country === currentFilter);
     const completed = i < activeIndex;
     const currentLeg = i === activeIndex;
@@ -4483,7 +4745,7 @@ function renderRouteLines(){
       color: baseColor,
       weight: currentLeg ? (sameCountry?4.5:5) : (completed ? (sameCountry?3:2.5) : (sameCountry?1.8:2.2)),
       opacity: dimmed ? 0.10 : (currentLeg ? 1 : (completed ? 0.78 : (isFlight?0.58:0.30))),
-      dashArray: isFlight ? (currentLeg ? '7 8' : '6 9') : null,
+      dashArray: isFlight ? (currentLeg ? '7 8' : '6 9') : (isWater ? (currentLeg ? '3 6' : '2 7') : null),
       lineCap:'round'
     }).addTo(map);
     routeLayers.push(line);
@@ -4598,6 +4860,7 @@ function renderTimeline(){
             <span class="distance-kicker">From previous stop</span>
             <strong>${distanceLabel(distance.legKm)}</strong>
             <small>${fromLabel} → ${stop.place}</small>
+            ${transportLegHtml(distance.from,stop)}
           </div>
           <div class="distance-metric total">
             <span class="distance-kicker">Total travelled</span>
@@ -4654,6 +4917,7 @@ function renderActiveStop(){
         <small>From previous stop</small>
         <b>${distanceLabel(distance.legKm)}</b>
         <em>${fromLabel} → ${stop.place}</em>
+        ${transportLegHtml(distance.from,stop)}
       </span>
       <span>
         <small>Total travelled</small>
@@ -4709,7 +4973,7 @@ function stopPlayback(){
   isPlaying=false;
   if(playTimer){ clearTimeout(playTimer); playTimer=null; }
   if(planeAnimationFrame){ cancelAnimationFrame(planeAnimationFrame); planeAnimationFrame=null; }
-  hideFlightPlane();
+  hideAllTransport();
   const btn=document.getElementById('playBtn');
   btn.classList.remove('is-playing');
   btn.setAttribute('aria-label','Play route');
@@ -4733,18 +4997,20 @@ function playAdvance(){
   }
   const legIndex=activeIndex;
   const a=stops[legIndex], b=stops[legIndex+1];
-  const isFlight=a.country!==b.country;
+  const transport=transportForLeg(a,b);
+  const shouldAnimate=!!transport || a.country!==b.country;
 
-  if(isFlight){
-        hideFlightPlane();
-    map.fitBounds([[a.lat,a.lng],[b.lat,b.lng]],{padding:[120,120],animate:false});
+  if(shouldAnimate){
+    hideAllTransport();
+    const framingPoints=[a,...(transport?.waypoints||[]),b].map(point=>[point.lat,point.lng]);
+    map.fitBounds(framingPoints,{padding:[110,110],animate:false,maxZoom:7.5});
     playTimer=setTimeout(()=>{
       playTimer=null;
       if(!isPlaying || activeIndex!==legIndex) return;
-      animateFlightLeg(legIndex,4600,()=>{
+      animateFlightLeg(legIndex,4300,()=>{
         if(!isPlaying) return;
         setActiveStop(legIndex+1,true,false);
-        playTimer=setTimeout(()=>{playTimer=null;playAdvance()},1100);
+        playTimer=setTimeout(()=>{playTimer=null;playAdvance()},900);
       });
     },180);
   }else{
@@ -4752,8 +5018,8 @@ function playAdvance(){
       playTimer=null;
       if(!isPlaying) return;
       setActiveStop(legIndex+1,true,false);
-      playTimer=setTimeout(()=>{playTimer=null;playAdvance()},1100);
-    },1250);
+      playTimer=setTimeout(()=>{playTimer=null;playAdvance()},900);
+    },1150);
   }
 }
 function togglePlayback(){
@@ -4804,7 +5070,7 @@ function setActiveStop(index, fly=true, showPopup=false){
   }
   const stop = currentRoute().stops[activeIndex];
   currentFilter = stop.country;
-  if(!isPlaying) hideFlightPlane();
+  if(!isPlaying) hideAllTransport();
 
   // The itinerary panel is the single detail surface. Map bubbles are intentionally disabled.
   setSidebarCollapsed(false);
