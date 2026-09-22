@@ -2173,73 +2173,118 @@ header p{display:none!important}
 }
 
 /* ===== Clara inspiration video coverage ===== */
-.stop-thumb,.active-photo{position:relative}
+.stop-thumb,.active-photo{position:relative;overflow:hidden}
 .video-availability{
   position:absolute;
-  z-index:4;
-  display:flex;
+  z-index:6;
+  display:inline-flex;
   align-items:center;
   justify-content:center;
-  gap:3px;
-  padding:0;
+  gap:5px;
+  width:auto!important;
+  min-width:0!important;
+  max-width:calc(100% - 10px)!important;
+  height:auto!important;
+  padding:5px 7px!important;
   border-radius:999px!important;
   color:#fff!important;
-  background:rgba(28,47,60,.72)!important;
+  background:linear-gradient(180deg,rgba(25,45,58,.91),rgba(16,33,44,.84))!important;
   border:1px solid rgba(255,255,255,.72)!important;
   box-shadow:
-    0 7px 18px rgba(9,26,38,.22),
-    inset 0 1px 0 rgba(255,255,255,.30)!important;
+    0 7px 18px rgba(9,26,38,.28),
+    inset 0 1px 0 rgba(255,255,255,.28)!important;
   backdrop-filter:blur(14px) saturate(125%)!important;
   -webkit-backdrop-filter:blur(14px) saturate(125%)!important;
+  transition:transform .16s ease,background .16s ease,box-shadow .16s ease!important;
 }
 .video-availability.thumb{
-  right:5px;bottom:5px;
-  width:25px!important;height:25px!important;
-  min-width:25px!important;max-width:34px!important;
+  left:5px;right:auto;bottom:5px;
+  font-size:7.2px!important;
 }
 .video-availability.active{
-  right:10px;bottom:10px;
-  width:38px!important;height:38px!important;
+  left:12px;right:auto;bottom:12px;
+  padding:7px 10px!important;
+  font-size:9.5px!important;
+  box-shadow:
+    0 10px 24px rgba(9,26,38,.32),
+    inset 0 1px 0 rgba(255,255,255,.32)!important;
 }
-.video-availability svg{width:16px;height:16px;display:block}
-.video-availability.active svg{width:21px;height:21px}
+.video-availability svg{
+  flex:0 0 auto;
+  width:14px;height:14px;display:block
+}
+.video-availability.active svg{width:18px;height:18px}
+.video-cta-text{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-weight:900;
+  letter-spacing:-.01em;
+}
+.video-provider{
+  flex:0 0 auto;
+  padding-left:5px;
+  border-left:1px solid rgba(255,255,255,.28);
+  font-size:6.4px;
+  font-weight:760;
+  opacity:.76;
+}
+.video-availability.active .video-provider{font-size:7px}
 .video-availability:hover{
-  transform:scale(1.06);
-  background:rgba(24,42,55,.88)!important;
-}
-.video-count{
-  position:absolute;
-  top:-5px;right:-5px;
-  min-width:15px;height:15px;
-  padding:0 3px;
-  display:flex;align-items:center;justify-content:center;
-  border-radius:999px;
-  font-size:7px;font-weight:900;
-  color:#253b49;
-  background:rgba(248,252,254,.96);
-  border:1px solid rgba(255,255,255,.9);
-  box-shadow:0 3px 8px rgba(9,26,38,.18);
+  transform:translateY(-1px) scale(1.025);
+  background:linear-gradient(180deg,rgba(31,54,69,.97),rgba(17,36,48,.94))!important;
+  box-shadow:
+    0 10px 24px rgba(9,26,38,.34),
+    inset 0 1px 0 rgba(255,255,255,.34)!important;
 }
 .video-coverage-note{
-  display:flex;
-  align-items:center;
-  gap:6px;
-  margin:7px 0 2px;
-  padding:7px 9px;
-  border-radius:12px;
-  background:rgba(255,255,255,.24);
-  border:1px solid rgba(255,255,255,.46);
-  font-size:8px;
-  color:#657581;
+  width:100%!important;
+  display:grid!important;
+  grid-template-columns:27px minmax(0,1fr) 18px!important;
+  align-items:center!important;
+  gap:8px!important;
+  margin:8px 0 3px!important;
+  padding:8px 9px!important;
+  border-radius:13px!important;
+  text-align:left!important;
+  color:#314958!important;
+  background:linear-gradient(135deg,rgba(255,255,255,.42),rgba(215,233,242,.28))!important;
+  border:1px solid rgba(255,255,255,.62)!important;
+  box-shadow:0 5px 15px rgba(20,39,53,.08),inset 0 1px 0 rgba(255,255,255,.68)!important;
 }
-.video-coverage-note>span:first-child{
-  width:17px;height:17px;
+.coverage-play{
+  width:27px;height:27px;
   display:flex;align-items:center;justify-content:center;
-  color:#314a59;
+  border-radius:50%;
+  color:#fff;
+  background:rgba(37,64,80,.88);
+  box-shadow:0 4px 10px rgba(20,39,53,.18);
 }
-.video-coverage-note svg{width:17px;height:17px}
-.video-coverage-note b{font-size:8.5px;color:#304957}
-.video-coverage-note span:last-child{margin-left:auto;text-align:right}
+.coverage-play svg{width:16px;height:16px}
+.coverage-copy{display:block;min-width:0}
+.coverage-copy b{
+  display:block;
+  font-size:9px;
+  font-weight:900;
+  color:#294351;
+}
+.coverage-copy small{
+  display:block;
+  margin-top:2px;
+  font-size:7.6px;
+  line-height:1.25;
+  color:#667782;
+}
+.coverage-arrow{
+  font-size:19px;
+  line-height:1;
+  color:#526b7a;
+}
+.video-coverage-note:hover{
+  transform:translateY(-1px);
+  background:linear-gradient(135deg,rgba(255,255,255,.58),rgba(215,233,242,.38))!important;
+}
 
 body.video-modal-open{overflow:hidden}
 .video-modal[hidden]{display:none}
@@ -2388,6 +2433,35 @@ body.video-modal-open{overflow:hidden}
   .video-modal-head h2{font-size:16px}
   .video-modal-footer{grid-template-columns:31px 1fr auto 31px}
   .video-source-link{font-size:8px}
+}
+
+/* Portrait sources such as YouTube Shorts and TikTok should feel native, not letterboxed. */
+.video-modal-card.portrait-video{
+  width:min(455px,calc(100vw - 44px))!important;
+}
+.video-modal-card.portrait-video .video-modal-head{
+  align-items:center;
+}
+.video-player-shell.portrait{
+  width:min(370px,100%)!important;
+  max-height:min(68vh,720px);
+  margin-inline:auto;
+  aspect-ratio:9/16!important;
+  background:#05090c!important;
+}
+.video-modal-card.portrait-video .video-modal-footer{
+  max-width:370px;
+  margin-left:auto;
+  margin-right:auto;
+}
+@media(max-width:700px){
+  .video-modal-card.portrait-video{
+    width:min(410px,calc(100vw - 20px))!important;
+  }
+  .video-player-shell.portrait{
+    width:min(340px,100%)!important;
+    max-height:66vh;
+  }
 }
 </style>
 </head>
@@ -2777,41 +2851,53 @@ function videosFor(place){
     .map(item=>typeof item==='string'?{url:item,title:''}:item)
     .filter(item=>item?.url);
 }
-function parseVideoUrl(url){
+function parseVideoUrl(url,options={}){
   try{
     const parsed=new URL(url);
     const host=parsed.hostname.replace(/^www\./,'');
     let id='';
-    if(host==='youtu.be') id=parsed.pathname.split('/').filter(Boolean)[0] || '';
+    let platform='Video';
+    let aspect=options.aspect || '';
+
+    if(host==='youtu.be'){
+      id=parsed.pathname.split('/').filter(Boolean)[0] || '';
+      platform='YouTube';
+    }
+
     if(host.endsWith('youtube.com')){
+      const isShort=parsed.pathname.startsWith('/shorts/');
       if(parsed.pathname==='/watch') id=parsed.searchParams.get('v') || '';
       else{
         const match=parsed.pathname.match(/^\/(?:shorts|embed|live)\/([^/?#]+)/);
         if(match) id=match[1];
       }
+      platform=isShort?'YouTube Short':'YouTube';
+      if(!aspect) aspect=isShort?'portrait':'landscape';
     }
+
     if(id){
       return {
-        platform:'YouTube',
+        platform,
         id,
-        aspect:'landscape',
+        aspect:aspect || 'landscape',
         embedUrl:'https://www.youtube-nocookie.com/embed/'+encodeURIComponent(id)+'?rel=0&playsinline=1'
       };
     }
+
     if(host.endsWith('tiktok.com')){
       const match=parsed.pathname.match(/\/video\/(\d+)/);
       if(match){
         return {
           platform:'TikTok',
           id:match[1],
-          aspect:'portrait',
+          aspect:aspect || 'portrait',
           embedUrl:'https://www.tiktok.com/player/v1/'+match[1]+'?autoplay=0&controls=1&loop=0&music_info=1&description=1'
         };
       }
-      return {platform:'TikTok',id:'',aspect:'portrait',embedUrl:''};
+      return {platform:'TikTok',id:'',aspect:aspect || 'portrait',embedUrl:''};
     }
   }catch(error){}
-  return {platform:'Video',id:'',aspect:'landscape',embedUrl:''};
+  return {platform:'Video',id:'',aspect:options.aspect || 'landscape',embedUrl:''};
 }
 function videoIconSvg(){
   return '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 6.8 17 12l-8.5 5.2Z" fill="currentColor"/><rect x="3.2" y="3.2" width="17.6" height="17.6" rx="5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>';
@@ -2819,9 +2905,14 @@ function videoIconSvg(){
 function videoButtonHtml(place,variant='thumb'){
   const clips=videosFor(place);
   if(!clips.length) return '';
-  const count=clips.length>1?'<span class="video-count">'+clips.length+'</span>':'';
-  const label=clips.length>1?`${clips.length} videos for ${place}`:`Video for ${place}`;
-  return `<button class="video-availability ${variant}" type="button" data-video-place="${escapeHtml(place)}" aria-label="${escapeHtml(label)}" title="${escapeHtml(label)}">${videoIconSvg()}${count}</button>`;
+  const first=parseVideoUrl(clips[0].url,clips[0]);
+  const count=clips.length;
+  const label=count>1?`${count} video clips for ${place}`:`Watch video clip for ${place}`;
+  const buttonText=variant==='active'
+    ? (count>1?`Watch ${count} clips`:'Watch Clara’s clip')
+    : (count>1?`${count} clips`:'Watch clip');
+  const platform=first.platform==='YouTube Short'?'Short':first.platform;
+  return `<button class="video-availability ${variant}" type="button" data-video-place="${escapeHtml(place)}" aria-label="${escapeHtml(label)}" title="${escapeHtml(label)}">${videoIconSvg()}<span class="video-cta-text">${buttonText}</span><span class="video-provider">${platform}</span></button>`;
 }
 
 const mediaCache = new Map();
@@ -3726,7 +3817,7 @@ function renderActiveStop(){
     <div class="active-photo loading" id="activePhoto" aria-label="Real image of ${escapeHtml(stop.place)}">
       ${videoButtonHtml(stop.place,'active')}
     </div>
-    ${videosFor(stop.place).length ? `<div class="video-coverage-note"><span>${videoIconSvg()}</span><b>Clara’s inspiration</b><span>${videosFor(stop.place).length} clip${videosFor(stop.place).length===1?'':'s'} saved for this stop</span></div>` : ''}
+    ${videosFor(stop.place).length ? `<button class="video-coverage-note" type="button" data-video-place="${escapeHtml(stop.place)}"><span class="coverage-play">${videoIconSvg()}</span><span class="coverage-copy"><b>Clara’s inspiration</b><small>${videosFor(stop.place).length===1?'Watch the clip that helped inspire this stop':`Watch ${videosFor(stop.place).length} saved inspiration clips`}</small></span><span class="coverage-arrow">›</span></button>` : ''}
     ${publicStopNote(stop) ? `<div class="note">${publicStopNote(stop)}</div>` : ''}
     <div id="activeMediaMeta"></div>
     <button class="view-itinerary-btn" id="viewItineraryBtn" type="button">Open itinerary →</button>
@@ -4086,8 +4177,9 @@ function renderVideoModal(){
   if(!clips.length){ closeVideoModal(); return; }
   videoModalIndex=Math.max(0,Math.min(videoModalIndex,clips.length-1));
   const clip=clips[videoModalIndex];
-  const parsed=parseVideoUrl(clip.url);
+  const parsed=parseVideoUrl(clip.url,clip);
   const modal=document.getElementById('videoModal');
+  const card=modal.querySelector('.video-modal-card');
   const shell=document.getElementById('videoPlayerShell');
   document.getElementById('videoModalTitle').textContent=clip.title || videoModalPlace;
   document.getElementById('videoPlatform').textContent=parsed.platform;
@@ -4098,6 +4190,8 @@ function renderVideoModal(){
   document.getElementById('videoPrev').disabled=videoModalIndex===0;
   document.getElementById('videoNext').disabled=videoModalIndex===clips.length-1;
   shell.className='video-player-shell '+parsed.aspect;
+  card.classList.toggle('portrait-video',parsed.aspect==='portrait');
+  card.classList.toggle('landscape-video',parsed.aspect!=='portrait');
   shell.innerHTML=parsed.embedUrl
     ? `<iframe src="${parsed.embedUrl}" title="${escapeHtml(clip.title || videoModalPlace)}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>`
     : `<div class="video-fallback"><span>${videoIconSvg()}</span><b>This link opens on ${parsed.platform}</b><p>The original clip can still be opened without leaving Clara’s itinerary context permanently.</p><a href="${clip.url}" target="_blank" rel="noopener noreferrer">Open clip ↗</a></div>`;
@@ -4117,6 +4211,8 @@ function closeVideoModal(){
   modal.hidden=true;
   modal.setAttribute('aria-hidden','true');
   document.getElementById('videoPlayerShell').innerHTML='';
+  const card=modal.querySelector('.video-modal-card');
+  card?.classList.remove('portrait-video','landscape-video');
   document.body.classList.remove('video-modal-open');
 }
 document.addEventListener('click',event=>{
