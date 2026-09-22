@@ -3423,6 +3423,51 @@ body.video-modal-open{overflow:hidden}
   .country-entry-outline{animation:none!important}
   .country-entry-hud{transition:none!important}
 }
+
+/* ===== Map-anchored moving transport: remains exactly on route during camera movement ===== */
+.moving-transport-marker{
+  width:52px;
+  height:52px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  pointer-events:none;
+  filter:
+    drop-shadow(0 3px 4px rgba(0,0,0,.62))
+    drop-shadow(0 0 3px rgba(255,255,255,.96));
+}
+.moving-transport-marker .moving-transport-art{
+  width:100%;
+  height:100%;
+  display:block;
+  object-fit:contain;
+  transform-origin:50% 50%;
+  will-change:transform;
+}
+.moving-transport-marker.plane{width:49px;height:49px}
+.moving-transport-marker.bus{width:50px;height:50px}
+.moving-transport-marker.minibus{width:47px;height:47px}
+.moving-transport-marker.taxi{width:45px;height:45px}
+.moving-transport-marker.train{width:54px;height:54px}
+.moving-transport-marker.ferry{width:58px;height:58px}
+.moving-transport-marker.boat{width:52px;height:52px}
+.moving-plane-svg .plane-fuselage,
+.moving-plane-svg .plane-wing,
+.moving-plane-svg .plane-tail{
+  fill:#f8fbfd;
+  stroke:#172635;
+  stroke-width:2.1;
+  stroke-linejoin:round;
+  stroke-linecap:round;
+}
+.moving-plane-svg .plane-wing{fill:#eaf1f6}
+.moving-plane-svg .plane-tail{fill:#eef4f8}
+.moving-plane-svg .plane-cockpit{fill:#4f8fb7;stroke:#172635;stroke-width:1.4}
+@media(max-width:760px){
+  .moving-transport-marker{width:46px;height:46px}
+  .moving-transport-marker.train{width:48px;height:48px}
+  .moving-transport-marker.ferry{width:50px;height:50px}
+}
 </style>
 </head>
 <body>
@@ -4154,6 +4199,9 @@ map.attributionControl.setPrefix(false);
 map.createPane('countryEntryPane');
 map.getPane('countryEntryPane').style.zIndex='390';
 map.getPane('countryEntryPane').style.pointerEvents='none';
+map.createPane('transportPane');
+map.getPane('transportPane').style.zIndex='1460';
+map.getPane('transportPane').style.pointerEvents='none';
 const esriImagery = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
   maxZoom:19,
   attribution:'Imagery © Esri',
@@ -4171,7 +4219,7 @@ const esriFallback = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/se
   crossOrigin:true
 });
 function updateReferenceLanguageMode(){
-  const close=map.getZoom()>=7;
+  const close=map.getZoom()>=5.5;
   esriReference.setOpacity(close?0:.96);
   updateStopLabelVisibility();
 }
@@ -4194,6 +4242,8 @@ let countryEntryClearTimer = null;
 let routeLayers = [];
 let markers = [];
 let planeAnimationFrame = null;
+let movingTransportMarker = null;
+let movingTransportMode = null;
 let activeIndex = 0;
 let currentFilter = 'All';
 let playTimer = null;
@@ -4727,23 +4777,46 @@ function playbackSafePadding(){
   };
 }
 
-function focusPlaybackLeg(a,b,transport){
+function smoothFlyToBounds(bounds,options={},onDone){
+  if(!bounds?.isValid?.()) { if(onDone) onDone(); return; }
+  let finished=false;
+  const duration=options.duration ?? .9;
+  const done=()=>{
+    if(finished) return;
+    finished=true;
+    map.off('moveend',done);
+    if(onDone) onDone();
+  };
+  map.once('moveend',done);
+  map.flyToBounds(bounds,{
+    ...options,
+    animate:true,
+    duration,
+    easeLinearity:.18
+  });
+  window.setTimeout(done,duration*1000+320);
+}
+
+function focusPlaybackLeg(a,b,transport,onDone){
   const points=[a,...(transport?.waypoints||[]),b];
   const bounds=L.latLngBounds(points.map(point=>[point.lat,point.lng]));
-  if(!bounds.isValid()) return;
+  if(!bounds.isValid()){ if(onDone) onDone(); return; }
 
   const legKm=haversineKm(a,b);
   const international=a.country!==b.country;
   const legMaxZoom=international
-    ? 5.25
+    ? 5.0
     : (legKm<35?10.4:legKm<80?9.6:legKm<150?8.9:legKm<250?8.2:7.6);
   const padding=playbackSafePadding();
 
-  map.fitBounds(bounds.pad(.018),{
+  smoothFlyToBounds(bounds.pad(.065),{
     paddingTopLeft:padding.topLeft,
     paddingBottomRight:padding.bottomRight,
-    animate:false,
-    maxZoom:window.innerWidth<=760?Math.min(legMaxZoom,9.8):legMaxZoom
+    maxZoom:window.innerWidth<=760?Math.min(legMaxZoom,9.8):legMaxZoom,
+    duration:international?1.05:.82
+  },()=>{
+    setMarkerStates();
+    if(onDone) onDone();
   });
 }
 
@@ -4874,11 +4947,12 @@ function focusDestinationCountry(country){
   const bounds=countryBounds(country);
   if(!bounds?.isValid()) return;
   const mobile=window.innerWidth<=760;
-  map.flyToBounds(bounds.pad(.045),{
+  map.flyToBounds(bounds.pad(.055),{
     paddingTopLeft:mobile?[28,42]:[48,50],
     paddingBottomRight:mobile?[28,136]:[48,112],
-    maxZoom:4.95,
-    duration:.78
+    maxZoom:4.85,
+    duration:1.05,
+    easeLinearity:.18
   });
 }
 function routeStopsInCountry(country){
@@ -4890,11 +4964,12 @@ function focusCountryRoutePins(country){
   const bounds=L.latLngBounds(stops.map(stop=>[stop.lat,stop.lng]));
   if(!bounds.isValid()) return;
   const mobile=window.innerWidth<=760;
-  map.flyToBounds(bounds.pad(.12),{
+  map.flyToBounds(bounds.pad(.10),{
     paddingTopLeft:mobile?[34,46]:[54,52],
     paddingBottomRight:mobile?[34,140]:[54,118],
-    maxZoom:mobile?5.85:6.35,
-    duration:.72
+    maxZoom:mobile?5.75:6.15,
+    duration:.90,
+    easeLinearity:.18
   });
 }
 function focusFlightArrivalRegion(destination){
@@ -4922,7 +4997,7 @@ function focusFlightArrivalRegion(destination){
 function focusFlightPinpoint(destination){
   if(!destination) return;
   const mobile=window.innerWidth<=760;
-  map.flyTo([destination.lat,destination.lng],mobile?7.35:8.05,{duration:.62});
+  map.flyTo([destination.lat,destination.lng],mobile?7.25:7.85,{duration:.72,easeLinearity:.18});
 }
 function renderCountryOverlays(){
   if(!countryGeoData) return;
@@ -4969,55 +5044,92 @@ function flightScreenAngle(a,b){
   const pb=map.latLngToContainerPoint([b.lat,b.lng]);
   return Math.atan2(pb.y-pa.y,pb.x-pa.x)*180/Math.PI;
 }
-function setFlightPlane(a,b,t){
-  const el=document.getElementById('flightPlane');
-  if(!el||!a||!b||!isPlaying){ hideFlightPlane(); return; }
+function movingPlaneMarkup(){
+  return `<div class="moving-transport-marker plane"><svg class="moving-transport-art moving-plane-svg" viewBox="0 0 120 120" aria-hidden="true">
+    <path class="plane-wing" d="M55 52 43 14c-1-4 1-7 5-8l6-1 19 45Z"/>
+    <path class="plane-wing" d="M55 68 43 106c-1 4 1 7 5 8l6 1 19-45Z"/>
+    <path class="plane-tail" d="M28 54 15 35c-2-3 0-5 3-5h5l17 22Z"/>
+    <path class="plane-tail" d="M28 66 15 85c-2 3 0 5 3 5h5l17-22Z"/>
+    <path class="plane-fuselage" d="M9 60c0-4 3-7 8-8l73-7c12-1 21 5 25 15-4 10-13 16-25 15l-73-7c-5-1-8-4-8-8Z"/>
+    <path class="plane-cockpit" d="M94 50c7 0 12 3 15 10-3 7-8 10-15 10l5-10Z"/>
+  </svg></div>`;
+}
+function movingTransportMarkup(mode){
+  if(mode==='flight') return movingPlaneMarkup();
+  const src=TRANSPORT_ICONS[mode];
+  return src ? `<div class="moving-transport-marker ${mode}"><img class="moving-transport-art" src="${src}" alt=""></div>` : '';
+}
+function clearMovingTransportMarker(){
+  if(movingTransportMarker && map.hasLayer(movingTransportMarker)) map.removeLayer(movingTransportMarker);
+  movingTransportMarker=null;
+  movingTransportMode=null;
+}
+function ensureMovingTransportMarker(mode){
+  if(movingTransportMarker && movingTransportMode===mode) return movingTransportMarker;
+  clearMovingTransportMarker();
+  const html=movingTransportMarkup(mode);
+  if(!html) return null;
+  movingTransportMode=mode;
+  movingTransportMarker=L.marker([0,0],{
+    pane:'transportPane',
+    interactive:false,
+    keyboard:false,
+    zIndexOffset:2200,
+    icon:L.divIcon({
+      className:'',
+      html,
+      iconSize:[60,60],
+      iconAnchor:[30,30]
+    })
+  }).addTo(map);
+  return movingTransportMarker;
+}
+function projectedLegPoint(a,b,t){
+  const zoom=map.getZoom();
+  const pa=map.project([a.lat,a.lng],zoom);
+  const pb=map.project([b.lat,b.lng],zoom);
+  return map.unproject(L.point(
+    pa.x+(pb.x-pa.x)*t,
+    pa.y+(pb.y-pa.y)*t
+  ),zoom);
+}
+function flightScreenAngle(a,b){
   const pa=map.latLngToContainerPoint([a.lat,a.lng]);
   const pb=map.latLngToContainerPoint([b.lat,b.lng]);
-  const x=pa.x+(pb.x-pa.x)*t;
-  const y=pa.y+(pb.y-pa.y)*t;
-  const svg=el.querySelector('svg');
-  el.style.left=x+'px';
-  el.style.top=y+'px';
-  el.classList.add('visible');
-  if(svg) svg.style.transform=`rotate(${Math.atan2(pb.y-pa.y,pb.x-pa.x)*180/Math.PI}deg)`;
+  return Math.atan2(pb.y-pa.y,pb.x-pa.x)*180/Math.PI;
+}
+function setFlightPlane(a,b,t){
+  setTransportVehicle(a,b,t,'flight');
 }
 function hideFlightPlane(){
-  const el=document.getElementById('flightPlane');
-  if(el) el.classList.remove('visible');
+  const legacy=document.getElementById('flightPlane');
+  if(legacy) legacy.classList.remove('visible');
+  if(movingTransportMode==='flight') clearMovingTransportMarker();
 }
 function hideTransportVehicle(){
-  const el=document.getElementById('transportVehicle');
-  if(el){
-    el.classList.remove('visible','mode-bus','mode-minibus','mode-taxi','mode-train','mode-ferry','mode-boat');
-  }
+  const legacy=document.getElementById('transportVehicle');
+  if(legacy) legacy.classList.remove('visible','mode-bus','mode-minibus','mode-taxi','mode-train','mode-ferry','mode-boat');
+  if(movingTransportMode && movingTransportMode!=='flight') clearMovingTransportMarker();
 }
 function hideAllTransport(){
-  hideFlightPlane();
-  hideTransportVehicle();
+  const legacyPlane=document.getElementById('flightPlane');
+  const legacyVehicle=document.getElementById('transportVehicle');
+  if(legacyPlane) legacyPlane.classList.remove('visible');
+  if(legacyVehicle) legacyVehicle.classList.remove('visible','mode-bus','mode-minibus','mode-taxi','mode-train','mode-ferry','mode-boat');
+  clearMovingTransportMarker();
 }
 function setTransportVehicle(a,b,t,mode){
-  if(mode==='flight'){
-    hideTransportVehicle();
-    setFlightPlane(a,b,t);
-    return;
+  if(!a||!b||!isPlaying){ hideAllTransport(); return; }
+  const marker=ensureMovingTransportMarker(mode);
+  if(!marker) return;
+  const pos=projectedLegPoint(a,b,t);
+  marker.setLatLng(pos);
+
+  const art=marker.getElement()?.querySelector('.moving-transport-art');
+  if(art){
+    const angle=flightScreenAngle(a,b)+(mode==='flight'?0:90);
+    art.style.transform=`rotate(${angle}deg)`;
   }
-  const src=TRANSPORT_ICONS[mode];
-  const el=document.getElementById('transportVehicle');
-  const img=document.getElementById('transportVehicleImage');
-  if(!el||!img||!src||!a||!b||!isPlaying){ hideTransportVehicle(); return; }
-  hideFlightPlane();
-  const pa=map.latLngToContainerPoint([a.lat,a.lng]);
-  const pb=map.latLngToContainerPoint([b.lat,b.lng]);
-  const x=pa.x+(pb.x-pa.x)*t;
-  const y=pa.y+(pb.y-pa.y)*t;
-  const angle=Math.atan2(pb.y-pa.y,pb.x-pa.x)*180/Math.PI;
-  img.src=src;
-  img.alt=TRANSPORT_MODE_LABELS[mode] || mode;
-  img.style.transform=`rotate(${angle+90}deg)`;
-  el.style.left=x+'px';
-  el.style.top=y+'px';
-  el.className='transport-vehicle-overlay visible mode-'+mode;
 }
 function interpolateLeg(a,b,t){
   return [a.lat+(b.lat-a.lat)*t,a.lng+(b.lng-a.lng)*t];
@@ -5034,16 +5146,16 @@ function animateTransportBetween(a,b,mode,duration,onDone,startT=0,endT=1){
     const eased=raw<.5?2*raw*raw:1-Math.pow(-2*raw+2,2)/2;
     const t=startT+(endT-startT)*eased;
 
-    if(crossCountryFlight && raw>=.18 && countryStage<1){
+    if(crossCountryFlight && raw>=.20 && countryStage<1){
       countryStage=1;
       showCountryEntry(b.country);
       focusDestinationCountry(b.country);
     }
-    if(crossCountryFlight && raw>=.54 && countryStage<2){
+    if(crossCountryFlight && raw>=.58 && countryStage<2){
       countryStage=2;
       focusCountryRoutePins(b.country);
     }
-    if(crossCountryFlight && raw>=.82 && countryStage<3){
+    if(crossCountryFlight && raw>=.86 && countryStage<3){
       countryStage=3;
       focusFlightPinpoint(b);
     }
@@ -5138,19 +5250,23 @@ function playGatewayFlight(direction,onDone){
   airportMarker.bindTooltip('GOT · Landvetter',{permanent:true,direction:'right',offset:[8,0],className:'gateway-airport-label'});
   routeLayers.push(airportMarker);
 
-  map.fitBounds([[a.lat,a.lng],[b.lat,b.lng]],{padding:[95,95],animate:false,maxZoom:4});
   gatewayLine.bringToFront();
   airportMarker.bringToFront();
 
-  playTimer=setTimeout(()=>{
-    playTimer=null;
+  const gatewayBounds=L.latLngBounds([[a.lat,a.lng],[b.lat,b.lng]]);
+  smoothFlyToBounds(gatewayBounds.pad(.045),{
+    paddingTopLeft:[72,72],
+    paddingBottomRight:[72,150],
+    maxZoom:4,
+    duration:1.15
+  },()=>{
     if(!isPlaying) return;
     animateFlightBetween(a,b,5400,()=>{
       gatewayPlaybackPhase=null;
       renderTripCalendar();
       if(onDone) onDone();
     });
-  },220);
+  });
 }
 
 function routeDirectionIcon(a,b,{color,isFlight,dimmed,currentLeg,completed}={}){
@@ -5180,7 +5296,8 @@ function renderRouteLines(){
     const completed = i < activeIndex;
     const currentLeg = i === activeIndex;
     const baseColor = sameCountry ? COLORS[a.country] : '#f8fafc';
-    const line = L.polyline([[a.lat,a.lng],[b.lat,b.lng]], {
+    const pathNodes=[a,...(transport?.waypoints||[]),b];
+    const line = L.polyline(pathNodes.map(point=>[point.lat,point.lng]), {
       color: baseColor,
       weight: currentLeg ? (sameCountry?4.5:5) : (completed ? (sameCountry?3:2.5) : (sameCountry?1.8:2.2)),
       opacity: dimmed ? 0.10 : (currentLeg ? 1 : (completed ? 0.78 : (isFlight?0.58:0.30))),
@@ -5189,21 +5306,26 @@ function renderRouteLines(){
     }).addTo(map);
     routeLayers.push(line);
 
-    // A single arrow on each leg makes the travel order legible without turning the map into a chevron pattern.
-    const arrowPoint=interpolateLeg(a,b,0.58);
-    const arrow=L.marker(arrowPoint,{
-      icon:routeDirectionIcon(a,b,{
-        color:sameCountry?COLORS[a.country]:'#ffffff',
-        isFlight,
-        dimmed,
-        currentLeg,
-        completed
-      }),
-      interactive:false,
-      keyboard:false,
-      zIndexOffset:currentLeg?420:260
-    }).addTo(map);
-    routeLayers.push(arrow);
+    // Direction arrows follow every actual path segment, including waypoint journeys.
+    for(let segment=0;segment<pathNodes.length-1;segment++){
+      const from=pathNodes[segment], to=pathNodes[segment+1];
+      const segmentMode=transport?.modes?.[segment] || transport?.modes?.[0] || (sameCountry?'ground':'flight');
+      const segmentIsFlight=segmentMode==='flight';
+      const arrowPoint=interpolateLeg(from,to,0.58);
+      const arrow=L.marker(arrowPoint,{
+        icon:routeDirectionIcon(from,to,{
+          color:sameCountry?COLORS[a.country]:'#ffffff',
+          isFlight:segmentIsFlight,
+          dimmed,
+          currentLeg,
+          completed
+        }),
+        interactive:false,
+        keyboard:false,
+        zIndexOffset:currentLeg?420:260
+      }).addTo(map);
+      routeLayers.push(arrow);
+    }
   }
 }
 function renderMarkers(){
@@ -5457,10 +5579,8 @@ function playAdvance(){
 
   if(shouldAnimate){
     hideAllTransport();
-    focusPlaybackLeg(a,b,transport);
     setMarkerStates();
-    playTimer=setTimeout(()=>{
-      playTimer=null;
+    focusPlaybackLeg(a,b,transport,()=>{
       if(!isPlaying || activeIndex!==legIndex) return;
       animateFlightLeg(legIndex,4300,()=>{
         if(!isPlaying) return;
@@ -5468,7 +5588,7 @@ function playAdvance(){
         if(a.country!==b.country) scheduleCountryEntryClear(2400);
         playTimer=setTimeout(()=>{playTimer=null;playAdvance()},ARRIVAL_DWELL_MS);
       });
-    },180);
+    });
   }else{
     playTimer=setTimeout(()=>{
       playTimer=null;
