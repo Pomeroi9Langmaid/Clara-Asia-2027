@@ -2705,6 +2705,181 @@ body.video-modal-open{overflow:hidden}
 @media(prefers-reduced-motion:reduce){
   .video-modal-card{animation:none!important}
 }
+
+/* ===== Timeline-first navigation + adaptive map framing ===== */
+
+/* The old country strip is intentionally retired. Country navigation now lives in the journey footer. */
+.country-bar{display:none!important}
+.shell{height:calc(100vh - 45px)!important}
+
+/* Give the footer enough visual authority to replace the removed country strip. */
+.trip-calendar{
+  bottom:12px!important;
+  width:min(1440px,calc(100% - 42px))!important;
+  min-height:88px!important;
+  padding:8px 13px 10px!important;
+}
+.trip-calendar-head{
+  grid-template-columns:minmax(150px,1fr) auto minmax(150px,1fr)!important;
+  min-height:22px!important;
+  margin-bottom:6px!important;
+}
+.timeline-all{
+  justify-self:center;
+  min-height:23px!important;
+  padding:4px 10px!important;
+  border-radius:999px!important;
+  border:1px solid rgba(255,255,255,.62)!important;
+  background:rgba(255,255,255,.32)!important;
+  color:#304957!important;
+  font-size:8px!important;
+  font-weight:900!important;
+  letter-spacing:.012em;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.68),0 3px 9px rgba(14,31,43,.08)!important;
+}
+.timeline-all:hover{
+  background:rgba(255,255,255,.50)!important;
+}
+.timeline-all.active{
+  background:rgba(44,67,81,.78)!important;
+  color:#fff!important;
+  border-color:rgba(255,255,255,.72)!important;
+}
+.trip-track{
+  height:55px!important;
+  border-radius:15px!important;
+}
+.month-band{
+  top:0!important;
+  height:17px!important;
+  padding-left:8px!important;
+  font-size:8.5px!important;
+}
+.country-stay{
+  appearance:none!important;
+  -webkit-appearance:none!important;
+  top:20px!important;
+  height:23px!important;
+  min-width:0!important;
+  padding:0 7px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:6px!important;
+  overflow:hidden!important;
+  border-radius:8px!important;
+  opacity:.88!important;
+  filter:saturate(1.08) brightness(1.00)!important;
+  border:1px solid rgba(255,255,255,.54)!important;
+  box-shadow:
+    0 3px 8px rgba(8,25,37,.16),
+    inset 0 1px 0 rgba(255,255,255,.22)!important;
+  color:#fff!important;
+  text-align:left!important;
+  cursor:pointer!important;
+  z-index:2!important;
+  transform:none!important;
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+}
+.country-stay:hover{
+  opacity:1!important;
+  filter:saturate(1.18) brightness(1.04)!important;
+  transform:translateY(-1px)!important;
+}
+.country-stay.past{
+  opacity:.53!important;
+  filter:saturate(.58) brightness(1.02)!important;
+}
+.country-stay.current{
+  opacity:1!important;
+  filter:saturate(1.20) brightness(1.02)!important;
+  border-color:rgba(255,255,255,.96)!important;
+  box-shadow:
+    0 4px 11px rgba(8,25,37,.22),
+    0 0 0 2px rgba(255,255,255,.20),
+    inset 0 1px 0 rgba(255,255,255,.32)!important;
+  z-index:3!important;
+}
+.country-stay-name{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-size:9px;
+  line-height:1;
+  font-weight:950;
+  letter-spacing:.005em;
+  color:#fff;
+  text-shadow:0 1px 3px rgba(13,26,35,.32);
+}
+.country-stay-dates{
+  flex:0 0 auto;
+  white-space:nowrap;
+  font-size:6.8px;
+  line-height:1;
+  font-weight:800;
+  color:rgba(255,255,255,.82);
+  text-shadow:0 1px 2px rgba(13,26,35,.24);
+}
+.trip-track::after{display:none!important}
+.calendar-stop{
+  top:38px!important;
+  width:7px!important;
+  height:12px!important;
+  z-index:6!important;
+  border:1.5px solid rgba(255,255,255,.96)!important;
+  box-shadow:0 2px 5px rgba(8,25,37,.20)!important;
+}
+.calendar-stop.active{
+  top:35px!important;
+  width:12px!important;
+  height:18px!important;
+}
+.country-arrival{display:none!important}
+.timeline-playhead::after,
+.timeline-playhead::before{top:43px!important}
+.timeline-playhead-label{top:-25px!important}
+
+/* Player lifts with the larger footer. */
+.journey-dock{bottom:116px!important}
+
+@media(max-width:1100px){
+  .trip-calendar{
+    bottom:10px!important;
+    width:calc(100% - 24px)!important;
+  }
+  .journey-dock{bottom:112px!important}
+  .country-stay-dates{display:none}
+}
+@media(max-width:960px){
+  .shell{height:auto!important}
+  .map-wrap{height:76vh!important}
+}
+@media(max-width:760px){
+  .trip-calendar{
+    bottom:7px!important;
+    width:calc(100% - 12px)!important;
+    min-height:68px!important;
+    padding:6px 7px 8px!important;
+  }
+  .trip-calendar-head{
+    display:grid!important;
+    grid-template-columns:1fr auto 1fr!important;
+    min-height:18px!important;
+    margin-bottom:4px!important;
+  }
+  .timeline-all{min-height:20px!important;padding:3px 7px!important;font-size:7px!important}
+  .trip-track{height:44px!important}
+  .month-band{height:13px!important;font-size:7px!important}
+  .country-stay{top:16px!important;height:19px!important;padding:0 4px!important;border-radius:6px!important}
+  .country-stay-name{font-size:7px}
+  .calendar-stop{top:32px!important;height:10px!important;width:6px!important}
+  .calendar-stop.active{top:29px!important;height:15px!important;width:10px!important}
+  .timeline-playhead::after,.timeline-playhead::before{top:36px!important}
+  .timeline-playhead-label{display:none!important}
+  .journey-dock{bottom:88px!important}
+}
 </style>
 </head>
 <body>
@@ -2807,7 +2982,7 @@ body.video-modal-open{overflow:hidden}
       <div class="section country-overview" id="countryOverview"></div>
     </div>
 
-    <div class="footer-note">Map markers, the itinerary and the country strip all navigate the same route.</div><div class="photo-truth">Real destination photography: Wikipedia / Wikimedia.</div>
+    <div class="footer-note">Map markers, the itinerary and the journey timeline all navigate the same route.</div><div class="photo-truth">Real destination photography: Wikipedia / Wikimedia.</div>
   </aside>
 </div>
 
@@ -3729,14 +3904,8 @@ function renderTripCalendar(){
     const stayStart=daySerial(w.start), stayEnd=daySerial(w.endExclusive);
     const left=timelinePct(w.start);
     const width=((stayEnd-stayStart)/total)*100;
-    let background=COLORS[w.country];
-    if(activeSerial>=stayEnd){
-      background='#b9c0c6';
-    }else if(activeSerial>stayStart && activeSerial<stayEnd){
-      const within=Math.max(0,Math.min(100,((activeSerial-stayStart)/(stayEnd-stayStart))*100));
-      background=`linear-gradient(90deg,#b9c0c6 0%,#b9c0c6 ${within}%,${COLORS[w.country]} ${within}%,${COLORS[w.country]} 100%)`;
-    }
-    return `<div class="country-stay" style="left:${left}%;width:${width}%;background:${background};--country-color:${COLORS[w.country]}" title="${w.country}: ${compactDateRange(w.start,w.end)}"></div>`;
+    const state=activeSerial>=stayEnd?'past':(activeSerial>=stayStart&&activeSerial<stayEnd?'current':'future');
+    return `<button class="country-stay ${state}" type="button" data-timeline-country="${w.country}" style="left:${left}%;width:${width}%;background:${COLORS[w.country]};--country-color:${COLORS[w.country]}" title="${w.country}: ${compactDateRange(w.start,w.end)}" aria-label="View ${w.country}, ${compactDateRange(w.start,w.end)}"><span class="country-stay-name">${w.country}</span><span class="country-stay-dates">${compactDateRange(w.start,w.end)}</span></button>`;
   }).join('');
 
   const stops=route.stops.map((stop,index)=>{
@@ -3774,6 +3943,7 @@ function renderTripCalendar(){
   document.getElementById('tripCalendar').innerHTML=`
     <div class="trip-calendar-head">
       <span class="timeline-endpoint"><b>GOT</b><small>Landvetter · 1 Feb</small></span>
+      <button class="timeline-all${currentFilter==='All'?' active':''}" type="button" data-timeline-country="All" aria-label="Show the whole trip">Whole trip</button>
       <span class="timeline-endpoint end"><small>2 May · Landvetter</small><b>GOT</b></span>
     </div>
     <div class="trip-track${isPlaying?' playing':''}">
@@ -3784,6 +3954,9 @@ function renderTripCalendar(){
   document.querySelectorAll('.calendar-stop').forEach(btn=>btn.addEventListener('click',()=>{
     stopPlayback();
     setActiveStop(Number(btn.dataset.index),true,true);
+  }));
+  document.querySelectorAll('[data-timeline-country]').forEach(btn=>btn.addEventListener('click',()=>{
+    setFilter(btn.dataset.timelineCountry);
   }));
 }
 
@@ -3825,8 +3998,53 @@ function popupOffsetFor(stop){
   return L.point(xByCountry[stop.country] || 118, -10);
 }
 
+const MAP_FOCUS_GROUPS = [
+  ['Bangkok'],
+  ['Chiang Mai','Pai'],
+  ['Krabi / Ao Nang','Koh Yao Noi','Khao Sok'],
+  ['Hanoi','Sapa','Ha Giang','Cat Ba','Ninh Binh'],
+  ['Hue','Da Nang','Hoi An'],
+  ['Ho Chi Minh City'],
+  ['Cebu City','Moalboal','Bohol / Panglao','El Nido','Coron'],
+  ['Yogyakarta'],
+  ['Mount Bromo','Ijen'],
+  ['Ubud','Canggu','Uluwatu'],
+  ['Osaka','Kyoto','Kinosaki Onsen'],
+  ['Hakone','Tokyo']
+];
+
 function currentRoute(){
   return ROUTES[document.getElementById('routeSelect').value];
+}
+
+function contextualStopsFor(index){
+  const route=currentRoute();
+  const stop=route.stops[index];
+  if(!stop) return [];
+  const group=MAP_FOCUS_GROUPS.find(items=>items.includes(stop.place));
+  if(!group) return [stop];
+  const context=route.stops.filter(item=>group.includes(item.place));
+  return context.length?context:[stop];
+}
+
+function focusMapForStop(index,{animate=true}={}){
+  const context=contextualStopsFor(index);
+  if(!context.length) return;
+  if(context.length===1){
+    const stop=context[0];
+    map.flyTo([stop.lat,stop.lng],8.35,{duration:animate?.72:0});
+    return;
+  }
+
+  const bounds=L.latLngBounds(context.map(stop=>[stop.lat,stop.lng]));
+  if(!bounds.isValid()) return;
+  const maxZoom=context.length<=2?8.6:(context.length<=4?7.9:7.4);
+  map.flyToBounds(bounds.pad(.06),{
+    paddingTopLeft:[54,54],
+    paddingBottomRight:[54,150],
+    maxZoom,
+    duration:animate?.78:0
+  });
 }
 function filteredStops(){
   const stops = currentRoute().stops;
@@ -4315,6 +4533,7 @@ function togglePlayback(){
   }
 }
 function setActiveStop(index, fly=true, showPopup=false){
+  const wasSidebarCollapsed=sidebarIsCollapsed();
   const previousStop = currentRoute().stops[activeIndex];
   activeIndex = Math.max(0, Math.min(index, currentRoute().stops.length - 1));
   if(!isPlaying && activeIndex===0){
@@ -4341,7 +4560,13 @@ function setActiveStop(index, fly=true, showPopup=false){
   renderActiveStop();
   updateJourneyControls();
 
-  if(fly) map.flyTo([stop.lat, stop.lng], Math.max(map.getZoom(), 6), { duration:.8 });
+  if(fly){
+    const focusDelay=wasSidebarCollapsed?310:24;
+    window.setTimeout(()=>{
+      map.invalidateSize({pan:false});
+      focusMapForStop(activeIndex,{animate:true});
+    },focusDelay);
+  }
   window.setTimeout(scrollActiveItineraryCard, fly ? 260 : 80);
 }
 function renderCountryOverlaysOnly(){
