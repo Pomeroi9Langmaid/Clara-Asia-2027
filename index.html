@@ -3235,6 +3235,79 @@ body.video-modal-open{overflow:hidden}
   .transport-mode-icon img{width:22px;height:22px}
   .transport-leg-copy b{font-size:8.5px}
 }
+
+/* ===== Country-entry choreography during international flights ===== */
+.country-entry-outline{
+  vector-effect:non-scaling-stroke;
+  animation:countryEntryPulse 1.7s ease-in-out infinite;
+  filter:drop-shadow(0 0 5px rgba(255,255,255,.38));
+}
+@keyframes countryEntryPulse{
+  0%,100%{stroke-opacity:.68;fill-opacity:.08;stroke-width:3}
+  50%{stroke-opacity:1;fill-opacity:.18;stroke-width:5}
+}
+.country-entry-label-wrap{
+  background:transparent!important;
+  border:0!important;
+}
+.country-entry-label{
+  min-width:122px;
+  padding:7px 11px 8px;
+  border-radius:13px;
+  text-align:center;
+  color:#fff;
+  background:rgba(20,35,46,.72);
+  border:1px solid rgba(255,255,255,.62);
+  box-shadow:
+    0 9px 22px rgba(6,21,31,.22),
+    inset 0 1px 0 rgba(255,255,255,.18);
+  backdrop-filter:blur(14px) saturate(120%);
+  -webkit-backdrop-filter:blur(14px) saturate(120%);
+  transform:translate(-50%,-50%);
+  animation:countryEntryLabelIn .45s cubic-bezier(.2,.72,.25,1) both;
+  pointer-events:none;
+}
+.country-entry-label span{
+  display:block;
+  margin-bottom:2px;
+  font-size:7px;
+  line-height:1;
+  font-weight:900;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  color:rgba(255,255,255,.70);
+}
+.country-entry-label strong{
+  display:block;
+  font-size:16px;
+  line-height:1.05;
+  letter-spacing:.025em;
+  text-transform:uppercase;
+  text-shadow:0 1px 4px rgba(0,0,0,.25);
+}
+.country-entry-label i{
+  display:block;
+  width:34px;
+  height:2px;
+  margin:5px auto 0;
+  border-radius:99px;
+  background:var(--entry-color,#fff);
+  box-shadow:0 0 8px var(--entry-color,#fff);
+}
+@keyframes countryEntryLabelIn{
+  from{opacity:0;transform:translate(-50%,-45%) scale(.96)}
+  to{opacity:1;transform:translate(-50%,-50%) scale(1)}
+}
+@media(max-width:760px){
+  .country-entry-label{
+    min-width:105px;
+    padding:6px 9px 7px;
+  }
+  .country-entry-label strong{font-size:13px}
+}
+@media(prefers-reduced-motion:reduce){
+  .country-entry-outline,.country-entry-label{animation:none!important}
+}
 </style>
 </head>
 <body>
@@ -3379,13 +3452,14 @@ body.video-modal-open{overflow:hidden}
 
 
 <script>
-const COUNTRY_ISO = {Thailand:'THA',Vietnam:'VNM',Philippines:'PHL',Indonesia:'IDN',Japan:'JPN'};
+const COUNTRY_ISO = {Thailand:'THA',Vietnam:'VNM',Philippines:'PHL',Indonesia:'IDN',Japan:'JPN',Sweden:'SWE'};
 const COLORS = {
   Thailand:'#d88662',
   Vietnam:'#4f9a8b',
   Indonesia:'#8c72bf',
   Philippines:'#5a86c8',
-  Japan:'#c8667f'
+  Japan:'#c8667f',
+  Sweden:'#6f8f9e'
 };
 
 const HOME_AIRPORT = {
@@ -3906,7 +3980,7 @@ const TRANSPORT_LEGS = {
   'Coron|Yogyakarta':{
     modes:['flight','flight'],
     label:'Flights via Jakarta',
-    waypoints:[{place:'Jakarta',lat:-6.2088,lng:106.8456}]
+    waypoints:[{place:'Jakarta',country:'Indonesia',lat:-6.2088,lng:106.8456}]
   },
   'Yogyakarta|Mount Bromo':{modes:['bus'],label:'Bus',note:'via Malang'},
   'Ubud|Canggu':{modes:['taxi'],label:'Taxi'},
@@ -3957,6 +4031,9 @@ const map = L.map('map', {
   markerZoomAnimation:true
 }).setView([15,113],4);
 map.attributionControl.setPrefix(false);
+map.createPane('countryEntryPane');
+map.getPane('countryEntryPane').style.zIndex='390';
+map.getPane('countryEntryPane').style.pointerEvents='none';
 const esriImagery = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
   maxZoom:19,
   attribution:'Imagery © Esri',
@@ -3986,6 +4063,9 @@ esriImagery.on('tileerror', () => {
 let countryLayers = [];
 let countryLabels = [];
 let countryGeoData = null;
+let countryEntryLayer = null;
+let countryEntryLabel = null;
+let countryEntryClearTimer = null;
 let routeLayers = [];
 let markers = [];
 let planeAnimationFrame = null;
@@ -4424,6 +4504,7 @@ function buildMarkerIcon(index, stop, active=false, dimmed=false){
   });
 }
 function clearLayers(){
+  clearCountryEntry();
   countryLayers.forEach(layer => map.removeLayer(layer));
   countryLabels.forEach(layer => map.removeLayer(layer));
   routeLayers.forEach(layer => map.removeLayer(layer));
@@ -4502,6 +4583,119 @@ function setMarkerStates(){
 }
 function geoCountryName(feature){
   return feature?.properties?._countryName || '';
+}
+
+const COUNTRY_LABEL_POINTS = {
+  Thailand:[15.6,101.0],
+  Vietnam:[16.1,106.1],
+  Philippines:[12.2,122.1],
+  Indonesia:[-2.3,118.0],
+  Japan:[36.3,138.1],
+  Sweden:[62.0,15.0]
+};
+const COUNTRY_APPROACH_ZOOM = {
+  Thailand:6.2,
+  Vietnam:6.2,
+  Philippines:5.8,
+  Indonesia:5.7,
+  Japan:6.0,
+  Sweden:5.8
+};
+
+function clearCountryEntry(){
+  if(countryEntryClearTimer){
+    clearTimeout(countryEntryClearTimer);
+    countryEntryClearTimer=null;
+  }
+  if(countryEntryLayer && map.hasLayer(countryEntryLayer)) map.removeLayer(countryEntryLayer);
+  if(countryEntryLabel && map.hasLayer(countryEntryLabel)) map.removeLayer(countryEntryLabel);
+  countryEntryLayer=null;
+  countryEntryLabel=null;
+}
+function scheduleCountryEntryClear(delay=1700){
+  if(countryEntryClearTimer) clearTimeout(countryEntryClearTimer);
+  countryEntryClearTimer=setTimeout(()=>{
+    countryEntryClearTimer=null;
+    clearCountryEntry();
+  },delay);
+}
+function countryFeatures(country){
+  return countryGeoData?.features?.filter(feature=>geoCountryName(feature)===country) || [];
+}
+function countryBounds(country){
+  const features=countryFeatures(country);
+  if(features.length){
+    const layer=L.geoJSON({type:'FeatureCollection',features});
+    const bounds=layer.getBounds();
+    if(bounds.isValid()) return bounds;
+  }
+  const localStops=currentRoute().stops.filter(stop=>stop.country===country);
+  return localStops.length ? L.latLngBounds(localStops.map(stop=>[stop.lat,stop.lng])) : null;
+}
+function showCountryEntry(country){
+  clearCountryEntry();
+  const features=countryFeatures(country);
+  const color=COLORS[country] || '#7f9baa';
+
+  if(features.length){
+    countryEntryLayer=L.geoJSON({type:'FeatureCollection',features},{
+      pane:'countryEntryPane',
+      interactive:false,
+      style:{
+        color,
+        weight:3.4,
+        opacity:.92,
+        fillColor:color,
+        fillOpacity:.11,
+        lineCap:'round',
+        lineJoin:'round'
+      }
+    }).addTo(map);
+
+    requestAnimationFrame(()=>{
+      countryEntryLayer?.eachLayer(layer=>{
+        const el=layer.getElement?.();
+        if(el) el.classList.add('country-entry-outline');
+      });
+    });
+  }
+
+  const point=COUNTRY_LABEL_POINTS[country];
+  const bounds=countryBounds(country);
+  const centre=point ? L.latLng(point[0],point[1]) : bounds?.getCenter();
+  if(centre){
+    const html=`<div class="country-entry-label" style="--entry-color:${color}"><span>Entering</span><strong>${escapeHtml(country)}</strong><i></i></div>`;
+    countryEntryLabel=L.marker(centre,{
+      interactive:false,
+      keyboard:false,
+      zIndexOffset:230,
+      icon:L.divIcon({
+        className:'country-entry-label-wrap',
+        html,
+        iconSize:[1,1],
+        iconAnchor:[0,0]
+      })
+    }).addTo(map);
+  }
+}
+function focusDestinationCountry(country){
+  const bounds=countryBounds(country);
+  if(!bounds?.isValid()) return;
+  const mobile=window.innerWidth<=760;
+  map.flyToBounds(bounds.pad(.055),{
+    paddingTopLeft:mobile?[36,50]:[58,58],
+    paddingBottomRight:mobile?[36,142]:[58,120],
+    maxZoom:5.25,
+    duration:1.05
+  });
+}
+function focusFlightArrivalRegion(destination){
+  if(!destination) return;
+  const mobile=window.innerWidth<=760;
+  const zoom=COUNTRY_APPROACH_ZOOM[destination.country] || 6;
+  map.flyTo([destination.lat,destination.lng],mobile?Math.min(zoom,5.9):zoom,{
+    duration:.82
+  });
 }
 function renderCountryOverlays(){
   if(!countryGeoData) return;
@@ -4604,11 +4798,25 @@ function interpolateLeg(a,b,t){
 function animateTransportBetween(a,b,mode,duration,onDone,startT=0,endT=1){
   if(!a||!b){ hideAllTransport(); if(onDone) onDone(); return; }
   const started=performance.now();
+  const crossCountryFlight=mode==='flight' && !!a.country && !!b.country && a.country!==b.country;
+  let countryStage=0;
+  if(crossCountryFlight) clearCountryEntry();
   const frame=now=>{
     if(!isPlaying){ hideAllTransport(); return; }
     const raw=Math.min(1,(now-started)/duration);
     const eased=raw<.5?2*raw*raw:1-Math.pow(-2*raw+2,2)/2;
     const t=startT+(endT-startT)*eased;
+
+    if(crossCountryFlight && raw>=.28 && countryStage<1){
+      countryStage=1;
+      showCountryEntry(b.country);
+      focusDestinationCountry(b.country);
+    }
+    if(crossCountryFlight && raw>=.72 && countryStage<2){
+      countryStage=2;
+      focusFlightArrivalRegion(b);
+    }
+
     setTransportVehicle(a,b,t,mode);
     if(raw<1) planeAnimationFrame=requestAnimationFrame(frame);
     else{
@@ -4974,6 +5182,7 @@ function stopPlayback(){
   if(playTimer){ clearTimeout(playTimer); playTimer=null; }
   if(planeAnimationFrame){ cancelAnimationFrame(planeAnimationFrame); planeAnimationFrame=null; }
   hideAllTransport();
+  clearCountryEntry();
   const btn=document.getElementById('playBtn');
   btn.classList.remove('is-playing');
   btn.setAttribute('aria-label','Play route');
@@ -5012,6 +5221,7 @@ function playAdvance(){
       animateFlightLeg(legIndex,4300,()=>{
         if(!isPlaying) return;
         setActiveStop(legIndex+1,true,false);
+        if(a.country!==b.country) scheduleCountryEntryClear(1800);
         playTimer=setTimeout(()=>{playTimer=null;playAdvance()},ARRIVAL_DWELL_MS);
       });
     },180);
@@ -5051,6 +5261,7 @@ function togglePlayback(){
         if(!isPlaying) return;
         outboundGatewayPlayed=true;
         setActiveStop(0,true,false);
+        scheduleCountryEntryClear(1800);
         playTimer=setTimeout(()=>{playTimer=null;if(isPlaying) playAdvance();},ARRIVAL_DWELL_MS);
       });
     },650);
