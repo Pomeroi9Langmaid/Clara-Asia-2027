@@ -3320,6 +3320,93 @@ body.video-modal-open{overflow:hidden}
 @media(prefers-reduced-motion:reduce){
   .country-entry-outline,.country-entry-label{animation:none!important}
 }
+
+/* ===== Final country-entry smoothing + English close-map labels ===== */
+.country-entry-outline{
+  stroke-width:4px!important;
+  animation:countryEntryPulseStable 1.8s ease-in-out infinite!important;
+}
+@keyframes countryEntryPulseStable{
+  0%,100%{stroke-opacity:.76;fill-opacity:.18}
+  50%{stroke-opacity:1;fill-opacity:.38}
+}
+.country-entry-label-wrap,.country-entry-label{display:none!important}
+.country-entry-hud{
+  position:absolute;
+  z-index:1550;
+  top:14px;
+  left:50%;
+  min-width:132px;
+  padding:7px 12px 8px;
+  border-radius:14px;
+  transform:translate(-50%,-8px);
+  opacity:0;
+  visibility:hidden;
+  text-align:center;
+  color:#fff;
+  background:rgba(18,33,44,.76);
+  border:1px solid rgba(255,255,255,.66);
+  box-shadow:0 10px 24px rgba(5,20,30,.24),inset 0 1px 0 rgba(255,255,255,.18);
+  backdrop-filter:blur(14px) saturate(120%);
+  -webkit-backdrop-filter:blur(14px) saturate(120%);
+  transition:opacity .26s ease,transform .34s cubic-bezier(.2,.72,.25,1),visibility 0s linear .34s;
+  pointer-events:none;
+}
+.country-entry-hud.visible{
+  opacity:1;
+  visibility:visible;
+  transform:translate(-50%,0);
+  transition:opacity .26s ease,transform .34s cubic-bezier(.2,.72,.25,1),visibility 0s;
+}
+.country-entry-hud span{
+  display:block;
+  margin-bottom:2px;
+  font-size:7px;
+  line-height:1;
+  font-weight:900;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  color:rgba(255,255,255,.70);
+}
+.country-entry-hud strong{
+  display:block;
+  font-size:14px;
+  line-height:1.05;
+  letter-spacing:.035em;
+  text-transform:uppercase;
+}
+.country-entry-hud i{
+  display:block;
+  width:36px;
+  height:2px;
+  margin:5px auto 0;
+  border-radius:999px;
+  background:var(--entry-color,#fff);
+  box-shadow:0 0 8px var(--entry-color,#fff);
+}
+.map-local-stop-label{
+  padding:3px 6px!important;
+  border-radius:7px!important;
+  color:#f5f9fb!important;
+  background:rgba(20,35,46,.76)!important;
+  border:1px solid rgba(255,255,255,.52)!important;
+  box-shadow:0 4px 10px rgba(7,22,31,.18)!important;
+  font-size:9px!important;
+  line-height:1!important;
+  font-weight:850!important;
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+}
+.map-local-stop-label::before{display:none!important}
+@media(max-width:760px){
+  .country-entry-hud{top:10px;min-width:118px;padding:6px 10px 7px}
+  .country-entry-hud strong{font-size:13px}
+  .map-local-stop-label{font-size:8px!important}
+}
+@media(prefers-reduced-motion:reduce){
+  .country-entry-outline{animation:none!important}
+  .country-entry-hud{transition:none!important}
+}
 </style>
 </head>
 <body>
@@ -3358,6 +3445,11 @@ body.video-modal-open{overflow:hidden}
     </div>
     <div id="transportVehicle" class="transport-vehicle-overlay" aria-hidden="true">
       <img id="transportVehicleImage" alt="">
+    </div>
+    <div id="countryEntryHud" class="country-entry-hud" aria-hidden="true">
+      <span>Entering</span>
+      <strong id="countryEntryHudName"></strong>
+      <i></i>
     </div>
     <div class="journey-dock" aria-label="Journey playback controls">
       <button id="restartBtn" class="restart-btn" type="button" aria-label="Back to beginning" title="Back to beginning">
@@ -4062,6 +4154,12 @@ const esriFallback = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/se
   attribution:'Basemap © Esri',
   crossOrigin:true
 });
+function updateReferenceLanguageMode(){
+  const close=map.getZoom()>=7;
+  esriReference.setOpacity(close?0:.96);
+  updateStopLabelVisibility();
+}
+
 let tileErrors = 0;
 esriImagery.on('tileerror', () => {
   tileErrors++;
@@ -4076,7 +4174,6 @@ let countryLayers = [];
 let countryLabels = [];
 let countryGeoData = null;
 let countryEntryLayer = null;
-let countryEntryLabel = null;
 let countryEntryClearTimer = null;
 let routeLayers = [];
 let markers = [];
@@ -4598,6 +4695,16 @@ function filteredStops(){
   const stops = currentRoute().stops;
   return currentFilter === 'All' ? stops : stops.filter(s => s.country === currentFilter);
 }
+function updateStopLabelVisibility(){
+  const close=map.getZoom()>=7;
+  const visible=new Set(contextualStopsFor(activeIndex).map(stop=>stop.place));
+  const stops=currentRoute().stops;
+  markers.forEach((marker,idx)=>{
+    const stop=stops[idx];
+    if(close && visible.has(stop.place)) marker.openTooltip();
+    else marker.closeTooltip();
+  });
+}
 function setMarkerStates(){
   const stops = currentRoute().stops;
   markers.forEach((marker, idx) => {
@@ -4606,6 +4713,7 @@ function setMarkerStates(){
     marker.setIcon(buildMarkerIcon(idx, stop, idx === activeIndex, dimmed));
     marker.setOpacity(dimmed ? 0.28 : 1);
   });
+  updateStopLabelVisibility();
 }
 function geoCountryName(feature){
   return feature?.properties?._countryName || '';
@@ -4634,9 +4742,12 @@ function clearCountryEntry(){
     countryEntryClearTimer=null;
   }
   if(countryEntryLayer && map.hasLayer(countryEntryLayer)) map.removeLayer(countryEntryLayer);
-  if(countryEntryLabel && map.hasLayer(countryEntryLabel)) map.removeLayer(countryEntryLabel);
   countryEntryLayer=null;
-  countryEntryLabel=null;
+  const hud=document.getElementById('countryEntryHud');
+  if(hud){
+    hud.classList.remove('visible');
+    hud.setAttribute('aria-hidden','true');
+  }
 }
 function scheduleCountryEntryClear(delay=1700){
   if(countryEntryClearTimer) clearTimeout(countryEntryClearTimer);
@@ -4689,22 +4800,13 @@ function showCountryEntry(country){
     });
   }
 
-  const point=COUNTRY_LABEL_POINTS[country];
-  const bounds=countryBounds(country);
-  const centre=point ? L.latLng(point[0],point[1]) : bounds?.getCenter();
-  if(centre){
-    const html=`<div class="country-entry-label" style="--entry-color:${color}"><span>Entering</span><strong>${escapeHtml(country)}</strong><i></i></div>`;
-    countryEntryLabel=L.marker(centre,{
-      interactive:false,
-      keyboard:false,
-      zIndexOffset:230,
-      icon:L.divIcon({
-        className:'country-entry-label-wrap',
-        html,
-        iconSize:[1,1],
-        iconAnchor:[0,0]
-      })
-    }).addTo(map);
+  const hud=document.getElementById('countryEntryHud');
+  if(hud){
+    const name=document.getElementById('countryEntryHudName');
+    if(name) name.textContent=country;
+    hud.style.setProperty('--entry-color',color);
+    hud.setAttribute('aria-hidden','false');
+    requestAnimationFrame(()=>hud.classList.add('visible'));
   }
 }
 function focusDestinationCountry(country){
@@ -4871,21 +4973,17 @@ function animateTransportBetween(a,b,mode,duration,onDone,startT=0,endT=1){
     const eased=raw<.5?2*raw*raw:1-Math.pow(-2*raw+2,2)/2;
     const t=startT+(endT-startT)*eased;
 
-    if(crossCountryFlight && raw>=.16 && countryStage<1){
+    if(crossCountryFlight && raw>=.18 && countryStage<1){
       countryStage=1;
       showCountryEntry(b.country);
       focusDestinationCountry(b.country);
     }
-    if(crossCountryFlight && raw>=.43 && countryStage<2){
+    if(crossCountryFlight && raw>=.54 && countryStage<2){
       countryStage=2;
       focusCountryRoutePins(b.country);
     }
-    if(crossCountryFlight && raw>=.68 && countryStage<3){
+    if(crossCountryFlight && raw>=.82 && countryStage<3){
       countryStage=3;
-      focusFlightArrivalRegion(b);
-    }
-    if(crossCountryFlight && raw>=.86 && countryStage<4){
-      countryStage=4;
       focusFlightPinpoint(b);
     }
 
@@ -5052,12 +5150,20 @@ function renderMarkers(){
   stops.forEach((stop, index) => {
     const dimmed = currentFilter !== 'All' && stop.country !== currentFilter;
     const marker = L.marker([stop.lat, stop.lng], { icon: buildMarkerIcon(index, stop, index === activeIndex, dimmed) }).addTo(map);
+    marker.bindTooltip(stop.place,{
+      permanent:true,
+      direction:index%2?'left':'right',
+      offset:index%2?[-12,0]:[12,0],
+      className:'map-local-stop-label',
+      opacity:1
+    });
     marker.on('click', () => {
       stopPlayback();
       setActiveStop(index, true, false);
     });
     markers.push(marker);
   });
+  updateStopLabelVisibility();
 }
 function renderSummary(){
   const route = currentRoute();
@@ -5600,7 +5706,12 @@ document.getElementById('copyBtn').addEventListener('click', async () => {
 render();
 loadCountryGeo();
 window.setInterval(renderTripCalendar,60*60*1000);
-map.on('zoomend moveend',()=>{ if(!isPlaying) renderRouteLinesOnly(); });
+map.on('zoomend',()=>{
+  updateReferenceLanguageMode();
+  if(!isPlaying) renderRouteLinesOnly();
+});
+map.on('moveend',()=>{ if(!isPlaying) renderRouteLinesOnly(); });
+updateReferenceLanguageMode();
 
 let videoModalPlace='';
 let videoModalIndex=0;
