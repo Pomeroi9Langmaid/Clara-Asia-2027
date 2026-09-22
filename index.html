@@ -204,6 +204,22 @@ header p{margin:5px 0 0;color:var(--muted);font-size:12px;max-width:720px}
 }
 .marker.optional{outline:2px dashed rgba(255,255,255,.95);outline-offset:2px}
 .marker.active{transform:scale(1.12);border-width:3px;box-shadow:0 7px 13px rgba(0,0,0,.28)}
+.marker.journey-target{
+  border-width:3px;
+  outline:2px solid rgba(255,255,255,.78);
+  outline-offset:3px;
+  box-shadow:
+    0 7px 16px rgba(0,0,0,.34),
+    0 0 0 5px rgba(255,255,255,.12);
+  animation:journeyTargetPulse 1.9s ease-in-out infinite;
+}
+@keyframes journeyTargetPulse{
+  0%,100%{transform:scale(1);outline-color:rgba(255,255,255,.68)}
+  50%{transform:scale(1.08);outline-color:rgba(255,255,255,.98)}
+}
+@media(prefers-reduced-motion:reduce){
+  .marker.journey-target{animation:none!important}
+}
 .flight-plane-overlay{position:absolute;left:0;top:0;width:48px;height:48px;z-index:1450;pointer-events:none;display:none;align-items:center;justify-content:center;transform:translate(-50%,-50%);filter:drop-shadow(0 2px 3px rgba(0,0,0,.62)) drop-shadow(0 0 3px rgba(255,255,255,.9));will-change:left,top}
 .flight-plane-overlay.visible{display:flex}
 .flight-plane-overlay svg{width:100%;height:100%;overflow:visible;transform-origin:50% 50%;will-change:transform}
@@ -4598,12 +4614,12 @@ function countryMetrics(stops, country){
     destinations: selected.map(s => s.place)
   };
 }
-function buildMarkerIcon(index, stop, active=false, dimmed=false){
+function buildMarkerIcon(index, stop, active=false, dimmed=false, target=false){
   const bg = COLORS[stop.country] || '#555';
   const mobile = window.innerWidth <= 760;
-  const size = active ? (mobile ? 34 : 27) : (mobile ? 28 : 21);
+  const size = active ? (mobile ? 34 : 27) : (target ? (mobile ? 32 : 26) : (mobile ? 28 : 21));
   const opacity = dimmed ? 0.28 : 1;
-  const classes = ['marker', stop.optional ? 'optional' : '', active ? 'active' : ''].join(' ');
+  const classes = ['marker', stop.optional ? 'optional' : '', active ? 'active' : '', target ? 'journey-target' : ''].join(' ');
   return L.divIcon({
     className:'',
     html:`<div class="${classes}" style="width:${size}px;height:${size}px;background:${bg};opacity:${opacity}">${index+1}</div>`,
@@ -4691,6 +4707,46 @@ function focusMapForStop(index,{animate=true}={}){
     duration:animate?.78:0
   });
 }
+function playbackSafePadding(){
+  const mapRect=map.getContainer().getBoundingClientRect();
+  const calendar=document.querySelector('.trip-calendar')?.getBoundingClientRect();
+  const dock=document.querySelector('.journey-dock')?.getBoundingClientRect();
+  const mobile=window.innerWidth<=760;
+
+  let bottom=mobile?118:128;
+  [calendar,dock].forEach(rect=>{
+    if(!rect) return;
+    const overlaps=rect.top < mapRect.bottom && rect.bottom > mapRect.top;
+    if(overlaps) bottom=Math.max(bottom,mapRect.bottom-rect.top+18);
+  });
+
+  bottom=Math.min(bottom,mapRect.height*.34);
+  return {
+    topLeft:mobile?[34,44]:[54,54],
+    bottomRight:mobile?[34,bottom]:[54,bottom]
+  };
+}
+
+function focusPlaybackLeg(a,b,transport){
+  const points=[a,...(transport?.waypoints||[]),b];
+  const bounds=L.latLngBounds(points.map(point=>[point.lat,point.lng]));
+  if(!bounds.isValid()) return;
+
+  const legKm=haversineKm(a,b);
+  const international=a.country!==b.country;
+  const legMaxZoom=international
+    ? 5.25
+    : (legKm<35?10.4:legKm<80?9.6:legKm<150?8.9:legKm<250?8.2:7.6);
+  const padding=playbackSafePadding();
+
+  map.fitBounds(bounds.pad(.018),{
+    paddingTopLeft:padding.topLeft,
+    paddingBottomRight:padding.bottomRight,
+    animate:false,
+    maxZoom:window.innerWidth<=760?Math.min(legMaxZoom,9.8):legMaxZoom
+  });
+}
+
 function filteredStops(){
   const stops = currentRoute().stops;
   return currentFilter === 'All' ? stops : stops.filter(s => s.country === currentFilter);
@@ -4699,19 +4755,24 @@ function updateStopLabelVisibility(){
   const close=map.getZoom()>=7;
   const visible=new Set(contextualStopsFor(activeIndex).map(stop=>stop.place));
   const stops=currentRoute().stops;
+  if(isPlaying && stops[activeIndex+1]) visible.add(stops[activeIndex+1].place);
   markers.forEach((marker,idx)=>{
     const stop=stops[idx];
-    if(close && visible.has(stop.place)) marker.openTooltip();
+    const journeyTarget=isPlaying && idx===activeIndex+1;
+    if((close && visible.has(stop.place)) || journeyTarget) marker.openTooltip();
     else marker.closeTooltip();
   });
 }
 function setMarkerStates(){
   const stops = currentRoute().stops;
+  const targetIndex=isPlaying && activeIndex<stops.length-1 ? activeIndex+1 : -1;
   markers.forEach((marker, idx) => {
     const stop = stops[idx];
-    const dimmed = currentFilter !== 'All' && stop.country !== currentFilter;
-    marker.setIcon(buildMarkerIcon(idx, stop, idx === activeIndex, dimmed));
+    const target=idx===targetIndex;
+    const dimmed = currentFilter !== 'All' && stop.country !== currentFilter && !target;
+    marker.setIcon(buildMarkerIcon(idx, stop, idx === activeIndex, dimmed, target));
     marker.setOpacity(dimmed ? 0.28 : 1);
+    marker.setZIndexOffset(idx===activeIndex?1100:(target?1000:0));
   });
   updateStopLabelVisibility();
 }
@@ -5148,8 +5209,12 @@ function renderRouteLines(){
 function renderMarkers(){
   const stops = currentRoute().stops;
   stops.forEach((stop, index) => {
-    const dimmed = currentFilter !== 'All' && stop.country !== currentFilter;
-    const marker = L.marker([stop.lat, stop.lng], { icon: buildMarkerIcon(index, stop, index === activeIndex, dimmed) }).addTo(map);
+    const target=isPlaying && index===activeIndex+1;
+    const dimmed = currentFilter !== 'All' && stop.country !== currentFilter && !target;
+    const marker = L.marker([stop.lat, stop.lng], {
+      icon: buildMarkerIcon(index, stop, index === activeIndex, dimmed, target),
+      zIndexOffset:index===activeIndex?1100:(target?1000:0)
+    }).addTo(map);
     marker.bindTooltip(stop.place,{
       permanent:true,
       direction:index%2?'left':'right',
@@ -5366,6 +5431,7 @@ function stopPlayback(){
   btn.setAttribute('aria-label','Play route');
   renderTripCalendar();
   renderRouteLinesOnly();
+  setMarkerStates();
   scheduleSidebarHide();
 }
 const ARRIVAL_DWELL_MS=4500;
@@ -5391,17 +5457,8 @@ function playAdvance(){
 
   if(shouldAnimate){
     hideAllTransport();
-    const framingPoints=[a,...(transport?.waypoints||[]),b].map(point=>[point.lat,point.lng]);
-    const legKm=haversineKm(a,b);
-    const international=a.country!==b.country;
-    const legMaxZoom=international
-      ? 5.25
-      : (legKm<35?10.4:legKm<80?9.6:legKm<150?8.9:legKm<250?8.2:7.6);
-    map.fitBounds(framingPoints,{
-      padding:window.innerWidth<=760?[54,70]:[78,88],
-      animate:false,
-      maxZoom:window.innerWidth<=760?Math.min(legMaxZoom,9.8):legMaxZoom
-    });
+    focusPlaybackLeg(a,b,transport);
+    setMarkerStates();
     playTimer=setTimeout(()=>{
       playTimer=null;
       if(!isPlaying || activeIndex!==legIndex) return;
@@ -5439,6 +5496,7 @@ function togglePlayback(){
   setSideTab('itinerary');
 
   isPlaying=true;
+  setMarkerStates();
   const playButton=document.getElementById('playBtn');
   playButton.classList.add('is-playing');
   playButton.setAttribute('aria-label','Pause route');
