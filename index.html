@@ -4981,6 +4981,8 @@ function stopPlayback(){
   renderRouteLinesOnly();
   scheduleSidebarHide();
 }
+const ARRIVAL_DWELL_MS=4500;
+
 function playAdvance(){
   if(!isPlaying) return;
   const stops=currentRoute().stops;
@@ -5010,7 +5012,7 @@ function playAdvance(){
       animateFlightLeg(legIndex,4300,()=>{
         if(!isPlaying) return;
         setActiveStop(legIndex+1,true,false);
-        playTimer=setTimeout(()=>{playTimer=null;playAdvance()},900);
+        playTimer=setTimeout(()=>{playTimer=null;playAdvance()},ARRIVAL_DWELL_MS);
       });
     },180);
   }else{
@@ -5018,7 +5020,7 @@ function playAdvance(){
       playTimer=null;
       if(!isPlaying) return;
       setActiveStop(legIndex+1,true,false);
-      playTimer=setTimeout(()=>{playTimer=null;playAdvance()},900);
+      playTimer=setTimeout(()=>{playTimer=null;playAdvance()},ARRIVAL_DWELL_MS);
     },1150);
   }
 }
@@ -5049,7 +5051,7 @@ function togglePlayback(){
         if(!isPlaying) return;
         outboundGatewayPlayed=true;
         setActiveStop(0,true,false);
-        playTimer=setTimeout(()=>{playTimer=null;if(isPlaying) playAdvance();},1000);
+        playTimer=setTimeout(()=>{playTimer=null;if(isPlaying) playAdvance();},ARRIVAL_DWELL_MS);
       });
     },650);
   }else{
