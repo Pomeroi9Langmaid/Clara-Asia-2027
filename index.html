@@ -203,7 +203,7 @@ header p{margin:5px 0 0;color:var(--muted);font-size:12px;max-width:720px}
   border:2px solid rgba(255,255,255,.98);box-shadow:0 4px 9px rgba(0,0,0,.22);transition:transform .15s ease;
 }
 .marker.optional{outline:2px dashed rgba(255,255,255,.95);outline-offset:2px}
-.marker.active{transform:scale(1.12);border-width:3px;box-shadow:0 7px 13px rgba(0,0,0,.28)}
+.marker.active{transform:scale(1.22);border-width:3px;box-shadow:0 0 0 5px rgba(255,255,255,.48),0 8px 18px rgba(0,0,0,.38)}
 .marker.journey-target{
   border-width:3px;
   outline:2px solid rgba(255,255,255,.78);
@@ -4969,7 +4969,8 @@ function updateStopLabelVisibility(){
   markers.forEach((marker,idx)=>{
     const stop=stops[idx];
     const journeyTarget=isPlaying && idx===activeIndex+1;
-    if((close && visible.has(stop.place)) || journeyTarget) marker.openTooltip();
+    const active=idx===activeIndex;
+    if(active || (close && visible.has(stop.place)) || journeyTarget) marker.openTooltip();
     else marker.closeTooltip();
   });
 }
@@ -4979,9 +4980,10 @@ function setMarkerStates(){
   markers.forEach((marker, idx) => {
     const stop = stops[idx];
     const target=idx===targetIndex;
-    const dimmed = currentFilter !== 'All' && stop.country !== currentFilter && !target;
-    marker.setIcon(buildMarkerIcon(idx, stop, idx === activeIndex, dimmed, target));
-    marker.setOpacity(dimmed ? 0.28 : 1);
+    const active=idx===activeIndex;
+    const dimmed = currentFilter !== 'All' && stop.country !== currentFilter && !target && !active;
+    marker.setIcon(buildMarkerIcon(idx, stop, active, dimmed, target));
+    marker.setOpacity(dimmed ? (mapViewIsLocked()?0.58:0.28) : 1);
     marker.setZIndexOffset(idx===activeIndex?1100:(target?1000:0));
   });
   updateStopLabelVisibility();
@@ -5429,9 +5431,9 @@ function renderRouteLines(){
     const transport=transportForLeg(a,b);
     const isFlight = transport ? transportHasFlight(transport) : !sameCountry;
     const isWater = transportHasWater(transport);
-    const dimmed = currentFilter !== 'All' && !(a.country === currentFilter || b.country === currentFilter);
     const completed = i < activeIndex;
     const currentLeg = i === activeIndex;
+    const dimmed = currentFilter !== 'All' && !(a.country === currentFilter || b.country === currentFilter) && !currentLeg;
     const baseColor = sameCountry ? COLORS[a.country] : '#f8fafc';
     const pathNodes=[a,...(transport?.waypoints||[]),b];
     const line = L.polyline(pathNodes.map(point=>[point.lat,point.lng]), {
@@ -5469,7 +5471,8 @@ function renderMarkers(){
   const stops = currentRoute().stops;
   stops.forEach((stop, index) => {
     const target=isPlaying && index===activeIndex+1;
-    const dimmed = currentFilter !== 'All' && stop.country !== currentFilter && !target;
+    const active=index===activeIndex;
+    const dimmed = currentFilter !== 'All' && stop.country !== currentFilter && !target && !active;
     const marker = L.marker([stop.lat, stop.lng], {
       icon: buildMarkerIcon(index, stop, index === activeIndex, dimmed, target),
       zIndexOffset:index===activeIndex?1100:(target?1000:0)
@@ -5795,7 +5798,9 @@ function setActiveStop(index, fly=true, showPopup=false){
     gatewayPlaybackPhase=null;
   }
   const stop = currentRoute().stops[activeIndex];
-  if(isPlaying || !mapViewIsLocked()) currentFilter = stop.country;
+  // Keep the camera fixed, but let the visual emphasis follow the journey.
+  // A deliberately locked "Whole trip" view remains Whole trip.
+  if(isPlaying || !mapViewIsLocked() || currentFilter !== 'All') currentFilter = stop.country;
   if(!isPlaying) hideAllTransport();
 
   // The itinerary panel is the single detail surface. Map bubbles are intentionally disabled.
