@@ -5666,13 +5666,20 @@ function fitForCurrentView(){
   const stops = filteredStops();
   const bounds = L.latLngBounds(stops.map(s => [s.lat, s.lng]));
   if(!bounds.isValid()) return;
-  const padded=bounds.pad(currentFilter==='All'?0.018:0.075);
+  const fullTrip=currentFilter==='All';
+  const padded=bounds.pad(fullTrip?0.018:0.075);
+
+  // The bottom journey player overlays the map. When showing the complete route,
+  // reserve its footprint so the southernmost pins remain comfortably visible.
+  const safe=fullTrip?playbackSafePadding():null;
+  const bottomPadding=fullTrip?Math.max(112,safe?.bottomRight?.[1]||0):28;
+
   map.fitBounds(padded,{
     paddingTopLeft:[18,18],
-    paddingBottomRight:[18,28],
+    paddingBottomRight:[18,bottomPadding],
     animate:true,
     duration:.65,
-    maxZoom:currentFilter==='All'?5.5:8
+    maxZoom:fullTrip?5.5:8
   });
 }
 function setFilter(country){
