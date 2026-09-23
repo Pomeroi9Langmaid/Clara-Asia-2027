@@ -239,6 +239,40 @@ header p{margin:5px 0 0;color:var(--muted);font-size:12px;max-width:720px}
 .side-panel.active{display:block}
 .sidebar-toggle{position:absolute;right:14px;top:14px;bottom:auto;z-index:650;border-radius:999px;background:rgba(255,255,255,.95);border:1px solid rgba(255,255,255,.98);box-shadow:0 6px 16px rgba(17,32,46,.16);backdrop-filter:blur(6px);font-weight:800;padding:7px 10px;color:#263441}
 .sidebar-toggle[aria-expanded="true"]{background:#263441;color:#fff;border-color:#263441}
+.map-view-controls{
+  position:absolute;left:56px;top:14px;z-index:650;display:flex;align-items:center;gap:6px;
+}
+.map-view-controls button{
+  min-height:32px;padding:6px 10px;border-radius:999px;
+  background:rgba(255,255,255,.94);border:1px solid rgba(255,255,255,.98);
+  box-shadow:0 6px 16px rgba(17,32,46,.14);backdrop-filter:blur(7px);
+  color:#263441;font-size:10px;font-weight:850;
+}
+.map-view-controls button:hover{background:#fff}
+.map-view-controls .map-view-mode{display:flex;align-items:center;gap:6px}
+.map-view-controls .map-view-mode.locked{background:#263441;color:#fff;border-color:#263441}
+.map-view-controls .map-view-mode.playback{background:#edf5fa;color:#263441;border-color:#d8e5ed;cursor:default}
+.map-view-controls .map-view-mode.playback:disabled{opacity:1}
+.map-view-icon{font-size:12px;line-height:1}
+.map-view-toast{
+  position:absolute;left:50%;top:58px;z-index:660;transform:translate(-50%,-8px);
+  display:flex;align-items:center;gap:8px;max-width:min(520px,calc(100% - 32px));
+  padding:7px 9px 7px 11px;border-radius:999px;
+  background:rgba(38,52,65,.94);color:#fff;border:1px solid rgba(255,255,255,.42);
+  box-shadow:0 8px 20px rgba(17,32,46,.2);backdrop-filter:blur(8px);
+  font-size:10px;font-weight:750;opacity:0;pointer-events:none;
+  transition:opacity .2s ease,transform .2s ease;
+}
+.map-view-toast.visible{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+.map-view-toast button{
+  flex:0 0 auto;padding:4px 8px;border-radius:999px;background:#fff;color:#263441;
+  border:0;font-size:9px;font-weight:850;
+}
+@media(max-width:760px){
+  .map-view-controls{left:50px;top:10px;gap:4px}
+  .map-view-controls button{min-height:30px;padding:5px 8px;font-size:9px}
+  .map-view-toast{top:50px;max-width:calc(100% - 22px);font-size:9px}
+}
 .shell:not(.sidebar-collapsed) .sidebar-toggle{right:14px}
 .journey-dock{
   position:fixed;
@@ -3494,6 +3528,17 @@ body.video-modal-open{overflow:hidden}
 <div class="country-bar" id="countryBar"></div>
 <div class="shell">
   <div class="map-wrap">
+    <div class="map-view-controls" aria-label="Map view controls">
+      <button id="mapViewModeBtn" class="map-view-mode" type="button" aria-pressed="false" title="Next and Previous follow the active stop">
+        <span id="mapViewIcon" class="map-view-icon" aria-hidden="true">◎</span>
+        <span id="mapViewModeLabel">Follow route</span>
+      </button>
+      <button id="fullRouteBtn" type="button" title="Show the full route and keep this map view">Full route</button>
+    </div>
+    <div id="mapViewToast" class="map-view-toast" role="status" aria-live="polite">
+      <span id="mapViewToastText">Map view locked · Next / Previous will not move the map.</span>
+      <button id="resumeMapFollowBtn" type="button">Follow route</button>
+    </div>
     <button id="sidebarToggle" class="sidebar-toggle" aria-expanded="true">Trip details</button>
     <div id="map"></div>
     <div class="trip-calendar" id="tripCalendar" aria-label="Clara's February to May 2027 journey timeline"></div>
@@ -4251,9 +4296,98 @@ let activeIndex = 0;
 let currentFilter = 'All';
 let playTimer = null;
 let isPlaying = false;
+let mapCameraMode = 'follow';
+let mapViewToastTimer = null;
 let gatewayPlaybackPhase = null;
 let outboundGatewayPlayed = false;
 let returnGatewayPlayed = false;
+
+function mapViewIsLocked(){
+  return mapCameraMode === 'manual';
+}
+function updateMapViewControls(){
+  const btn=document.getElementById('mapViewModeBtn');
+  const label=document.getElementById('mapViewModeLabel');
+  const icon=document.getElementById('mapViewIcon');
+  if(!btn || !label || !icon) return;
+
+  btn.classList.toggle('locked',mapViewIsLocked() && !isPlaying);
+  btn.classList.toggle('playback',isPlaying);
+  btn.disabled=isPlaying;
+
+  if(isPlaying){
+    icon.textContent='▶';
+    label.textContent='Play follows route';
+    btn.setAttribute('aria-pressed','false');
+    btn.title='Playback controls the map camera';
+  }else if(mapViewIsLocked()){
+    icon.textContent='🔒';
+    label.textContent='Keep my view';
+    btn.setAttribute('aria-pressed','true');
+    btn.title='Next and Previous keep your current map position and zoom';
+  }else{
+    icon.textContent='◎';
+    label.textContent='Follow route';
+    btn.setAttribute('aria-pressed','false');
+    btn.title='Next and Previous follow the active stop';
+  }
+}
+function hideMapViewToast(){
+  const toast=document.getElementById('mapViewToast');
+  if(toast) toast.classList.remove('visible');
+}
+function showMapViewToast(message='Map view locked · Next / Previous will not move the map.'){
+  const toast=document.getElementById('mapViewToast');
+  const textNode=document.getElementById('mapViewToastText');
+  if(!toast || !textNode) return;
+  textNode.textContent=message;
+  toast.classList.add('visible');
+  if(mapViewToastTimer) clearTimeout(mapViewToastTimer);
+  mapViewToastTimer=window.setTimeout(()=>{
+    mapViewToastTimer=null;
+    hideMapViewToast();
+  },3200);
+}
+function setMapCameraMode(mode,{announce=false}={}){
+  mapCameraMode=mode==='manual'?'manual':'follow';
+  updateMapViewControls();
+  if(announce && mapViewIsLocked()){
+    showMapViewToast();
+  }else if(!mapViewIsLocked()){
+    hideMapViewToast();
+  }
+}
+function lockMapViewFromUser(){
+  if(isPlaying || mapViewIsLocked()) return;
+  setMapCameraMode('manual',{announce:true});
+}
+function refreshMapScope(){
+  renderCountryBar();
+  renderCountryOverview();
+  renderCountryOverlaysOnly();
+  renderRouteLinesOnly();
+  setMarkerStates();
+}
+function resumeFollowingActiveStop(){
+  if(isPlaying) return;
+  setMapCameraMode('follow');
+  const stop=currentRoute().stops[activeIndex];
+  if(!stop) return;
+  currentFilter=stop.country;
+  refreshMapScope();
+  window.setTimeout(()=>{
+    map.invalidateSize({pan:false});
+    focusMapForStop(activeIndex,{animate:true});
+  },24);
+}
+function showFullRouteAndLock(){
+  stopPlayback();
+  currentFilter='All';
+  setMapCameraMode('manual');
+  refreshMapScope();
+  fitForCurrentView();
+  showMapViewToast('Full route view locked · adjust the map freely, then use Next / Previous.');
+}
 
 function ordinalDay(day){
   const mod100 = day % 100;
@@ -5547,6 +5681,7 @@ function setFilter(country){
 }
 function stopPlayback(){
   isPlaying=false;
+  updateMapViewControls();
   if(playTimer){ clearTimeout(playTimer); playTimer=null; }
   if(planeAnimationFrame){ cancelAnimationFrame(planeAnimationFrame); planeAnimationFrame=null; }
   hideAllTransport();
@@ -5605,10 +5740,12 @@ function togglePlayback(){
   const stops=currentRoute().stops;
   if(isPlaying){
     stopPlayback();
-    window.setTimeout(()=>{
-      map.invalidateSize({pan:false});
-      focusMapForStop(activeIndex,{animate:true});
-    },40);
+    if(!mapViewIsLocked()){
+      window.setTimeout(()=>{
+        map.invalidateSize({pan:false});
+        focusMapForStop(activeIndex,{animate:true});
+      },40);
+    }
     return;
   }
   if(activeIndex>=stops.length-1) setActiveStop(0,true,false);
@@ -5619,6 +5756,7 @@ function togglePlayback(){
   setSideTab('itinerary');
 
   isPlaying=true;
+  updateMapViewControls();
   setMarkerStates();
   const playButton=document.getElementById('playBtn');
   playButton.classList.add('is-playing');
@@ -5657,7 +5795,7 @@ function setActiveStop(index, fly=true, showPopup=false){
     gatewayPlaybackPhase=null;
   }
   const stop = currentRoute().stops[activeIndex];
-  currentFilter = stop.country;
+  if(isPlaying || !mapViewIsLocked()) currentFilter = stop.country;
   if(!isPlaying) hideAllTransport();
 
   // The itinerary panel is the single detail surface. Map bubbles are intentionally disabled.
@@ -5675,14 +5813,15 @@ function setActiveStop(index, fly=true, showPopup=false){
   renderActiveStop();
   updateJourneyControls();
 
-  if(fly){
+  const shouldMoveMap=fly && (isPlaying || !mapViewIsLocked());
+  if(shouldMoveMap){
     const focusDelay=wasSidebarCollapsed?310:24;
     window.setTimeout(()=>{
       map.invalidateSize({pan:false});
       focusMapForStop(activeIndex,{animate:true});
     },focusDelay);
   }
-  window.setTimeout(scrollActiveItineraryCard, fly ? 260 : 80);
+  window.setTimeout(scrollActiveItineraryCard, shouldMoveMap ? 260 : 80);
 }
 function renderCountryOverlaysOnly(){
   countryLayers.forEach(layer => map.removeLayer(layer));
@@ -5715,6 +5854,7 @@ function render(){
 
 document.getElementById('routeSelect').addEventListener('change', () => {
   stopPlayback();
+  setMapCameraMode('follow');
   currentFilter = 'All';
   activeIndex = 0;
   gatewayPlaybackPhase=null;
@@ -5732,6 +5872,26 @@ document.getElementById('restartBtn').addEventListener('click', () => {
 document.getElementById('prevBtn').addEventListener('click', () => { stopPlayback(); setActiveStop(activeIndex - 1, true, false); });
 document.getElementById('nextBtn').addEventListener('click', () => { stopPlayback(); setActiveStop(activeIndex + 1, true, false); });
 document.getElementById('playBtn').addEventListener('click', togglePlayback);
+document.getElementById('mapViewModeBtn').addEventListener('click', () => {
+  if(isPlaying) return;
+  if(mapViewIsLocked()){
+    resumeFollowingActiveStop();
+  }else{
+    setMapCameraMode('manual',{announce:true});
+  }
+});
+document.getElementById('resumeMapFollowBtn').addEventListener('click', resumeFollowingActiveStop);
+document.getElementById('fullRouteBtn').addEventListener('click', showFullRouteAndLock);
+
+map.on('dragstart',lockMapViewFromUser);
+map.getContainer().addEventListener('wheel',lockMapViewFromUser,{passive:true});
+map.getContainer().addEventListener('dblclick',lockMapViewFromUser,{passive:true});
+map.getContainer().addEventListener('touchstart',event=>{
+  if(event.touches && event.touches.length>=2) lockMapViewFromUser();
+},{passive:true});
+map.getContainer().addEventListener('click',event=>{
+  if(event.target.closest('.leaflet-control-zoom-in,.leaflet-control-zoom-out')) lockMapViewFromUser();
+});
 
 let mobileResizeTimer=null;
 window.addEventListener('resize',()=>{
@@ -5885,6 +6045,7 @@ document.getElementById('copyBtn').addEventListener('click', async () => {
 });
 
 render();
+updateMapViewControls();
 loadCountryGeo();
 window.setInterval(renderTripCalendar,60*60*1000);
 map.on('zoomend',()=>{
