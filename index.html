@@ -4267,7 +4267,7 @@ const esriFallback = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/se
   crossOrigin:true
 });
 function updateReferenceLanguageMode(){
-  const close=map.getZoom()>=5.5;
+  const close=map.getZoom()>=4.35;
   esriReference.setOpacity(close?0:.96);
   updateStopLabelVisibility();
 }
@@ -4900,17 +4900,17 @@ function playbackSafePadding(){
   const dock=document.querySelector('.journey-dock')?.getBoundingClientRect();
   const mobile=window.innerWidth<=760;
 
-  let bottom=mobile?118:128;
+  let bottom=mobile?154:176;
   [calendar,dock].forEach(rect=>{
     if(!rect) return;
     const overlaps=rect.top < mapRect.bottom && rect.bottom > mapRect.top;
-    if(overlaps) bottom=Math.max(bottom,mapRect.bottom-rect.top+18);
+    if(overlaps) bottom=Math.max(bottom,mapRect.bottom-rect.top+(mobile?58:76));
   });
 
-  bottom=Math.min(bottom,mapRect.height*.34);
+  bottom=Math.min(bottom,mapRect.height*.42);
   return {
-    topLeft:mobile?[34,44]:[54,54],
-    bottomRight:mobile?[34,bottom]:[54,bottom]
+    topLeft:mobile?[42,54]:[68,68],
+    bottomRight:mobile?[42,bottom]:[68,bottom]
   };
 }
 
@@ -4946,12 +4946,27 @@ function focusPlaybackLeg(a,b,transport,onDone){
     : (legKm<35?10.4:legKm<80?9.6:legKm<150?8.9:legKm<250?8.2:7.6);
   const padding=playbackSafePadding();
 
-  smoothFlyToBounds(bounds.pad(.065),{
+  smoothFlyToBounds(bounds.pad(international?.065:.095),{
     paddingTopLeft:padding.topLeft,
     paddingBottomRight:padding.bottomRight,
     maxZoom:window.innerWidth<=760?Math.min(legMaxZoom,9.8):legMaxZoom,
-    duration:international?1.05:.82
+    duration:international?.95:.82
   },()=>{
+    const p=map.latLngToContainerPoint([b.lat,b.lng]);
+    const s=map.getSize();
+    const ok=p.x>=padding.topLeft[0]&&p.x<=s.x-padding.bottomRight[0]&&p.y>=padding.topLeft[1]&&p.y<=s.y-padding.bottomRight[1];
+    if(!ok){
+      smoothFlyToBounds(bounds.pad(.14),{
+        paddingTopLeft:padding.topLeft,
+        paddingBottomRight:padding.bottomRight,
+        maxZoom:Math.max(3.5,map.getZoom()-.75),
+        duration:.5
+      },()=>{
+        setMarkerStates();
+        if(onDone) onDone();
+      });
+      return;
+    }
     setMarkerStates();
     if(onDone) onDone();
   });
@@ -5090,8 +5105,8 @@ function focusDestinationCountry(country){
     paddingTopLeft:mobile?[28,42]:[48,50],
     paddingBottomRight:mobile?[28,136]:[48,112],
     maxZoom:4.85,
-    duration:1.05,
-    easeLinearity:.18
+    duration:.78,
+    easeLinearity:.16
   });
 }
 function routeStopsInCountry(country){
@@ -5136,7 +5151,7 @@ function focusFlightArrivalRegion(destination){
 function focusFlightPinpoint(destination){
   if(!destination) return;
   const mobile=window.innerWidth<=760;
-  map.flyTo([destination.lat,destination.lng],mobile?7.25:7.85,{duration:.72,easeLinearity:.18});
+  map.flyTo([destination.lat,destination.lng],mobile?7.45:8.05,{duration:.46,easeLinearity:.16});
 }
 function renderCountryOverlays(){
   if(!countryGeoData) return;
@@ -5285,16 +5300,16 @@ function animateTransportBetween(a,b,mode,duration,onDone,startT=0,endT=1){
     const eased=raw<.5?2*raw*raw:1-Math.pow(-2*raw+2,2)/2;
     const t=startT+(endT-startT)*eased;
 
-    if(crossCountryFlight && raw>=.20 && countryStage<1){
+    if(crossCountryFlight && raw>=.16 && countryStage<1){
       countryStage=1;
       showCountryEntry(b.country);
       focusDestinationCountry(b.country);
     }
-    if(crossCountryFlight && raw>=.58 && countryStage<2){
+    if(crossCountryFlight && raw>=.52 && countryStage<2){
       countryStage=2;
-      focusCountryRoutePins(b.country);
+      focusFlightArrivalRegion(b);
     }
-    if(crossCountryFlight && raw>=.86 && countryStage<3){
+    if(crossCountryFlight && raw>=.80 && countryStage<3){
       countryStage=3;
       focusFlightPinpoint(b);
     }
