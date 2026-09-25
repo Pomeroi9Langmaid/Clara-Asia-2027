@@ -3605,7 +3605,7 @@ body.video-modal-open{overflow:hidden}
       <details class="section planning-notes">
         <summary>Still to decide</summary>
         <div class="note-body"><strong>Final days:</strong> the last few days before the 2 May flight are still being planned.</div>
-        <div class="note-body"><strong>Possible changes:</strong> Khao Sok, Sapa and Hakone are being considered; Coron and the Philippines/Indonesia order may also change.</div>
+        <div class="note-body"><strong>Possible changes:</strong> Sapa and Hakone are being considered; Coron and the Philippines/Indonesia order may also change.</div>
       </details>
 
       <details class="section trip-facts">
@@ -3685,7 +3685,7 @@ const HOME_AIRPORT = {
 };
 
 const COORDS = {
-  'Bangkok':[13.7563,100.5018],'Chiang Mai':[18.7883,98.9853],'Pai':[19.3583,98.4400],'Krabi / Ao Nang':[8.0320,98.8225],'Koh Yao Noi':[8.1178,98.6184],'Khao Sok':[8.9105,98.5313],
+  'Bangkok':[13.7563,100.5018],'Chiang Mai':[18.7883,98.9853],'Pai':[19.3583,98.4400],'Krabi / Ao Nang':[8.0320,98.8225],'Koh Yao Noi':[8.1178,98.6184],
   'Hanoi':[21.0278,105.8342],'Sapa':[22.3364,103.8438],'Ha Giang':[22.8233,104.9836],'Cat Ba':[20.7270,107.0480],'Ninh Binh':[20.2506,105.9745],'Hue':[16.4637,107.5909],'Da Nang':[16.0544,108.2022],'Hoi An':[15.8801,108.3380],'Ho Chi Minh City':[10.8231,106.6297],
   'Yogyakarta':[-7.7956,110.3695],'Mount Bromo':[-7.9425,112.9530],'Ijen':[-8.0583,114.2420],'Ubud':[-8.5069,115.2625],'Canggu':[-8.6478,115.1385],'Uluwatu':[-8.8291,115.0849],
   'Cebu City':[10.3157,123.8854],'Moalboal':[9.9431,123.3926],'Bohol / Panglao':[9.5774,123.7453],'El Nido':[11.1949,119.4034],'Coron':[12.0012,120.2047],
@@ -3702,7 +3702,6 @@ const PUBLIC_STOP_NOTES = {
   'Pai':'Pai Canyon, hot springs and sunset cafés.',
   'Krabi / Ao Nang':'Railay Beach and island day trips.',
   'Koh Yao Noi':'A quieter island stop in Phang Nga Bay.',
-  'Khao Sok':'Rainforest, limestone scenery and Cheow Lan Lake.',
   'Hanoi':'Old Quarter, cafés and a street-food tour.',
   'Sapa':'Mountain scenery, rice terraces and trekking.',
   'Ha Giang':'The Ha Giang Loop through northern mountain scenery.',
@@ -3739,7 +3738,6 @@ const MEDIA_TITLES = {
   'Pai':'Pai, Thailand',
   'Krabi / Ao Nang':'Railay Beach',
   'Koh Yao Noi':'Ko Yao Noi',
-  'Khao Sok':'Khao Sok National Park',
   'Hanoi':'Old Quarter, Hanoi',
   'Sapa':'Sa Pa',
   'Ha Giang':'Ha Giang Loop',
@@ -3772,7 +3770,6 @@ const COMMONS_SEARCH_TERMS = {
   'Pai':'Pai Canyon Thailand landscape',
   'Krabi / Ao Nang':'Railay Beach Krabi Thailand limestone',
   'Koh Yao Noi':'Koh Yao Noi Phang Nga Bay Thailand beach landscape',
-  'Khao Sok':'Khao Sok National Park Thailand lake limestone',
   'Hanoi':'Hanoi Old Quarter Vietnam street',
   'Sapa':'Sa Pa Vietnam rice terraces mountains',
   'Ha Giang':'Ha Giang Vietnam mountain pass landscape',
@@ -3813,7 +3810,6 @@ const MEDIA_FOCAL = {
   'Pai':'50% 52%',
   'Krabi / Ao Nang':'50% 52%',
   'Koh Yao Noi':'50% 50%',
-  'Khao Sok':'50% 50%',
   'Hanoi':'50% 52%',
   'Sapa':'50% 52%',
   'Ha Giang':'50% 50%',
@@ -3862,7 +3858,6 @@ const DIRECT_MEDIA = {
   'Pai':commonsDirect('Pai canyon 1.jpg'),
   'Krabi / Ao Nang':commonsDirect('Railay, Krabi, Thailand.jpg'),
   'Koh Yao Noi':commonsDirect('Koh Yao Noi, Limestone formations in Phang Nga Bay, Thailand.jpg'),
-  'Khao Sok':commonsDirect('Khao Sok National Park, Chiew Lan lake. 10.jpg'),
 
   'Hanoi':commonsDirect('Vietnam, Hanoi, Streets of central Hanoi.jpg'),
   'Sapa':commonsDirect('Rice Fields - Sapa, Vietnam - Landscape photography - Flickr - Giuseppe Milo (www.milo.photography).jpg'),
@@ -4113,14 +4108,13 @@ const ROUTES = {
   },
   revised: {
     title:'Possible revised route — not yet confirmed',
-    note:'A planning scenario based on the ideas written in Clara’s document: Khao Sok, Sapa and Hakone are added; Indonesia is moved before the Philippines; Coron/Bohol remain decision points. This is not the confirmed itinerary.',
+    note:'A planning scenario based on the ideas written in Clara’s document: Sapa and Hakone are added; Indonesia is moved before the Philippines; Coron/Bohol remain decision points. This is not the confirmed itinerary.',
     stops:[
       stop('2027-02-01','Bangkok','Thailand',4,'Easy landing point: temples, food, shopping, nightlife.'),
       stop('2027-02-05','Chiang Mai','Thailand',5,'Night markets, cooking class, waterfalls.'),
       stop('2027-02-10','Pai','Thailand',3,'Canyon, hot springs, relaxed mountain stop.'),
       stop('2027-02-13','Krabi / Ao Nang','Thailand',4,'Base for Railay and island day trips.'),
       stop('2027-02-17','Koh Yao Noi','Thailand',3,'Quieter island break.'),
-      stop('2027-02-20','Khao Sok','Thailand',3,'Added from Clara’s wish list: rainforest / lake.'),
       stop('2027-02-23','Hanoi','Vietnam',4,'Old Quarter, cafés, street-food tour.'),
       stop('2027-02-27','Sapa','Vietnam',3,'Added from Clara’s wish list: mountains / countryside.'),
       stop('2027-03-02','Ha Giang','Vietnam',4,'Ha Giang Loop with Easy Rider.'),
